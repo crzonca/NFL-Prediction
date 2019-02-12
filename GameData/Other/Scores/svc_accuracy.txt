@@ -1,0 +1,48 @@
+Best parameters set found on development set:
+0.66620 (+/-0.023) for {'C': 100, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True}
+
+Grid scores on development set:
+0.66620 (+/-0.023) for {'C': 100, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True}
+0.66596 (+/-0.022) for {'C': 100, 'gamma': 0.0001, 'kernel': 'rbf', 'probability': True}
+0.66573 (+/-0.023) for {'C': 10, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True}
+0.66550 (+/-0.021) for {'C': 10, 'gamma': 0.001, 'kernel': 'rbf', 'probability': True}
+0.66550 (+/-0.023) for {'C': 100, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True}
+0.66550 (+/-0.023) for {'C': 0.1, 'kernel': 'linear', 'probability': True}
+0.66526 (+/-0.027) for {'C': 100, 'gamma': 1e-05, 'kernel': 'rbf', 'probability': True}
+0.66503 (+/-0.023) for {'C': 1, 'kernel': 'linear', 'probability': True}
+0.66503 (+/-0.023) for {'C': 10, 'kernel': 'linear', 'probability': True}
+0.66503 (+/-0.023) for {'C': 100, 'kernel': 'linear', 'probability': True}
+0.66479 (+/-0.027) for {'C': 10, 'gamma': 0.0001, 'kernel': 'rbf', 'probability': True}
+0.66433 (+/-0.027) for {'C': 1, 'gamma': 0.001, 'kernel': 'rbf', 'probability': True}
+0.66339 (+/-0.028) for {'C': 100, 'gamma': 0.001, 'kernel': 'rbf', 'probability': True}
+0.66128 (+/-0.022) for {'C': 10, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True}
+0.66128 (+/-0.022) for {'C': 100, 'gamma': 1e-05, 'kernel': 'sigmoid', 'probability': True}
+0.66105 (+/-0.022) for {'C': 1, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True}
+0.59082 (+/-0.009) for {'C': 1, 'gamma': 0.0001, 'kernel': 'rbf', 'probability': True}
+0.59082 (+/-0.009) for {'C': 10, 'gamma': 1e-05, 'kernel': 'rbf', 'probability': True}
+0.59082 (+/-0.009) for {'C': 100, 'gamma': 1e-06, 'kernel': 'rbf', 'probability': True}
+0.58942 (+/-0.007) for {'C': 0.1, 'gamma': 0.001, 'kernel': 'rbf', 'probability': True}
+0.57210 (+/-0.001) for {'C': 0.1, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True}
+0.57210 (+/-0.001) for {'C': 1, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True}
+0.57210 (+/-0.001) for {'C': 10, 'gamma': 1e-05, 'kernel': 'sigmoid', 'probability': True}
+0.57210 (+/-0.001) for {'C': 100, 'gamma': 1e-06, 'kernel': 'sigmoid', 'probability': True}
+0.57186 (+/-0.000) for {'C': 0.1, 'gamma': 0.0001, 'kernel': 'rbf', 'probability': True}
+0.57186 (+/-0.000) for {'C': 0.1, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True}
+0.57186 (+/-0.000) for {'C': 0.1, 'gamma': 1e-05, 'kernel': 'rbf', 'probability': True}
+0.57186 (+/-0.000) for {'C': 0.1, 'gamma': 1e-05, 'kernel': 'sigmoid', 'probability': True}
+0.57186 (+/-0.000) for {'C': 0.1, 'gamma': 1e-06, 'kernel': 'rbf', 'probability': True}
+0.57186 (+/-0.000) for {'C': 0.1, 'gamma': 1e-06, 'kernel': 'sigmoid', 'probability': True}
+0.57186 (+/-0.000) for {'C': 0.1, 'gamma': 1e-07, 'kernel': 'rbf', 'probability': True}
+0.57186 (+/-0.000) for {'C': 0.1, 'gamma': 1e-07, 'kernel': 'sigmoid', 'probability': True}
+0.57186 (+/-0.000) for {'C': 1, 'gamma': 1e-05, 'kernel': 'rbf', 'probability': True}
+0.57186 (+/-0.000) for {'C': 1, 'gamma': 1e-05, 'kernel': 'sigmoid', 'probability': True}
+0.57186 (+/-0.000) for {'C': 1, 'gamma': 1e-06, 'kernel': 'rbf', 'probability': True}
+0.57186 (+/-0.000) for {'C': 1, 'gamma': 1e-06, 'kernel': 'sigmoid', 'probability': True}
+0.57186 (+/-0.000) for {'C': 1, 'gamma': 1e-07, 'kernel': 'rbf', 'probability': True}
+0.57186 (+/-0.000) for {'C': 1, 'gamma': 1e-07, 'kernel': 'sigmoid', 'probability': True}
+0.57186 (+/-0.000) for {'C': 10, 'gamma': 1e-06, 'kernel': 'rbf', 'probability': True}
+0.57186 (+/-0.000) for {'C': 10, 'gamma': 1e-06, 'kernel': 'sigmoid', 'probability': True}
+0.57186 (+/-0.000) for {'C': 10, 'gamma': 1e-07, 'kernel': 'rbf', 'probability': True}
+0.57186 (+/-0.000) for {'C': 10, 'gamma': 1e-07, 'kernel': 'sigmoid', 'probability': True}
+0.57186 (+/-0.000) for {'C': 100, 'gamma': 1e-07, 'kernel': 'rbf', 'probability': True}
+0.57186 (+/-0.000) for {'C': 100, 'gamma': 1e-07, 'kernel': 'sigmoid', 'probability': True}
