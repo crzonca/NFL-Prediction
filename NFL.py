@@ -15,7 +15,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import brier_score_loss
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import StratifiedKFold
-from sklearn.model_selection import cross_val_score
 from sklearn.naive_bayes import BernoulliNB
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
@@ -24,7 +23,7 @@ from sklearn.svm import SVC
 
 from Projects.nfl import StatsHelper as Stats
 
-base_dir = 'D:\\Colin\\Programming\\DataSets\\NFL\\Game Outcomes\\Round 2\\'
+base_dir = '..\\Projects\\nfl\\NFL_Prediction\\GameData\\'
 
 
 def run_all():
@@ -45,13 +44,9 @@ def run_all():
 
     won_series = won_series.filter(best_features).sort_values(kind="quicksort", ascending=False)
     best_features = list(won_series.index)
-    # best_brier_models, best_accuracy_models, scaler = evaluate_model_parameters(best_features)
 
+    evaluate_model_parameters(best_features)
     voting_classifier = get_voting_classifier(best_features)
-
-    test_voting(voting_classifier, best_features)
-
-    i = 0
 
 
 def get_all_data_frames():
@@ -59,7 +54,8 @@ def get_all_data_frames():
     frames = list()
 
     for file in os.listdir(base_dir):
-        if os.path.splitext(file)[1] == '.csv' and os.path.splitext(file)[0] != '20022018':
+        if os.path.splitext(file)[1] == '.csv' and os.path.splitext(file)[0] != '20022018' and os.path.splitext(file)[
+            0] != '20022017':
             with open(base_dir + file, 'r') as season_csv:
                 df = pd.read_csv(season_csv, encoding='utf-8')
                 df = df.rename(index=str, columns={'ï»¿home_team': 'home_team'})
@@ -988,6 +984,7 @@ def evaluate_model_parameters(contributing_features):
     print('Top ' + str(len(feature_col_names)) + ' features ranked by importance are:')
     for feature in feature_col_names:
         print(feature)
+    print()
 
     # Get the feature and label data sets
     X = df[feature_col_names].values
@@ -1003,50 +1000,31 @@ def evaluate_model_parameters(contributing_features):
 
     # Tune the parameters to find the best models based on brier loss and accuracy
     scores = ['brier_score_loss', 'accuracy']
-    best_brier_models = list()
-    best_accuracy_models = list()
-    print()
 
-    # # Logistic Regression               -0.21192    66.643
-    best_logistic_regression_brier_model, \
-        best_logistic_regression_accuracy_model = tune_logistic_regression(X, y, skf, scores)
-    best_brier_models.append(best_logistic_regression_brier_model)
-    best_accuracy_models.append(best_logistic_regression_accuracy_model)
+    # Logistic Regression               -0.21192    66.643
+    tune_logistic_regression(X, y, skf, scores)
 
-    # # C Support Vector Classifier       -0.21210    66.573
-    best_svc_classifierbrier_model, \
-        best_svc_classifier_accuracy_model = tune_svc_classifier(X, y, skf, scores)
-    best_brier_models.append(best_svc_classifierbrier_model)
-    best_accuracy_models.append(best_svc_classifier_accuracy_model)
+    # C Support Vector Classifier       -0.21210    66.573
+    tune_svc_classifier(X, y, skf, scores)
 
     # Random Forest                     -0.21271    66.667
-    best_random_forest_brier_model, \
-        best_random_forest_accuracy_model = tune_random_forest(X, y, feature_col_names, skf, scores)
-    best_brier_models.append(best_random_forest_brier_model)
-    best_accuracy_models.append(best_random_forest_accuracy_model)
+    tune_random_forest(X, y, feature_col_names, skf, scores)
 
-    # # K Nearest Neighbors               -0.23838    62.125
-    # best_k_nearest_neighbors_brier_model, \
-    #     best_k_nearest_neighbors_accuracy_model = tune_k_nearest_neighbors(X, y, skf, scores)
-    # best_brier_models.append(best_k_nearest_neighbors_brier_model)
-    # best_accuracy_models.append(best_k_nearest_neighbors_accuracy_model)
-    #
-    # # Gaussian Naive Bayes              -0.24793     63.928
-    # best_gauss_naive_bayes_brier_model, \
-    #     best_gauss_naive_bayes_accuracy_model = tune_gauss_naive_bayes(X, y, skf, scores)
-    # best_brier_models.append(best_gauss_naive_bayes_brier_model)
-    # best_accuracy_models.append(best_gauss_naive_bayes_accuracy_model)
-    #
-    # # Bernoulli Naive Bayes             -0.30135    62.687
-    # best_bernoulli_naive_bayes_brier_model, \
-    #     best_bernoulli_naive_bayes_accuracy_model = tune_bernoulli_naive_bayes(X, y, skf, scores)
-    # best_brier_models.append(best_bernoulli_naive_bayes_brier_model)
-    # best_accuracy_models.append(best_bernoulli_naive_bayes_accuracy_model)
+    # K Nearest Neighbors               -0.23838    62.125
+    tune_k_nearest_neighbors(X, y, skf, scores)
 
-    return best_brier_models, best_accuracy_models, scaler
+    # Gaussian Naive Bayes              -0.24793     63.928
+    tune_gauss_naive_bayes(X, y, skf, scores)
+
+    # Bernoulli Naive Bayes             -0.30135    62.687
+    tune_bernoulli_naive_bayes(X, y, skf, scores)
 
 
 def tune_logistic_regression(X, y, skf, scores):
+    """Does a grid search over different parameters for a logistic regression model.
+    Returns the model with the least brier loss and the most accurate model."""
+
+    # Create a list of dicts to try parameter combinations over
     print('Logistic Regression')
     logistic_regression_parameters = [{'penalty': ['l2'],
                                        'tol': [1e-3, 1e-4, 1e-5],
@@ -1074,10 +1052,16 @@ def tune_logistic_regression(X, y, skf, scores):
     best_brier_model = None
     best_accuracy_model = None
 
+    # For each scoring method
     for score in scores:
-        print('# Tuning hyper-parameters for %s' % score)
+        # State the scoring method
+        print('# Tuning parameters for %s' % score)
+
+        # Log the start time
         start = maya.now()
         print('Started at: ' + str(start))
+
+        # Do a grid search over all parameter combinations
         clf = GridSearchCV(LogisticRegression(),
                            logistic_regression_parameters,
                            cv=skf,
@@ -1085,8 +1069,10 @@ def tune_logistic_regression(X, y, skf, scores):
                            verbose=2)
         clf.fit(X, y.ravel())
 
+        # Print the results of the grid search
         print_grid_search_details(clf, 'logistic_regression_' + score + '.txt')
 
+        # Get the best model for each scoring method
         if score == 'brier_score_loss':
             best_brier_model = clf.best_estimator_
         else:
@@ -1096,18 +1082,26 @@ def tune_logistic_regression(X, y, skf, scores):
 
 
 def tune_gauss_naive_bayes(X, y, skf, scores):
+    """Does a grid search over different parameters for a gaussian naive bayes model.
+    Returns the model with the least brier loss and the most accurate model."""
+
+    # Create a list of dicts to try parameter combinations over
     print('Gaussian Naive Bayes')
     naive_bayes_parameters = [{'var_smoothing': [1 * 10 ** x for x in range(0, -20, -1)]}]
 
     best_brier_model = None
     best_accuracy_model = None
 
+    # For each scoring method
     for score in scores:
-        print('# Tuning hyper-parameters for %s' % score)
+        # State the scoring method
+        print('# Tuning parameters for %s' % score)
 
+        # Log the start time
         start = maya.now()
         print('Started at: ' + str(start))
 
+        # Do a grid search over all parameter combinations
         clf = GridSearchCV(GaussianNB(),
                            naive_bayes_parameters,
                            cv=skf,
@@ -1115,8 +1109,10 @@ def tune_gauss_naive_bayes(X, y, skf, scores):
                            verbose=2)
         clf.fit(X, y.ravel())
 
+        # Print the results of the grid search
         print_grid_search_details(clf, 'gaussian_naive_bayes_' + score + '.txt')
 
+        # Get the best model for each scoring method
         if score == 'brier_score_loss':
             best_brier_model = clf.best_estimator_
         else:
@@ -1126,18 +1122,26 @@ def tune_gauss_naive_bayes(X, y, skf, scores):
 
 
 def tune_bernoulli_naive_bayes(X, y, skf, scores):
+    """Does a grid search over different parameters for a bernoulli naive bayes model.
+    Returns the model with the least brier loss and the most accurate model."""
+
+    # Create a list of dicts to try parameter combinations over
     print('Bernoulli Naive Bayes')
     naive_bayes_parameters = [{'alpha': [x / 10.0 for x in range(5, 20)]}]
 
     best_brier_model = None
     best_accuracy_model = None
 
+    # For each scoring method
     for score in scores:
-        print('# Tuning hyper-parameters for %s' % score)
+        # State the scoring method
+        print('# Tuning parameters for %s' % score)
 
+        # Log the start time
         start = maya.now()
         print('Started at: ' + str(start))
 
+        # Do a grid search over all parameter combinations
         clf = GridSearchCV(BernoulliNB(),
                            naive_bayes_parameters,
                            cv=skf,
@@ -1145,8 +1149,10 @@ def tune_bernoulli_naive_bayes(X, y, skf, scores):
                            verbose=2)
         clf.fit(X, y.ravel())
 
+        # Print the results of the grid search
         print_grid_search_details(clf, 'bernoulli_naive_bayes_' + score + '.txt')
 
+        # Get the best model for each scoring method
         if score == 'brier_score_loss':
             best_brier_model = clf.best_estimator_
         else:
@@ -1156,6 +1162,10 @@ def tune_bernoulli_naive_bayes(X, y, skf, scores):
 
 
 def tune_random_forest(X, y, feature_col_names, skf, scores):
+    """Does a grid search over different parameters for a random forest model.
+    Returns the model with the least brier loss and the most accurate model."""
+
+    # Create a list of dicts to try parameter combinations over
     print('Random Forest')
     random_forest_parameters = [{'n_estimators': [500, 1000],
                                  'random_state': [42],
@@ -1173,12 +1183,16 @@ def tune_random_forest(X, y, feature_col_names, skf, scores):
     best_brier_model = None
     best_accuracy_model = None
 
+    # For each scoring method
     for score in scores:
-        print('# Tuning hyper-parameters for %s' % score)
+        # State the scoring method
+        print('# Tuning parameters for %s' % score)
 
+        # Log the start time
         start = maya.now()
         print('Started at: ' + str(start))
 
+        # Do a grid search over all parameter combinations
         clf = GridSearchCV(RandomForestClassifier(),
                            random_forest_parameters,
                            cv=skf,
@@ -1187,8 +1201,10 @@ def tune_random_forest(X, y, feature_col_names, skf, scores):
                            n_jobs=2)
         clf.fit(X, y.ravel())
 
+        # Print the results of the grid search
         print_grid_search_details(clf, 'random_forest_' + score + '.txt')
 
+        # Get the best model for each scoring method
         if score == 'brier_score_loss':
             best_brier_model = clf.best_estimator_
         else:
@@ -1198,6 +1214,10 @@ def tune_random_forest(X, y, feature_col_names, skf, scores):
 
 
 def tune_k_nearest_neighbors(X, y, skf, scores):
+    """Does a grid search over different parameters for a K nearest neighbors model.
+    Returns the model with the least brier loss and the most accurate model."""
+
+    # Create a list of dicts to try parameter combinations over
     print('K Nearest Neighbors')
     k_neighbors_parameters = [{'n_neighbors': range(3, 9),
                                'weights': ['uniform', 'distance'],
@@ -1208,12 +1228,16 @@ def tune_k_nearest_neighbors(X, y, skf, scores):
     best_brier_model = None
     best_accuracy_model = None
 
+    # For each scoring method
     for score in scores:
-        print('# Tuning hyper-parameters for %s' % score)
+        # State the scoring method
+        print('# Tuning parameters for %s' % score)
 
+        # Log the start time
         start = maya.now()
         print('Started at: ' + str(start))
 
+        # Do a grid search over all parameter combinations
         clf = GridSearchCV(KNeighborsClassifier(),
                            k_neighbors_parameters,
                            cv=skf,
@@ -1221,8 +1245,10 @@ def tune_k_nearest_neighbors(X, y, skf, scores):
                            verbose=2)
         clf.fit(X, y.ravel())
 
+        # Print the results of the grid search
         print_grid_search_details(clf, 'knn_' + score + '.txt')
 
+        # Get the best model for each scoring method
         if score == 'brier_score_loss':
             best_brier_model = clf.best_estimator_
         else:
@@ -1232,6 +1258,10 @@ def tune_k_nearest_neighbors(X, y, skf, scores):
 
 
 def tune_svc_classifier(X, y, skf, scores):
+    """Does a grid search over different parameters for a C support vector classification model.
+    Returns the model with the least brier loss and the most accurate model."""
+
+    # Create a list of dicts to try parameter combinations over
     print('C Support Vector Classifier')
     support_vector_parameters = [{'kernel': ['rbf', 'sigmoid'],
                                   'probability': [True],
@@ -1244,10 +1274,16 @@ def tune_svc_classifier(X, y, skf, scores):
     best_brier_model = None
     best_accuracy_model = None
 
+    # For each scoring method
     for score in scores:
-        print('# Tuning hyper-parameters for %s' % score)
+        # State the scoring method
+        print('# Tuning parameters for %s' % score)
+
+        # Log the start time
         start = maya.now()
         print('Started at: ' + str(start))
+
+        # Do a grid search over all parameter combinations
         clf = GridSearchCV(SVC(),
                            support_vector_parameters,
                            cv=skf,
@@ -1256,8 +1292,10 @@ def tune_svc_classifier(X, y, skf, scores):
                            n_jobs=2)
         clf.fit(X, y.ravel())
 
+        # Print the results of the grid search
         print_grid_search_details(clf, 'svc_' + score + '.txt')
 
+        # Get the best model for each scoring method
         if score == 'brier_score_loss':
             best_brier_model = clf.best_estimator_
         else:
@@ -1267,6 +1305,12 @@ def tune_svc_classifier(X, y, skf, scores):
 
 
 def print_grid_search_details(clf, filename):
+    """Prints the results of the grid search to a file and the console."""
+
+    # Set the directory to write files to
+    filename = base_dir + 'Other\\Scores\\' + filename
+
+    # Print the best parameter found in the search along with its score
     print('Best parameters set found on development set:')
     print('Best parameters set found on development set:', file=open(filename, 'a'))
 
@@ -1277,6 +1321,7 @@ def print_grid_search_details(clf, filename):
                                         clf.cv_results_['std_test_score'][clf.best_index_] * 2,
                                         clf.best_params_), file=open(filename, 'a'))
 
+    # Print the results of all parameter combinations, sorted from best score to worst
     print('\nGrid scores on development set:')
     print('\nGrid scores on development set:', file=open(filename, 'a'))
 
@@ -1291,126 +1336,44 @@ def print_grid_search_details(clf, filename):
     print()
 
 
-def get_best_logistic_regression(contributing_features):
-    df = pd.read_csv(base_dir + '20022018.csv')
+def get_best_logistic_regression():
+    """Gets the logistic regression model that yielded the best result."""
 
-    columns_to_keep = list()
-    for feature in contributing_features:
-        columns_to_keep.extend(list(filter(lambda f: f == feature, df.columns.values)))
-
-    columns_to_keep.extend(list(filter(lambda f: 'home_victory' in f, df.columns.values)))
-    columns_to_drop = list(set(df.columns.values) - set(columns_to_keep))
-    df = df.drop(columns=columns_to_drop)
-
-    feature_col_names = contributing_features
-    predicted_class_name = ['home_victory']
-
-    X = df[feature_col_names].values
-    y = df[predicted_class_name].values
-
-    # Standardize the X values
-    scaler = StandardScaler()
-    scaler.fit(X)
-    X = scaler.transform(X)
-
-    model = LogisticRegression(C=0.05,
-                               class_weight=None,
-                               multi_class='ovr',
-                               penalty='l1',
-                               random_state=42,
-                               solver='saga',
-                               tol=0.0001)
-
-    skf = StratifiedKFold(n_splits=5)
-
-    brier_loss_scores = cross_val_score(model, X, y.ravel(), cv=skf, scoring='brier_score_loss')
-    print("Brier Loss: %0.5f (+/- %0.2f)" % (brier_loss_scores.mean(), brier_loss_scores.std() * 2))
-    accuracy_scores = cross_val_score(model, X, y.ravel(), cv=skf, scoring='accuracy')
-    print("Accuracy: %0.3f (+/- %0.2f)" % (accuracy_scores.mean() * 100, accuracy_scores.std() * 200))
-    print()
-
-    return model
+    return LogisticRegression(C=0.05,
+                              class_weight=None,
+                              multi_class='ovr',
+                              penalty='l1',
+                              random_state=42,
+                              solver='saga',
+                              tol=0.0001)
 
 
-def get_best_svc(contributing_features):
-    df = pd.read_csv(base_dir + '20022018.csv')
+def get_best_svc():
+    """Gets the SVC model that yielded the best result."""
 
-    columns_to_keep = list()
-    for feature in contributing_features:
-        columns_to_keep.extend(list(filter(lambda f: f == feature, df.columns.values)))
-
-    columns_to_keep.extend(list(filter(lambda f: 'home_victory' in f, df.columns.values)))
-    columns_to_drop = list(set(df.columns.values) - set(columns_to_keep))
-    df = df.drop(columns=columns_to_drop)
-
-    feature_col_names = contributing_features
-    predicted_class_name = ['home_victory']
-
-    X = df[feature_col_names].values
-    y = df[predicted_class_name].values
-
-    # Standardize the X values
-    scaler = StandardScaler()
-    scaler.fit(X)
-    X = scaler.transform(X)
-
-    model = SVC(C=10,
-                gamma=0.001,
-                kernel='sigmoid',
-                probability=True)
-
-    skf = StratifiedKFold(n_splits=5)
-
-    brier_loss_scores = cross_val_score(model, X, y.ravel(), cv=skf, scoring='brier_score_loss')
-    print("Brier Loss: %0.5f (+/- %0.2f)" % (brier_loss_scores.mean(), brier_loss_scores.std() * 2))
-    accuracy_scores = cross_val_score(model, X, y.ravel(), cv=skf, scoring='accuracy')
-    print("Accuracy: %0.3f (+/- %0.2f)" % (accuracy_scores.mean() * 100, accuracy_scores.std() * 200))
-    print()
-
-    return model
+    return SVC(C=10,
+               gamma=0.001,
+               kernel='sigmoid',
+               probability=True)
 
 
-def get_best_random_forest(contributing_features):
-    df = pd.read_csv(base_dir + '20022018.csv')
+def get_best_random_forest():
+    """Gets the random forest model that yielded the best result."""
 
-    columns_to_keep = list()
-    for feature in contributing_features:
-        columns_to_keep.extend(list(filter(lambda f: f == feature, df.columns.values)))
-
-    columns_to_keep.extend(list(filter(lambda f: 'home_victory' in f, df.columns.values)))
-    columns_to_drop = list(set(df.columns.values) - set(columns_to_keep))
-    df = df.drop(columns=columns_to_drop)
-
-    feature_col_names = contributing_features
-    predicted_class_name = ['home_victory']
-
-    X = df[feature_col_names].values
-    y = df[predicted_class_name].values
-
-    # Standardize the X values
-    scaler = StandardScaler()
-    scaler.fit(X)
-    X = scaler.transform(X)
-
-    model = RandomForestClassifier(n_estimators=100,
-                                   max_features=11,
-                                   max_depth=3,
-                                   random_state=42)
-
-    skf = StratifiedKFold(n_splits=5)
-
-    brier_loss_scores = cross_val_score(model, X, y.ravel(), cv=skf, scoring='brier_score_loss')
-    print("Brier Loss: %0.5f (+/- %0.2f)" % (brier_loss_scores.mean(), brier_loss_scores.std() * 2))
-    accuracy_scores = cross_val_score(model, X, y.ravel(), cv=skf, scoring='accuracy')
-    print("Accuracy: %0.3f (+/- %0.2f)" % (accuracy_scores.mean() * 100, accuracy_scores.std() * 200))
-    print()
-
-    return model
+    return RandomForestClassifier(n_estimators=100,
+                                  max_features=11,
+                                  max_depth=3,
+                                  random_state=42)
 
 
 def get_voting_classifier(contributing_features):
+    """Creates a voting classifier based on the top 3 estimators,
+    estimators are weighted by the normalized inverse of their respective briers."""
+
+    # Get the data frame for all seasons
     df = pd.read_csv(base_dir + '20022018.csv')
 
+    # Drop all columns except for the most important features, and the predicted label
     columns_to_keep = list()
     for feature in contributing_features:
         columns_to_keep.extend(list(filter(lambda f: f == feature, df.columns.values)))
@@ -1419,9 +1382,17 @@ def get_voting_classifier(contributing_features):
     columns_to_drop = list(set(df.columns.values) - set(columns_to_keep))
     df = df.drop(columns=columns_to_drop)
 
+    # Get a list of all the feature names
     feature_col_names = contributing_features
     predicted_class_name = ['home_victory']
 
+    # Print the feature column names by order of importance
+    print()
+    print('Top ' + str(len(feature_col_names)) + ' features ranked by importance are:')
+    for feature in feature_col_names:
+        print(feature)
+
+    # Get the feature and label data sets
     X = df[feature_col_names].values
     y = df[predicted_class_name].values
 
@@ -1433,10 +1404,12 @@ def get_voting_classifier(contributing_features):
     # Pickle the scaler
     joblib.dump(scaler, base_dir + 'Other\\Scaler.pkl')
 
-    logistic_regression = get_best_logistic_regression(contributing_features)
-    svc = get_best_svc(contributing_features)
-    random_forest = get_best_random_forest(contributing_features)
+    # Get the classification models
+    logistic_regression = get_best_logistic_regression()
+    svc = get_best_svc()
+    random_forest = get_best_random_forest()
 
+    # Create a voting classifier from the 3 estimators, weighted by the invers of the briers, soft voting
     voting_classifier = VotingClassifier(estimators=[('Logistic Regression', logistic_regression),
                                                      ('SVC', svc),
                                                      ('Random Forest', random_forest)],
@@ -1444,107 +1417,10 @@ def get_voting_classifier(contributing_features):
                                          voting='soft',
                                          flatten_transform=False)
 
+    # Fit the voting classifier
     voting_classifier.fit(X, y.ravel())
 
+    # Pickle the voting classifier
+    joblib.dump(voting_classifier, base_dir + 'Other\\2018VotingClassifier.pkl')
+
     return voting_classifier
-
-
-def test_voting(voting_classifier, contributing_features):
-    frames = get_all_data_frames()
-    print('Results')
-    frames = add_point_diff_and_results(frames)
-    print('Records')
-    frames = add_team_records(frames)
-    print('Elos')
-    frames = add_team_elos(frames)
-    frame = frames[-1]
-    frames.clear()
-    frames.append(frame)
-    print('Totals')
-    frames = add_season_totals(frames)
-    print('Averages')
-    frames = add_season_averages(frames)
-    print('Stats')
-    frames = add_advanced_stats(frames)
-    print('Differences')
-    frames = add_stat_differences(frames)
-
-    df = frames[0]
-
-    # Drop all columns that arent the label, the spread or a team difference
-    columns_to_keep = list()
-    for feature in contributing_features:
-        columns_to_keep.extend(list(filter(lambda f: f == feature, df.columns.values)))
-
-    columns_to_keep.extend(list(filter(lambda f: 'home_victory' in f, df.columns.values)))
-    columns_to_drop = list(set(df.columns.values) - set(columns_to_keep))
-    df = df.drop(columns=columns_to_drop)
-
-    # Get the feature column names and predicted label name
-    feature_col_names = contributing_features
-    predicted_class_name = ['home_victory']
-
-    # Create data frames with the X and y values
-    X = df[feature_col_names].values
-    y = df[predicted_class_name].values
-
-    scaler = joblib.load(base_dir + 'Other\\Scaler.pkl')
-
-    X = scaler.transform(X)
-
-    vote_probs = list()
-    lr_probs = list()
-    svc_probs = list()
-    rf_probs = list()
-    for index in range(len(X)):
-        game = X[index]
-        outcome = y[index]
-        vote_prob = voting_classifier.predict_proba([game])[0][1]
-        vote_probs.append(vote_prob)
-        trans = voting_classifier.transform([game])
-        lr_prob = trans[0][0][1]
-        lr_probs.append(lr_prob)
-        svc_prob = trans[1][0][1]
-        svc_probs.append(svc_prob)
-        rf_prob = trans[2][0][1]
-        rf_probs.append(rf_prob)
-    vote_probs = pd.Series(vote_probs)
-    lr_probs = pd.Series(lr_probs)
-    svc_probs = pd.Series(svc_probs)
-    rf_probs = pd.Series(rf_probs)
-    vote_loss = brier_score_loss(y, vote_probs)
-    lr_loss = brier_score_loss(y, lr_probs)
-    svc_loss = brier_score_loss(y, svc_probs)
-    rf_loss = brier_score_loss(y, rf_probs)
-
-    probs_frame = pd.DataFrame()
-    probs_frame['vote_probs'] = vote_probs
-    probs_frame['lr_probs'] = lr_probs
-    probs_frame['svc_probs'] = svc_probs
-    probs_frame['rf_probs'] = rf_probs
-    probs_frame['y'] = y
-
-    probs_frame['vote_points'] = probs_frame.apply(lambda row: get_elo_points(row, 'vote_probs'), axis=1)
-    probs_frame['lr_points'] = probs_frame.apply(lambda row: get_elo_points(row, 'lr_probs'), axis=1)
-    probs_frame['svc_points'] = probs_frame.apply(lambda row: get_elo_points(row, 'svc_probs'), axis=1)
-    probs_frame['rf_points'] = probs_frame.apply(lambda row: get_elo_points(row, 'rf_probs'), axis=1)
-
-    probs_frame.to_csv('points.csv')
-
-    vote_points = probs_frame['vote_points'].sum()
-    lr_points = probs_frame['lr_points'].sum()
-    svc_points = probs_frame['svc_points'].sum()
-    rf_points = probs_frame['rf_points'].sum()
-
-
-    i=0
-
-
-def get_elo_points(row, col):
-    prob = float(row[col])
-    result = int(row['y'])
-    rounded_elo_prob = round(prob, 2)
-    elo_brier = (rounded_elo_prob - result) * (rounded_elo_prob - result)
-    elo_points = 25 - (100 * elo_brier)
-    elo_points = round(elo_points, 1)
-    return elo_points
