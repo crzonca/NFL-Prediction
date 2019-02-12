@@ -23,7 +23,7 @@ from sklearn.svm import SVC
 
 from Projects.nfl import StatsHelper as Stats
 
-base_dir = '..\\Projects\\nfl\\NFL_Prediction\\GameData\\'
+base_dir = '..\\Projects\\nfl\\NFL_Prediction\\Game Data\\'
 
 
 def run_all():
@@ -54,8 +54,9 @@ def get_all_data_frames():
     frames = list()
 
     for file in os.listdir(base_dir):
-        if os.path.splitext(file)[1] == '.csv' and os.path.splitext(file)[0] != '20022018' and os.path.splitext(file)[
-            0] != '20022017':
+        if (os.path.splitext(file)[1] == '.csv'
+                and os.path.splitext(file)[0] != '20022018'
+                and os.path.splitext(file)[0] != '20022017'):
             with open(base_dir + file, 'r') as season_csv:
                 df = pd.read_csv(season_csv, encoding='utf-8')
                 df = df.rename(index=str, columns={'ï»¿home_team': 'home_team'})
