@@ -27,17 +27,17 @@ base_dir = '..\\Projects\\nfl\\NFL_Prediction\\GameData\\'
 
 
 def run_all():
-    # frames = get_all_data_frames()
-    # frames = add_point_diff_and_results(frames)
-    # frames = add_team_records(frames)
-    # # best_reg, best_k = evaluate_elo(frames)
-    # # frames = add_team_elos(frames, regression_factor=best_reg, k_factor=best_k)
-    # frames = add_team_elos(frames)
-    # frames = add_season_totals(frames)
-    # frames = add_season_averages(frames)
-    # frames = add_advanced_stats(frames)
-    # frames = add_stat_differences(frames)
-    # all_games = combine_frames(frames)
+    frames = get_all_data_frames()
+    frames = add_point_diff_and_results(frames)
+    frames = add_team_records(frames)
+    # best_reg, best_k = evaluate_elo(frames)
+    # frames = add_team_elos(frames, regression_factor=best_reg, k_factor=best_k)
+    frames = add_team_elos(frames)
+    frames = add_season_totals(frames)
+    frames = add_season_averages(frames)
+    frames = add_advanced_stats(frames)
+    frames = add_stat_differences(frames)
+    all_games = combine_frames(frames)
 
     won_series = plot_corr()
     best_features = get_best_features()
