@@ -184,6 +184,7 @@ def predict_game_outcome(teams, home_name, away_name, home_spread, verbose=False
         print('SVC Away Victory Probability: ' + str(away_svc_prob_formatted) + '%')
         print('Random Forest Home Victory Probability: ' + str(home_rf_prob_formatted) + '%')
         print('Random Forest Away Victory Probability: ' + str(away_rf_prob_formatted) + '%')
+        print()
 
     # Return the favored teams chance of winning and a message
     return home_vote_prob if home_vote_prob >= away_vote_prob else away_vote_prob, message
