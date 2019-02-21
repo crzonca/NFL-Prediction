@@ -1,6 +1,4 @@
 import statistics
-import operator
-import statistics
 
 from prettytable import PrettyTable
 
@@ -8,7 +6,8 @@ import Projects.nfl.NFL_Prediction.NFLPredictor as Predictor
 
 
 def season():
-    teams = handle_week(None, 'Preseason', set_up_teams)
+    eliminated_teams = list()
+    teams = handle_week(None, 'Preseason', set_up_teams, eliminated_teams)
     # teams = handle_week(teams, 'Week 1', week_1)
     # teams = handle_week(teams, 'Week 2', week_2)
     # teams = handle_week(teams, 'Week 3', week_3)
@@ -22,8 +21,8 @@ def season():
     # teams = handle_week(teams, 'Week 11', week_11)
     # teams = handle_week(teams, 'Week 12', week_12)
     #
-    # eliminated_teams = ['Raiders', '49ers']
-    # teams = handle_week(teams, 'Week 13', week_13, eliminated_teams=eliminated_teams)
+    # eliminated_teams.extend(['Raiders', '49ers'])
+    # teams = handle_week(teams, 'Week 13', week_13, eliminated_teams)
     #
     # eliminated_teams.extend(['Bills', 'Cardinals', 'Jets', 'Jaguars'])
     # teams = handle_week(teams, 'Week 14', week_14, eliminated_teams=eliminated_teams)
@@ -48,7 +47,7 @@ def season():
     #
     # teams = handle_week(teams, 'Superbowl', superbowl, full_standings=True, eliminated_teams=eliminated_teams)
 
-    print_league_details(teams, full_standings=True)
+    print_league_details(teams, [], full_standings=True)
 
 
 def set_up_teams():
@@ -91,13 +90,13 @@ def set_up_teams():
     return teams
 
 
-def handle_week(teams, week_name, week, full_standings=False, eliminated_teams=None):
+def handle_week(teams, week_name, week, eliminated_teams, full_standings=False):
     print(week_name)
     if teams:
         teams = week(teams)
     else:
         teams = week()
-    print_league_details(teams, full_standings=full_standings, eliminated_teams=eliminated_teams)
+    print_league_details(teams, eliminated_teams, full_standings=full_standings)
     return teams
 
 
@@ -953,7 +952,7 @@ def handle_week(teams, week_name, week, full_standings=False, eliminated_teams=N
 #     return teams
 
 
-def print_elo_rankings(teams):
+def print_elo_rankings(teams, eliminated_teams):
     sorted_by_losses = sorted(teams, key=lambda tup: tup[2])
     sorted_by_wins = sorted(sorted_by_losses, reverse=True, key=lambda tup: tup[1])
     sorted_by_elo = sorted(sorted_by_wins, reverse=True, key=lambda tup: tup[4])
@@ -969,49 +968,15 @@ def print_elo_rankings(teams):
         team_info.append(team[4])
         team_info.append(get_tier(teams, team))
         row = row + team_info
-        if row[-1] == 'S+':
-            row = [Colors.BRIGHT_GREEN + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'S':
-            row = [Colors.BRIGHT_BLUE + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'S-':
-            row = [Colors.BRIGHT_PURPLE + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'A+':
-            row = [Colors.BRIGHT_CYAN + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'A':
-            row = [Colors.BRIGHT_YELLOW + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'A-':
-            row = [Colors.BRIGHT_RED + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'B+':
-            row = [Colors.GREEN + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'B':
-            row = [Colors.BLUE + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'B-':
-            row = [Colors.PURPLE + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'C+':
-            row = [Colors.CYAN + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'C':
-            row = [Colors.YELLOW + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'C-':
-            row = [Colors.RED + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'D+':
-            row = [Colors.GRAY + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'D':
-            row = [Colors.BLACK + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'D-':
-            row = [Colors.BRIGHT_GREEN + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'F+':
-            row = [Colors.BRIGHT_BLUE + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'F':
-            row = [Colors.BRIGHT_PURPLE + str(val) + Colors.ENDC for val in row]
-        elif row[-1] == 'F-':
-            row = [Colors.BRIGHT_CYAN + str(val) + Colors.ENDC for val in row]
-        table.add_row(row)
+        row = [get_tier_color(row[-1], val) for val in row]
+        if team[0] not in eliminated_teams:
+            table.add_row(row)
     print('Elo Rankings')
     print(table)
     print()
 
 
-def print_standings(teams):
+def print_standings(teams, eliminated_teams):
     sorted_by_yards = sorted(teams, reverse=True, key=lambda tup: tup[13])
     sorted_by_point_diff = sorted(sorted_by_yards, reverse=True, key=lambda tup: tup[5] - tup[6])
     sorted_by_losses = sorted(sorted_by_point_diff, key=lambda tup: tup[2])
@@ -1027,13 +992,14 @@ def print_standings(teams):
         team_info.append(team[3])
         team_info.append(team[4])
         row = row + team_info
-        table.add_row(row)
+        if team[0] not in eliminated_teams:
+            table.add_row(row)
     print('Standings')
     print(table)
     print()
 
 
-def print_full_standings(teams):
+def print_full_standings(teams, eliminated_teams):
     sorted_by_yards = sorted(teams, reverse=True, key=lambda tup: tup[13])
     sorted_by_point_diff = sorted(sorted_by_yards, reverse=True, key=lambda tup: tup[5] - tup[6])
     sorted_by_losses = sorted(sorted_by_point_diff, key=lambda tup: tup[2])
@@ -1070,21 +1036,19 @@ def print_full_standings(teams):
         else:
             team_info.append(round(100 * (team[15] / team[16]), 1))
         row = row + team_info
-        table.add_row(row)
+        if team[0] not in eliminated_teams:
+            table.add_row(row)
     print('Standings')
     print(table)
     print()
 
 
-def print_league_details(teams, full_standings=False, eliminated_teams=None):
-    if eliminated_teams:
-        teams = list(filter(lambda t: t[0] not in eliminated_teams, teams))
-
+def print_league_details(teams, eliminated_teams, full_standings=False):
     if full_standings:
-        print_full_standings(teams)
+        print_full_standings(teams, eliminated_teams)
     else:
-        print_standings(teams)
-    print_elo_rankings(teams)
+        print_standings(teams, eliminated_teams)
+    print_elo_rankings(teams, eliminated_teams)
 
 
 def get_team(teams, team_name):
@@ -1100,23 +1064,23 @@ def get_tier(teams, team):
     elo_dev = statistics.stdev(elos)
     elo_dev_third = elo_dev / 3
 
-    if team_elo > avg_elo + elo_dev_third * 9:
+    if team_elo > avg_elo + elo_dev_third * 8:
         tier = 'S+'
-    elif team_elo > avg_elo + elo_dev_third * 8:
-        tier = 'S'
     elif team_elo > avg_elo + elo_dev_third * 7:
-        tier = 'S-'
+        tier = 'S'
     elif team_elo > avg_elo + elo_dev_third * 6:
-        tier = 'A+'
+        tier = 'S-'
     elif team_elo > avg_elo + elo_dev_third * 5:
-        tier = 'A'
+        tier = 'A+'
     elif team_elo > avg_elo + elo_dev_third * 4:
-        tier = 'A-'
+        tier = 'A'
     elif team_elo > avg_elo + elo_dev_third * 3:
-        tier = 'B+'
+        tier = 'A-'
     elif team_elo > avg_elo + elo_dev_third * 2:
+        tier = 'B+'
+    elif team_elo > avg_elo + elo_dev_third * 1:
         tier = 'B'
-    elif team_elo >= avg_elo + elo_dev_third * 1:
+    elif team_elo >= avg_elo:
         tier = 'B-'
     elif team_elo > avg_elo - elo_dev_third * 1:
         tier = 'C+'
@@ -1134,11 +1098,49 @@ def get_tier(teams, team):
         tier = 'F+'
     elif team_elo > avg_elo - elo_dev_third * 8:
         tier = 'F'
-    elif team_elo > avg_elo - elo_dev_third * 9:
-        tier = 'F-'
     else:
-        tier = 'X'
+        tier = 'F-'
     return tier
+
+
+def get_tier_color(tier, string):
+    if tier == 'S+':
+        string = Colors.UNDERLINE + str(string) + Colors.ENDC
+    elif tier == 'S':
+        string = Colors.UNDERLINE + str(string) + Colors.ENDC
+    elif tier == 'S-':
+        string = Colors.WHITE + str(string) + Colors.ENDC
+    elif tier == 'A+':
+        string = Colors.BRIGHT_PURPLE + str(string) + Colors.ENDC
+    elif tier == 'A':
+        string = Colors.PURPLE + str(string) + Colors.ENDC
+    elif tier == 'A-':
+        string = Colors.BRIGHT_BLUE + str(string) + Colors.ENDC
+    elif tier == 'B+':
+        string = Colors.BLUE + str(string) + Colors.ENDC
+    elif tier == 'B':
+        string = Colors.BRIGHT_CYAN + str(string) + Colors.ENDC
+    elif tier == 'B-':
+        string = Colors.CYAN + str(string) + Colors.ENDC
+    elif tier == 'C+':
+        string = Colors.GREEN + str(string) + Colors.ENDC
+    elif tier == 'C':
+        string = Colors.BRIGHT_YELLOW + str(string) + Colors.ENDC
+    elif tier == 'C-':
+        string = Colors.YELLOW + str(string) + Colors.ENDC
+    elif tier == 'D+':
+        string = Colors.BRIGHT_RED + str(string) + Colors.ENDC
+    elif tier == 'D':
+        string = Colors.RED + str(string) + Colors.ENDC
+    elif tier == 'D-':
+        string = Colors.BRIGHT_GRAY + str(string) + Colors.ENDC
+    elif tier == 'F+':
+        string = Colors.GRAY + str(string) + Colors.ENDC
+    elif tier == 'F':
+        string = Colors.BLACK + str(string) + Colors.ENDC
+    elif tier == 'F-':
+        string = Colors.BLACK + str(string) + Colors.ENDC
+    return string
 
 
 class Colors:
@@ -1149,8 +1151,10 @@ class Colors:
     BRIGHT_YELLOW = '\033[93m'
     BRIGHT_GREEN = '\033[92m'
     BRIGHT_RED = '\033[91m'
+    BRIGHT_GRAY = '\033[37m'
     GRAY = '\033[90m'
     WHITE = '\033[30m'
+    UNDERLINE = '\033[4m'
     CYAN = '\033[36m'
     PURPLE = '\033[35m'
     BLUE = '\033[34m'
