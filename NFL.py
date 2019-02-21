@@ -178,7 +178,7 @@ def add_team_elos(frames, regression_factor=.41, k_factor=42):
             df.loc[df.index[row_num], 'away_elo'] = float(team_elos.get(opponent))
 
             # Calculate each teams new elo based on the game result
-            home_elo, visiting_elo = get_new_elos(team_elos.get(team),
+            home_elo, away_elo = get_new_elos(team_elos.get(team),
                                                   team_elos.get(opponent),
                                                   row[df.columns.get_loc('home_victory')] == 1,
                                                   row[df.columns.get_loc('home_draw')] == 1,
@@ -186,30 +186,30 @@ def add_team_elos(frames, regression_factor=.41, k_factor=42):
 
             # Update the dictionary
             team_elos[team] = home_elo
-            team_elos[opponent] = visiting_elo
+            team_elos[opponent] = away_elo
 
     return frames
 
 
-def get_new_elos(home_elo, visiting_elo, home_victory, home_draw, k_factor):
+def get_new_elos(home_elo, away_elo, home_victory, home_draw, k_factor):
     """Calculates the new Elos of each team given their previous Elos and the outcome of the game."""
     q_home = 10 ** (home_elo / 400)
-    q_away = 10 ** (visiting_elo / 400)
+    q_away = 10 ** (away_elo / 400)
 
     e_home = q_home / (q_home + q_away)
     e_away = q_away / (q_home + q_away)
 
     if home_victory:
         home_elo = home_elo + k_factor * (1 - e_home)
-        visiting_elo = visiting_elo + k_factor * (0 - e_away)
+        away_elo = away_elo + k_factor * (0 - e_away)
     elif home_draw:
         home_elo = home_elo + k_factor * (.5 - e_home)
-        visiting_elo = visiting_elo + k_factor * (.5 - e_away)
+        away_elo = away_elo + k_factor * (.5 - e_away)
     else:
         home_elo = home_elo + k_factor * (0 - e_home)
-        visiting_elo = visiting_elo + k_factor * (1 - e_away)
+        away_elo = away_elo + k_factor * (1 - e_away)
 
-    return home_elo, visiting_elo
+    return home_elo, away_elo
 
 
 def evaluate_season_elo(df):
@@ -218,17 +218,17 @@ def evaluate_season_elo(df):
 
     # Get the elo and result columns
     home_elo_column = df['home_elo']
-    visiting_elo_column = df['away_elo']
+    away_elo_column = df['away_elo']
     results = df['home_victory'].values
 
     # Calculate the expectations for each game
     home_expectations = list()
     for index in range(len(home_elo_column)):
         home_elo = home_elo_column[index]
-        visiting_elo = visiting_elo_column[index]
+        away_elo = away_elo_column[index]
 
         q_home = 10 ** (home_elo / 400)
-        q_away = 10 ** (visiting_elo / 400)
+        q_away = 10 ** (away_elo / 400)
 
         e_home = q_home / (q_home + q_away)
         home_expectations.append(e_home)
@@ -1403,7 +1403,7 @@ def get_voting_classifier(contributing_features):
     X = scaler.transform(X)
 
     # Pickle the scaler
-    joblib.dump(scaler, base_dir + 'Other\\Scaler.pkl')
+    joblib.dump(scaler, base_dir + 'Other\\2018Scaler.pkl')
 
     # Get the classification models
     logistic_regression = get_best_logistic_regression()
