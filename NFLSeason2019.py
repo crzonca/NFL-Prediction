@@ -73,8 +73,6 @@ def week_1(teams):
     print()
 
     teams = Predictor.update_teams(teams,
-                                   away_name='Lions',
-                                   away_score=13,
                                    home_name='Vikings',
                                    home_score=17,
                                    home_touchdowns=2,
@@ -87,6 +85,8 @@ def week_1(teams):
                                    home_first_downs=28,
                                    home_third_down_conversions=9,
                                    home_third_downs=15,
+                                   away_name='Lions',
+                                   away_score=13,
                                    away_touchdowns=1,
                                    away_net_pass_yards=217,
                                    away_pass_completions=15,
@@ -98,8 +98,8 @@ def week_1(teams):
                                    away_third_down_conversions=7,
                                    away_third_downs=13)
 
-    teams = Predictor.update_teams(teams, 'Bears', 14, 'Packers', 7, 1, 386, 19, 22, 1, 0, 440, 28, 11, 18,
-                                   2, 182, 14, 24, 0, 0, 355, 26, 10, 15)
+    teams = Predictor.update_teams(teams, 'Packers', 7, 1, 386, 19, 22, 1, 0, 440, 28, 11, 18,
+                                   'Bears', 14, 2, 182, 14, 24, 0, 0, 355, 26, 10, 15)
 
     return teams
 
@@ -305,14 +305,14 @@ class Colors:
     BRIGHT_YELLOW = '\033[93m'
     BRIGHT_GREEN = '\033[92m'
     BRIGHT_RED = '\033[91m'
-    BRIGHT_GRAY = '\033[37m'
     GRAY = '\033[90m'
+    BRIGHT_GRAY = '\033[37m'
     WHITE = '\033[30m'
-    UNDERLINE = '\033[4m'
     CYAN = '\033[36m'
     PURPLE = '\033[35m'
     BLUE = '\033[34m'
     YELLOW = '\033[33m'
     GREEN = '\033[32m'
     RED = '\033[31m'
+    UNDERLINE = '\033[4m'
     ENDC = '\033[0m'

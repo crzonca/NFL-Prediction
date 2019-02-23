@@ -206,13 +206,12 @@ def predict_game_outcome(teams, home_name, away_name, home_spread, verbose=False
     return home_vote_prob if home_vote_prob >= away_vote_prob else away_vote_prob, message
 
 
-def update_teams(teams, away_name, away_score, home_name, home_score,
-                 home_touchdowns, home_net_pass_yards, home_pass_completions, home_pass_attempts, home_pass_tds,
-                 home_interceptions_thrown, home_total_yards, home_first_downs, home_third_down_conversions,
-                 home_third_downs,
-                 away_touchdowns, away_net_pass_yards, away_pass_completions, away_pass_attempts, away_pass_tds,
-                 away_interceptions_thrown, away_total_yards, away_first_downs, away_third_down_conversions,
-                 away_third_downs):
+def update_teams(teams, home_name, home_score, home_touchdowns, home_net_pass_yards, home_pass_completions,
+                 home_pass_attempts, home_pass_tds, home_interceptions_thrown, home_total_yards, home_first_downs,
+                 home_third_down_conversions, home_third_downs,
+                 away_name, away_score, away_touchdowns, away_net_pass_yards, away_pass_completions, away_pass_attempts,
+                 away_pass_tds, away_interceptions_thrown, away_total_yards, away_first_downs,
+                 away_third_down_conversions, away_third_downs):
     # Get the home team info
     home = get_team(teams, home_name)
     home_wins = home[1]
