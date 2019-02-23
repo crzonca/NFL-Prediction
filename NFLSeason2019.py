@@ -8,10 +8,7 @@ import Projects.nfl.NFL_Prediction.NFLPredictor as Predictor
 def season():
     eliminated_teams = list()
     teams = handle_week(None, 'Preseason', set_up_teams, eliminated_teams)
-    teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
-
-    print('FINAL STANDINGS')
-    print_league_details(teams, [], full_standings=True)
+    teams = handle_week(teams, 'Week 1', week_1, eliminated_teams, full_standings=True)
 
 
 def set_up_teams():
@@ -67,8 +64,8 @@ def handle_week(teams, week_name, week, eliminated_teams, full_standings=False):
 def week_1(teams):
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1*spread otherwise)
     probabilities = list()
-    probabilities.append(Predictor.predict_game_outcome(teams, 'Bears', 'Vikings', -6, verbose=True))
-    probabilities.append(Predictor.predict_game_outcome(teams, 'Lions', 'Packers', 3))
+    probabilities.append(Predictor.predict_game_outcome(teams, 'Vikings', 'Lions', -6, verbose=True))
+    probabilities.append(Predictor.predict_game_outcome(teams, 'Packers', 'Bears', 3))
 
     probabilities.sort(key=lambda outcome: outcome[0], reverse=True)
     for game in probabilities:
@@ -76,9 +73,9 @@ def week_1(teams):
     print()
 
     teams = Predictor.update_teams(teams,
-                                   away_name='Vikings',
+                                   away_name='Lions',
                                    away_score=13,
-                                   home_name='Bears',
+                                   home_name='Vikings',
                                    home_score=17,
                                    home_touchdowns=2,
                                    home_net_pass_yards=264,
@@ -101,8 +98,8 @@ def week_1(teams):
                                    away_third_down_conversions=7,
                                    away_third_downs=13)
 
-    teams = Predictor.update_teams(teams, 'Packers', 7, 'Lions', 14, 2, 182, 14, 24, 0, 0, 355, 26, 10, 15,
-                                   1, 386, 19, 22, 1, 0, 440, 28, 11, 18)
+    teams = Predictor.update_teams(teams, 'Bears', 14, 'Packers', 7, 1, 386, 19, 22, 1, 0, 440, 28, 11, 18,
+                                   2, 182, 14, 24, 0, 0, 355, 26, 10, 15)
 
     return teams
 
