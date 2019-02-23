@@ -21,7 +21,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
-from Projects.nfl import StatsHelper as Stats
+from Projects.nfl.NFL_Prediction import StatsHelper as Stats
 
 base_dir = '..\\Projects\\nfl\\NFL_Prediction\\Game Data\\'
 

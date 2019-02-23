@@ -8,7 +8,7 @@ import Projects.nfl.NFL_Prediction.NFLPredictor as Predictor
 def season():
     eliminated_teams = list()
     teams = handle_week(None, 'Preseason', set_up_teams, eliminated_teams)
-    # teams = handle_week(teams, 'Week 1', week_1)
+    teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
 
     print('FINAL STANDINGS')
     print_league_details(teams, [], full_standings=True)
@@ -64,52 +64,47 @@ def handle_week(teams, week_name, week, eliminated_teams, full_standings=False):
     return teams
 
 
-# def week_1(teams):
-#     # Games are listed as: Away Team, Home Team, Home - Away
-#     # probabilities = list()
-#     # probabilities.append(Predictor.predict_game_outcome(teams, 'Falcons', 'Eagles', 1))
-#     # probabilities.append(Predictor.predict_game_outcome(teams, 'Bills', 'Ravens', 7.5))
-#     # probabilities.append(Predictor.predict_game_outcome(teams, 'Jaguars', 'Giants', -3))
-#     # probabilities.append(Predictor.predict_game_outcome(teams, 'Buccaneers', 'Saints', 9.5))
-#     # probabilities.append(Predictor.predict_game_outcome(teams, 'Texans', 'Patriots', 6.5))
-#     # probabilities.append(Predictor.predict_game_outcome(teams, '49ers', 'Vikings', 6.5))
-#     # probabilities.append(Predictor.predict_game_outcome(teams, 'Titans', 'Dolphins', -1))
-#     # probabilities.append(Predictor.predict_game_outcome(teams, 'Bengals', 'Colts', 2.5))
-#     # probabilities.append(Predictor.predict_game_outcome(teams, 'Steelers', 'Browns', -4.5))
-#     # probabilities.append(Predictor.predict_game_outcome(teams, 'Chiefs', 'Chargers', 3.5))
-#     # probabilities.append(Predictor.predict_game_outcome(teams, 'Seahawks', 'Broncos', 3))
-#     # probabilities.append(Predictor.predict_game_outcome(teams, 'Cowboys', 'Panthers', 3))
-#     # probabilities.append(Predictor.predict_game_outcome(teams, 'Redskins', 'Cardinals', 1))
-#     # probabilities.append(Predictor.predict_game_outcome(teams, 'Bears', 'Packers', 7))
-#     # probabilities.append(Predictor.predict_game_outcome(teams, 'Jets', 'Lions', 7))
-#     # probabilities.append(Predictor.predict_game_outcome(teams, 'Rams', 'Raiders', -5.5))
-#     #
-#     # probabilities.sort(key=lambda outcome: outcome[0], reverse=True)
-#     # for game in probabilities:
-#     #     print(game[1])
-#     # print()
-#
-#     teams = Predictor.update_teams(teams=teams, away_name='Falcons', away_score=12, home_name='Eagles', home_score=18,
-#                                    away_sacked_yards=26, home_sacked_yards=13, away_penalty_yards=135,
-#                                    home_penalty_yards=101, away_convs=0, away_conv_attempts=1, home_convs=0,
-#                                    home_conv_attempts=0)
-#     teams = Predictor.update_teams(teams, 'Bills', 3, 'Ravens', 47, 28, 8, 100, 78, 0, 1, 0, 0)
-#     teams = Predictor.update_teams(teams, 'Jaguars', 20, 'Giants', 15, 8, 14, 119, 43, 0, 0, 0, 2)
-#     teams = Predictor.update_teams(teams, 'Buccaneers', 48, 'Saints', 40, 0, 7, 70, 77, 0, 0, 1, 1)
-#     teams = Predictor.update_teams(teams, 'Texans', 20, 'Patriots', 27, 18, 10, 44, 36, 0, 1, 1, 1)
-#     teams = Predictor.update_teams(teams, '49ers', 16, 'Vikings', 24, 24, 17, 21, 52, 0, 0, 0, 1)
-#     teams = Predictor.update_teams(teams, 'Titans', 20, 'Dolphins', 27, 0, 8, 48, 51, 0, 2, 0, 1)
-#     teams = Predictor.update_teams(teams, 'Bengals', 34, 'Colts', 23, 14, 14, 94, 91, 0, 0, 0, 0)
-#     teams = Predictor.update_teams(teams, 'Steelers', 21, 'Browns', 21, 22, 47, 116, 87, 0, 0, 0, 1)
-#     teams = Predictor.update_teams(teams, 'Chiefs', 38, 'Chargers', 28, 0, 6, 50, 45, 0, 0, 1, 1)
-#     teams = Predictor.update_teams(teams, 'Seahawks', 24, 'Broncos', 27, 56, 5, 45, 60, 0, 0, 0, 0)
-#     teams = Predictor.update_teams(teams, 'Cowboys', 8, 'Panthers', 16, 32, 15, 85, 80, 0, 1, 0, 0)
-#     teams = Predictor.update_teams(teams, 'Redskins', 24, 'Cardinals', 6, 8, 8, 63, 67, 1, 1, 0, 1)
-#     teams = Predictor.update_teams(teams, 'Bears', 23, 'Packers', 24, 16, 40, 35, 72, 0, 2, 0, 1)
-#     teams = Predictor.update_teams(teams, 'Jets', 48, 'Lions', 17, 18, 0, 49, 15, 2, 3, 0, 2)
-#     teams = Predictor.update_teams(teams, 'Rams', 33, 'Raiders', 13, 8, 3, 70, 155, 0, 0, 0, 0)
-#
-#     return teams
+def week_1(teams):
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1*spread otherwise)
+    probabilities = list()
+    probabilities.append(Predictor.predict_game_outcome(teams, 'Bears', 'Vikings', -6, verbose=True))
+    probabilities.append(Predictor.predict_game_outcome(teams, 'Lions', 'Packers', 3))
+
+    probabilities.sort(key=lambda outcome: outcome[0], reverse=True)
+    for game in probabilities:
+        print(game[1])
+    print()
+
+    teams = Predictor.update_teams(teams,
+                                   away_name='Vikings',
+                                   away_score=13,
+                                   home_name='Bears',
+                                   home_score=17,
+                                   home_touchdowns=2,
+                                   home_net_pass_yards=264,
+                                   home_pass_completions=17,
+                                   home_pass_attempts=26,
+                                   home_pass_tds=1,
+                                   home_interceptions_thrown=0,
+                                   home_total_yards=407,
+                                   home_first_downs=28,
+                                   home_third_down_conversions=9,
+                                   home_third_downs=15,
+                                   away_touchdowns=1,
+                                   away_net_pass_yards=217,
+                                   away_pass_completions=15,
+                                   away_pass_attempts=22,
+                                   away_pass_tds=0,
+                                   away_interceptions_thrown=1,
+                                   away_total_yards=322,
+                                   away_first_downs=21,
+                                   away_third_down_conversions=7,
+                                   away_third_downs=13)
+
+    teams = Predictor.update_teams(teams, 'Packers', 7, 'Lions', 14, 2, 182, 14, 24, 0, 0, 355, 26, 10, 15,
+                                   1, 386, 19, 22, 1, 0, 440, 28, 11, 18)
+
+    return teams
 
 
 def print_elo_rankings(teams, eliminated_teams):

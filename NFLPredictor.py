@@ -1,8 +1,12 @@
-import pandas as pd
-import Projects.nfl.NFL_Prediction.NFL as Nfl
+import warnings
 
+import pandas as pd
+from sklearn.exceptions import DataConversionWarning
 from sklearn.externals import joblib
 
+import Projects.nfl.NFL_Prediction.NFL as Nfl
+
+warnings.filterwarnings(action='ignore', category=DataConversionWarning)
 base_dir = '..\\Projects\\nfl\\NFL_Prediction\\'
 
 
@@ -130,10 +134,10 @@ def predict_game(home_info, away_info, home_spread=0):
     game = scaler.transform(game)
 
     # Get the voting classifier probability
-    vote_prob = voting_classifier.predict_proba([game])[0]
+    vote_prob = voting_classifier.predict_proba(game)[0]
 
     # Get the individual estimator probabilities
-    estimator_probs = voting_classifier.transform([game])
+    estimator_probs = voting_classifier.transform(game)
     lr_prob = estimator_probs[0][0]
     svc_prob = estimator_probs[1][0]
     rf_prob = estimator_probs[2][0]
@@ -157,8 +161,17 @@ def predict_game_outcome(teams, home_name, away_name, home_spread, verbose=False
     away = get_team(teams, away_name)
 
     # Get each teams probability of victory according to each estimator
-    home_vote_prob, home_lr_prob, home_svc_prob, home_rf_prob = predict_home_victory(home, away, home_spread)
-    away_vote_prob, away_lr_prob, away_svc_prob, away_rf_prob = predict_away_victory(away, away, home_spread)
+    vote_probs, lr_probs, svc_probs, rf_probs = predict_game(home, away, home_spread)
+
+    home_vote_prob = vote_probs[1]
+    home_lr_prob = lr_probs[1]
+    home_svc_prob = svc_probs[1]
+    home_rf_prob = rf_probs[1]
+
+    away_vote_prob = vote_probs[0]
+    away_lr_prob = lr_probs[0]
+    away_svc_prob = svc_probs[0]
+    away_rf_prob = rf_probs[0]
 
     # Write the favored teams chance of winning
     home_vote_prob_formatted = round(home_vote_prob * 100, 2)
@@ -177,13 +190,16 @@ def predict_game_outcome(teams, home_name, away_name, home_spread, verbose=False
         away_lr_prob_formatted = round(away_lr_prob * 100, 2)
         away_svc_prob_formatted = round(away_svc_prob * 100, 2)
         away_rf_prob_formatted = round(away_rf_prob * 100, 2)
-        print(message)
-        print('Logistic Regression Home Victory Probability: ' + str(home_lr_prob_formatted) + '%')
-        print('Logistic Regression Away Victory Probability: ' + str(away_lr_prob_formatted) + '%')
-        print('SVC Home Victory Probability: ' + str(home_svc_prob_formatted) + '%')
-        print('SVC Away Victory Probability: ' + str(away_svc_prob_formatted) + '%')
-        print('Random Forest Home Victory Probability: ' + str(home_rf_prob_formatted) + '%')
-        print('Random Forest Away Victory Probability: ' + str(away_rf_prob_formatted) + '%')
+        print('>> ' + message)
+        print()
+        print('>> Logistic Regression ' + home_name + ' Victory Probability: ' + str(home_lr_prob_formatted) + '%')
+        print('>> Logistic Regression ' + away_name + ' Victory Probability: ' + str(away_lr_prob_formatted) + '%')
+        print()
+        print('>> SVC ' + home_name + ' Victory Probability: ' + str(home_svc_prob_formatted) + '%')
+        print('>> SVC ' + away_name + ' Victory Probability: ' + str(away_svc_prob_formatted) + '%')
+        print()
+        print('>> Random Forest ' + home_name + ' Victory Probability: ' + str(home_rf_prob_formatted) + '%')
+        print('>> Random Forest ' + away_name + ' Victory Probability: ' + str(away_rf_prob_formatted) + '%')
         print()
 
     # Return the favored teams chance of winning and a message
@@ -294,7 +310,7 @@ def update_teams(teams, away_name, away_score, home_name, home_score,
 
     # Update the totals for all other stats for the away team
     away_total_points_for = away_total_points_for + away_score
-    away_total_points_against = away_total_points_against + away_score
+    away_total_points_against = away_total_points_against + home_score
     away_total_tds = away_total_tds + away_touchdowns
     away_total_net_pass_yards = away_total_net_pass_yards + away_net_pass_yards
     away_total_pass_completions = away_total_pass_completions + away_pass_completions
