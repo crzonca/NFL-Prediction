@@ -8,7 +8,7 @@ import Projects.nfl.NFL_Prediction.NFLPredictor as Predictor
 def season():
     eliminated_teams = list()
     teams = handle_week(None, 'Preseason', set_up_teams, eliminated_teams)
-    teams = handle_week(teams, 'Week 1', week_1, eliminated_teams, full_standings=True)
+    teams = handle_week(teams, 'Week 1', week_1, eliminated_teams, full_standings=True, model_rankings=True)
 
 
 def set_up_teams():
@@ -51,13 +51,13 @@ def set_up_teams():
     return teams
 
 
-def handle_week(teams, week_name, week, eliminated_teams, full_standings=False):
+def handle_week(teams, week_name, week, eliminated_teams, full_standings=False, model_rankings=False):
     print(week_name)
     if teams:
         teams = week(teams)
     else:
         teams = week()
-    print_league_details(teams, eliminated_teams, full_standings=full_standings)
+    print_league_details(teams, eliminated_teams, full_standings=full_standings, model_rankings=model_rankings)
     return teams
 
 
@@ -226,7 +226,7 @@ def print_model_rankings(teams, eliminated_teams):
     print()
 
 
-def print_league_details(teams, eliminated_teams, full_standings=False, model_rankings=True):
+def print_league_details(teams, eliminated_teams, full_standings=False, model_rankings=False):
     if full_standings:
         print_full_standings(teams, eliminated_teams)
     else:
