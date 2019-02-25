@@ -197,12 +197,43 @@ def print_full_standings(teams, eliminated_teams):
     print()
 
 
-def print_league_details(teams, eliminated_teams, full_standings=False):
+def print_model_rankings(teams, eliminated_teams):
+    team_probs = list()
+    for team in teams:
+        team_probs.append((team, get_chance_against_average(teams, team)))
+
+    team_probs.sort(key=lambda tup: tup[1], reverse=True)
+
+    teams = [team[0] for team in team_probs]
+
+    table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo', 'Tier'])
+    for rank, team in enumerate(teams):
+        row = list()
+        row.append(rank + 1)
+        team_info = list()
+        team_info.append(team[0])
+        team_info.append(team[1])
+        team_info.append(team[2])
+        team_info.append(team[3])
+        team_info.append(round(team[4], 3))
+        team_info.append(get_tier(teams, team))
+        row = row + team_info
+        row = [get_tier_color(row[-1], val) for val in row]
+        if team[0] not in eliminated_teams:
+            table.add_row(row)
+    print('Model Rankings')
+    print(table)
+    print()
+
+
+def print_league_details(teams, eliminated_teams, full_standings=False, model_rankings=True):
     if full_standings:
         print_full_standings(teams, eliminated_teams)
     else:
         print_standings(teams, eliminated_teams)
     print_elo_rankings(teams, eliminated_teams)
+    if model_rankings:
+        print_model_rankings(teams, eliminated_teams)
 
 
 def get_team(teams, team_name):
@@ -295,6 +326,76 @@ def get_tier_color(tier, string):
     elif tier == 'F-':
         string = Colors.BLACK + str(string) + Colors.ENDC
     return string
+
+
+def get_average_team(teams):
+    all_wins = list()
+    all_losses = list()
+    all_ties = list()
+    all_elo = list()
+    all_average_points_for = list()
+    all_average_points_against = list()
+    all_average_tds = list()
+    all_total_net_pass_yards = list()
+    all_total_pass_completions = list()
+    all_total_pass_attempts = list()
+    all_total_pass_tds = list()
+    all_total_interceptions_thrown = list()
+    all_average_total_yards = list()
+    all_average_first_downs = list()
+    all_total_third_down_conversions = list()
+    all_total_third_downs = list()
+
+    for team in teams:
+        all_wins.append(team[1])
+        all_losses.append(team[2])
+        all_ties.append(team[3])
+        all_elo.append(team[4])
+        all_average_points_for.append(team[5])
+        all_average_points_against.append(team[6])
+        all_average_tds.append(team[7])
+        all_total_net_pass_yards.append(team[8])
+        all_total_pass_completions.append(team[9])
+        all_total_pass_attempts.append(team[10])
+        all_total_pass_tds.append(team[11])
+        all_total_interceptions_thrown.append(team[12])
+        all_average_total_yards.append(team[13])
+        all_average_first_downs.append(team[14])
+        all_total_third_down_conversions.append(team[15])
+        all_total_third_downs.append(team[16])
+
+    avg_wins = statistics.mean(all_wins)
+    avg_losses = statistics.mean(all_losses)
+    avg_ties = statistics.mean(all_ties)
+    avg_elo = statistics.mean(all_elo)
+    avg_average_points_for = statistics.mean(all_average_points_for)
+    avg_average_points_against = statistics.mean(all_average_points_against)
+    avg_average_tds = statistics.mean(all_average_tds)
+    avg_total_net_pass_yards = statistics.mean(all_total_net_pass_yards)
+    avg_total_pass_completions = statistics.mean(all_total_pass_completions)
+    avg_total_pass_attempts = statistics.mean(all_total_pass_attempts)
+    avg_total_pass_tds = statistics.mean(all_total_pass_tds)
+    avg_total_interceptions_thrown = statistics.mean(all_total_interceptions_thrown)
+    avg_average_total_yards = statistics.mean(all_average_total_yards)
+    avg_average_first_downs = statistics.mean(all_average_first_downs)
+    avg_total_third_down_conversions = statistics.mean(all_total_third_down_conversions)
+    avg_total_third_downs = statistics.mean(all_total_third_downs)
+
+    return ('Average', avg_wins, avg_losses, avg_ties, avg_elo, avg_average_points_for, avg_average_points_against,
+            avg_average_tds, avg_total_net_pass_yards, avg_total_pass_completions, avg_total_pass_attempts,
+            avg_total_pass_tds, avg_total_interceptions_thrown, avg_average_total_yards, avg_average_total_yards,
+            avg_average_first_downs, avg_total_third_down_conversions, avg_total_third_downs)
+
+
+def get_chance_against_average(teams, team):
+    avg_team = get_average_team(teams)
+    team_avg_points_diff = team[5] - team[6]
+    avg_team_avg_points_diff = avg_team[5] - avg_team[6]
+    spread = team_avg_points_diff - avg_team_avg_points_diff
+    home_vote_prob, home_lr_prob, home_svc_prob, home_rf_prob = Predictor.predict_home_victory(team, avg_team, -spread)
+    away_vote_prob, away_lr_prob, away_svc_prob, away_rf_prob = Predictor.predict_away_victory(avg_team, team, spread)
+    avg_prob = (home_vote_prob + away_vote_prob) / 2
+    return avg_prob
 
 
 class Colors:
