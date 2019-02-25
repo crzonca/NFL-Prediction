@@ -52,12 +52,20 @@ def set_up_teams():
 
 
 def handle_week(teams, week_name, week, eliminated_teams, full_standings=False, model_rankings=False):
+    # Print the week name
     print(week_name)
+
+    # If the league already has teams
     if teams:
+        # Handle the week
         teams = week(teams)
     else:
+        # Otherwise do setup
         teams = week()
+    # Print the tables
     print_league_details(teams, eliminated_teams, full_standings=full_standings, model_rankings=model_rankings)
+
+    # Return the updated teams
     return teams
 
 
@@ -105,10 +113,16 @@ def week_1(teams):
 
 
 def print_elo_rankings(teams, eliminated_teams):
+    # Sort the teams by elo, then wins, then least losses
     sorted_by_losses = sorted(teams, key=lambda tup: tup[2])
     sorted_by_wins = sorted(sorted_by_losses, reverse=True, key=lambda tup: tup[1])
     sorted_by_elo = sorted(sorted_by_wins, reverse=True, key=lambda tup: tup[4])
+
+    # Create the table header
     table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo', 'Tier'])
+    table.float_format = '0.3'
+
+    # Add the info to the rows
     for rank, team in enumerate(sorted_by_elo):
         row = list()
         row.append(rank + 1)
@@ -120,21 +134,32 @@ def print_elo_rankings(teams, eliminated_teams):
         team_info.append(round(team[4], 3))
         team_info.append(get_tier(teams, team))
         row = row + team_info
+
+        # Color the row based of the teams tier
         row = [get_tier_color(row[-1], val) for val in row]
+
+        # Add the row to the table if the team isnt eliminated
         if team[0] not in eliminated_teams:
             table.add_row(row)
+
+    # Print the table
     print('Elo Rankings')
     print(table)
     print()
 
 
 def print_standings(teams, eliminated_teams):
+    # Sort the teams by wins, then least losses, then point differential, then total yards
     sorted_by_yards = sorted(teams, reverse=True, key=lambda tup: tup[13])
     sorted_by_point_diff = sorted(sorted_by_yards, reverse=True, key=lambda tup: tup[5] - tup[6])
     sorted_by_losses = sorted(sorted_by_point_diff, key=lambda tup: tup[2])
     sorted_by_wins = sorted(sorted_by_losses, reverse=True, key=lambda tup: tup[1])
+
+    # Create the table header
     table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo'])
     table.float_format = '0.3'
+
+    # Add the info to the rows
     for rank, team in enumerate(sorted_by_wins):
         row = list()
         row.append(rank + 1)
@@ -145,21 +170,30 @@ def print_standings(teams, eliminated_teams):
         team_info.append(team[3])
         team_info.append(team[4])
         row = row + team_info
+
+        # Add the row to the table if the team isnt eliminated
         if team[0] not in eliminated_teams:
             table.add_row(row)
+
+    # Print the table
     print('Standings')
     print(table)
     print()
 
 
 def print_full_standings(teams, eliminated_teams):
+    # Sort the teams by wins, then least losses, then point differential, then total yards
     sorted_by_yards = sorted(teams, reverse=True, key=lambda tup: tup[13])
     sorted_by_point_diff = sorted(sorted_by_yards, reverse=True, key=lambda tup: tup[5] - tup[6])
     sorted_by_losses = sorted(sorted_by_point_diff, key=lambda tup: tup[2])
     sorted_by_wins = sorted(sorted_by_losses, reverse=True, key=lambda tup: tup[1])
+
+    # Create the table header
     table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo', 'Points', 'Points Against', 'Point Diff.',
                          'Touchdowns', 'Passer Rating', 'Total Yards', 'First Downs', '3rd Down %'])
     table.float_format = '0.3'
+
+    # Add the info to the rows
     for rank, team in enumerate(sorted_by_wins):
         row = list()
         row.append(rank + 1)
@@ -190,23 +224,35 @@ def print_full_standings(teams, eliminated_teams):
         else:
             team_info.append(round(100 * (team[15] / team[16]), 1))
         row = row + team_info
+
+        # Add the row to the table if the team isnt eliminated
         if team[0] not in eliminated_teams:
             table.add_row(row)
+
+    # Print the table
     print('Standings')
     print(table)
     print()
 
 
 def print_model_rankings(teams, eliminated_teams):
+    # Get every teams chance to beat the perfectly average team in the league
     team_probs = list()
     for team in teams:
-        team_probs.append((team, get_chance_against_average(teams, team)))
+        team_probs.append((team, round(get_chance_against_average(teams, team), 3)))
 
+    # Sort the teams by their chance to beat an average team, then by elo
+    team_probs.sort(key=lambda tup: tup[0][4], reverse=True)
     team_probs.sort(key=lambda tup: tup[1], reverse=True)
 
+    # Remove the victory probability from the team info
     teams = [team[0] for team in team_probs]
 
+    # Create the table header
     table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo', 'Tier'])
+    table.float_format = '0.3'
+
+    # Add the info to the rows
     for rank, team in enumerate(teams):
         row = list()
         row.append(rank + 1)
@@ -218,20 +264,31 @@ def print_model_rankings(teams, eliminated_teams):
         team_info.append(round(team[4], 3))
         team_info.append(get_tier(teams, team))
         row = row + team_info
+
+        # Color the row based of the teams tier
         row = [get_tier_color(row[-1], val) for val in row]
+
+        # Add the row to the table if the team isnt eliminated
         if team[0] not in eliminated_teams:
             table.add_row(row)
+
+    # Print the table
     print('Model Rankings')
     print(table)
     print()
 
 
 def print_league_details(teams, eliminated_teams, full_standings=False, model_rankings=False):
+    # Print the standings
     if full_standings:
         print_full_standings(teams, eliminated_teams)
     else:
         print_standings(teams, eliminated_teams)
+
+    # Print the elo rankings
     print_elo_rankings(teams, eliminated_teams)
+
+    # If model rankings are desired, print the model rankings
     if model_rankings:
         print_model_rankings(teams, eliminated_teams)
 
@@ -388,12 +445,23 @@ def get_average_team(teams):
 
 
 def get_chance_against_average(teams, team):
+    # Get a perfectly average team for the leage
     avg_team = get_average_team(teams)
+
+    # Get the teams average point differential
     team_avg_points_diff = team[5] - team[6]
+
+    # Get the "average" teams average point differential
     avg_team_avg_points_diff = avg_team[5] - avg_team[6]
+
+    # The teams expected margin of victory is their point differential less the average teams point differential
     spread = team_avg_points_diff - avg_team_avg_points_diff
+
+    # Calculate the teams chances of victory if they were the home team and if they were the away team
     home_vote_prob, home_lr_prob, home_svc_prob, home_rf_prob = Predictor.predict_home_victory(team, avg_team, -spread)
     away_vote_prob, away_lr_prob, away_svc_prob, away_rf_prob = Predictor.predict_away_victory(avg_team, team, spread)
+
+    # Return the average of the teams chance of victory
     avg_prob = (home_vote_prob + away_vote_prob) / 2
     return avg_prob
 
