@@ -51,7 +51,13 @@ def set_up_teams():
     return teams
 
 
-def handle_week(teams, week_name, week, eliminated_teams, full_standings=False, model_rankings=False):
+def handle_week(teams,
+                week_name,
+                week,
+                eliminated_teams,
+                full_standings=False,
+                divisional_view=False,
+                model_rankings=False):
     # Print the week name
     print(week_name)
 
@@ -63,7 +69,11 @@ def handle_week(teams, week_name, week, eliminated_teams, full_standings=False, 
         # Otherwise do setup
         teams = week()
     # Print the tables
-    print_league_details(teams, eliminated_teams, full_standings=full_standings, model_rankings=model_rankings)
+    print_league_details(teams,
+                         eliminated_teams,
+                         full_standings=full_standings,
+                         divisional_view=divisional_view,
+                         model_rankings=model_rankings)
 
     # Return the updated teams
     return teams
@@ -112,7 +122,7 @@ def week_1(teams):
     return teams
 
 
-def print_elo_rankings(teams, eliminated_teams):
+def print_elo_rankings(teams, eliminated_teams, include_title=True):
     # Sort the teams by elo, then wins, then least losses
     sorted_by_losses = sorted(teams, key=lambda tup: tup[2])
     sorted_by_wins = sorted(sorted_by_losses, reverse=True, key=lambda tup: tup[1])
@@ -143,12 +153,13 @@ def print_elo_rankings(teams, eliminated_teams):
             table.add_row(row)
 
     # Print the table
-    print('Elo Rankings')
+    if include_title:
+        print('Elo Rankings')
     print(table)
     print()
 
 
-def print_standings(teams, eliminated_teams):
+def print_standings(teams, eliminated_teams, include_title=True):
     # Sort the teams by wins, then least losses, then point differential, then total yards
     sorted_by_yards = sorted(teams, reverse=True, key=lambda tup: tup[13])
     sorted_by_point_diff = sorted(sorted_by_yards, reverse=True, key=lambda tup: tup[5] - tup[6])
@@ -176,12 +187,13 @@ def print_standings(teams, eliminated_teams):
             table.add_row(row)
 
     # Print the table
-    print('Standings')
+    if include_title:
+        print('Standings')
     print(table)
     print()
 
 
-def print_full_standings(teams, eliminated_teams):
+def print_full_standings(teams, eliminated_teams, include_title=True):
     # Sort the teams by wins, then least losses, then point differential, then total yards
     sorted_by_yards = sorted(teams, reverse=True, key=lambda tup: tup[13])
     sorted_by_point_diff = sorted(sorted_by_yards, reverse=True, key=lambda tup: tup[5] - tup[6])
@@ -230,9 +242,46 @@ def print_full_standings(teams, eliminated_teams):
             table.add_row(row)
 
     # Print the table
-    print('Standings')
+    if include_title:
+        print('Standings')
     print(table)
     print()
+
+
+def print_division_rankings(teams):
+    nfl = get_league_structure()
+    for conference_name, conference in nfl.items():
+        for division_name, division in conference.items():
+            division_teams = list()
+            for team in division:
+                division_teams.append(get_team(teams, team))
+            print(division_name)
+            other_divisions = list(set(teams) - set(division_teams))
+            print_elo_rankings(teams, [team[0] for team in other_divisions], False)
+
+
+def print_division_standings(teams):
+    nfl = get_league_structure()
+    for conference_name, conference in nfl.items():
+        for division_name, division in conference.items():
+            division_teams = list()
+            for team in division:
+                division_teams.append(get_team(teams, team))
+            print(division_name)
+            other_divisions = list(set(teams) - set(division_teams))
+            print_standings(teams, [team[0] for team in other_divisions], False)
+
+
+def print_full_division_standings(teams):
+    nfl = get_league_structure()
+    for conference_name, conference in nfl.items():
+        for division_name, division in conference.items():
+            division_teams = list()
+            for team in division:
+                division_teams.append(get_team(teams, team))
+            print(division_name)
+            other_divisions = list(set(teams) - set(division_teams))
+            print_full_standings(teams, [team[0] for team in other_divisions], False)
 
 
 def print_model_rankings(teams, eliminated_teams):
@@ -278,15 +327,24 @@ def print_model_rankings(teams, eliminated_teams):
     print()
 
 
-def print_league_details(teams, eliminated_teams, full_standings=False, model_rankings=False):
+def print_league_details(teams, eliminated_teams, full_standings=False, divisional_view=False, model_rankings=False):
     # Print the standings
     if full_standings:
-        print_full_standings(teams, eliminated_teams)
+        if divisional_view:
+            print_full_division_standings(teams)
+        else:
+            print_full_standings(teams, eliminated_teams)
     else:
-        print_standings(teams, eliminated_teams)
+        if divisional_view:
+            print_division_standings(teams)
+        else:
+            print_standings(teams, eliminated_teams)
 
     # Print the elo rankings
-    print_elo_rankings(teams, eliminated_teams)
+    if divisional_view:
+        print_division_rankings(teams)
+    else:
+        print_elo_rankings(teams, eliminated_teams)
 
     # If model rankings are desired, print the model rankings
     if model_rankings:
@@ -485,3 +543,18 @@ class Colors:
     RED = '\033[31m'
     UNDERLINE = '\033[4m'
     ENDC = '\033[0m'
+
+
+def get_league_structure():
+    afc = {'AFC North': ['Bengals', 'Browns', 'Ravens', 'Steelers'],
+           'AFC East': ['Bills', 'Dolphins', 'Jets', 'Patriots'],
+           'AFC South': ['Colts', 'Jaguars', 'Texans', 'Titans'],
+           'AFC West': ['Broncos', 'Chargers', 'Chiefs', 'Raiders']}
+
+    nfc = {'NFC North': ['Bears', 'Lions', 'Packers', 'Vikings'],
+           'NFC East': ['Cowboys', 'Eagles', 'Giants', 'Redskins'],
+           'NFC South': ['Buccaneers', 'Falcons', 'Panthers', 'Saints'],
+           'NFC West': ['49ers', 'Cardinals', 'Rams', 'Seahawks']}
+
+    nfl = {'AFC': afc, 'NFC': nfc}
+    return nfl
