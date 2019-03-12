@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.exceptions import DataConversionWarning
 from sklearn.externals import joblib
 
-import Projects.nfl.NFL_Prediction.NFL as Nfl
+import Projects.nfl.NFL_Prediction.NFL as NFL
 
 warnings.filterwarnings(action='ignore', category=DataConversionWarning)
 base_dir = '..\\Projects\\nfl\\NFL_Prediction\\'
@@ -287,7 +287,7 @@ def update_teams(teams, home_name, home_score, home_touchdowns, home_net_pass_ya
     away_games_played = away_games_played + 1
 
     # Update each teams elo
-    home_elo, away_elo = Nfl.get_new_elos(home_elo,
+    home_elo, away_elo = NFL.get_new_elos(home_elo,
                                           away_elo,
                                           home_victory,
                                           draw,
