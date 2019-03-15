@@ -12,10 +12,10 @@ def get_team(teams, team_name):
 
 
 def print_elo_rankings(teams, eliminated_teams, include_title=True):
-    # Sort the teams by elo, then wins, then least losses
-    sorted_by_losses = sorted(teams, key=lambda tup: tup[2])
-    sorted_by_wins = sorted(sorted_by_losses, reverse=True, key=lambda tup: tup[1])
-    sorted_by_elo = sorted(sorted_by_wins, reverse=True, key=lambda tup: tup[4])
+    # Sort the teams by elo, then by playoff tiebreakers
+    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    teams = Playoffs.sort_by_tiebreakers(teams)
+    sorted_by_elo = sorted(teams, reverse=True, key=lambda tup: tup[4])
 
     # Create the table header
     table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo', 'Tier'])
