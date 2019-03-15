@@ -1,5 +1,5 @@
-import itertools
 import random
+from functools import cmp_to_key
 
 import Projects.nfl.NFL_Prediction.NFL as NFL
 import Projects.nfl.NFL_Prediction.StandingsHelper as Standings
@@ -28,31 +28,280 @@ def get_league_structure():
     return nfl
 
 
-def get_fake_schedule(teams):
+def get_fake_schedule():
     games = list()
 
-    structure = get_league_structure()
-    afc = structure.get('AFC')
-    afc_divisions = list()
-    for afc_div_name, afc_division in afc.items():
-        afc_divisions.append(afc_division)
-    afc_teams = [team for afc_division in afc_divisions for team in afc_division]
-    for game in itertools.combinations(afc_teams, 2):
-        games.append(game)
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
 
-    nfc = structure.get('NFC')
-    nfc_divisions = list()
-    for nfc_div_name, nfc_division in nfc.items():
-        nfc_divisions.append(nfc_division)
-    nfc_teams = [team for nfc_division in nfc_divisions for team in nfc_division]
-    for game in itertools.combinations(nfc_teams, 2):
-        games.append(game)
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
 
-    team_names = [team[0] for team in teams]
-    for team_name in team_names:
-        other_teams = team_names.copy()
-        other_teams.remove(team_name)
-        games.append((team_name, random.choice(other_teams)))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
+    games.append(('', ''))
 
     return games
 
@@ -60,12 +309,12 @@ def get_fake_schedule(teams):
 def monte_carlo(teams):
     all_trials = list()
     # 100,000 Trials
-    for trial in range(100):
+    for trial in range(100000):
         # Get just the name, record and elo of each team
         pseudo_teams = [(team[0], team[1], team[2], team[3], team[4]) for team in teams]
 
         # For each game in the list of games
-        for game in get_fake_schedule(teams):
+        for game in get_fake_schedule():
             # Get the home and away teams
             home = game[0]
             away = game[1]
@@ -143,73 +392,245 @@ def get_pct_chance(home_elo, away_elo):
     return e_home
 
 
-def get_divisional_leaders(teams):
+def get_playoff_picture(teams):
+    teams = sort_by_tiebreakers(teams)
     league = get_league_structure()
-    afc = league.get('AFC')
-    for div_name, division in afc.items():
-        teams = [get_team(teams, name) for name in division]
-        sorted_by_wins = sorted(teams, reverse=True, key=lambda team: team[1])
+    first_round_byes = list()
+    division_leaders = list()
+    wild_cards = list()
+
+    for conf_name, conference in league.items():
+        conference_teams = list()
+
+        for div_name, division in conference.items():
+            division_teams = [get_team(teams, team_name) for team_name in division]
+            division_teams = sort_by_tiebreakers(division_teams)
+            division_leaders.append(division_teams[0])
+            conference_teams.extend(division_teams)
+
+        conference_teams = sort_by_tiebreakers(conference_teams)
+        first_round_byes.append(conference_teams[0])
+
+        conf_leader = conference_teams[0][0]
+        conf_leaders_division = None
+        for div_name, division in conference.items():
+            if conf_leader in division:
+                conf_leaders_division = division
+        for runner_up in range(1, 5):
+            runner_up_name = conference_teams[runner_up][0]
+            runner_up_division = None
+            for div_name, division in conference.items():
+                if runner_up_name in division:
+                    runner_up_division = division
+            if runner_up_division != conf_leaders_division:
+                first_round_byes.append(conference_teams[runner_up])
+                break
+
+        other_teams = conference_teams.copy()
+        other_teams = list(set(other_teams) - set(division_leaders))
+        other_teams = sort_by_tiebreakers(other_teams)
+        wild_cards.append(other_teams[0])
+        wild_cards.append(other_teams[1])
+
+    print('First Round Byes:')
+    first_round_byes = [team[0] for team in first_round_byes]
+    print('\n'.join(first_round_byes))
+    print()
+
+    print('Division Leaders:')
+    division_leaders = [team[0] for team in division_leaders]
+    print('\n'.join(division_leaders))
+    print()
+
+    print('Wild Cards:')
+    wild_cards = [team[0] for team in wild_cards]
+    print('\n'.join(wild_cards))
+    print()
 
 
-def get_divisional_tiebreaker(team1, team2):
-    if team1[1] > team2[1]:
-        return team1
-    elif team1[1] < team2[1]:
-        return team2
-    else:
-        return get_head_to_head(team1, team2)
+def sort_by_tiebreakers(teams):
+    sorted_teams = sorted(teams, key=cmp_to_key(compare_win_pct), reverse=True)
+    return sorted_teams
 
 
-def get_head_to_head(team1, team2):
-    def contains_both_teams(game):
-        return game[0] == team1[0] and game[2] == team2[0] or game[0] == team2[0] and game[2] == team1[0]
+def compare_win_pct(team1, team2):
+    team1_games_played = team1[1] + team1[2] + team1[3]
+    team2_games_played = team2[1] + team2[2] + team2[3]
+    team1_pct = team1[1] / team1_games_played if team1_games_played > 0 else 0
+    team2_pct = team2[1] / team2_games_played if team2_games_played > 0 else 0
 
-    head_to_head_games = list(filter(lambda g: contains_both_teams(g), completed_games))
+    if team1_pct - team2_pct == 0:
+        return compare_head_to_head(team1, team2)
+    return team1_pct - team2_pct
 
-    def get_team_victories(team, game):
-        if game[0] == team[0]:
-            return game[1] > game[3]
+
+def compare_head_to_head(team1, team2):
+    head_to_head_games = list(filter(lambda game: contains_both_teams(team1, team2, game), completed_games))
+
+    team1_victories = list(filter(lambda game: filter_team_victories(team1, game), head_to_head_games))
+    team2_victories = list(filter(lambda game: filter_team_victories(team2, game), head_to_head_games))
+
+    if len(team1_victories) - len(team2_victories) == 0:
+        return compare_divisional_record(team1, team2)
+    return len(team1_victories) - len(team2_victories)
+
+
+def compare_divisional_record(team1, team2):
+    team1_divisional_games = list(filter(lambda game: contains_divisional_teams(team1, game), completed_games))
+    team2_divisional_games = list(filter(lambda game: contains_divisional_teams(team2, game), completed_games))
+
+    team1_victories = list(filter(lambda game: filter_team_victories(team1, game), team1_divisional_games))
+    team2_victories = list(filter(lambda game: filter_team_victories(team2, game), team2_divisional_games))
+
+    if len(team1_victories) - len(team2_victories) == 0:
+        return compare_common_record(team1, team2)
+    return len(team1_victories) - len(team2_victories)
+
+
+def compare_common_record(team1, team2):
+    team1_common_games = list(filter(lambda game: contains_common_opponents(team1, team2, game), completed_games))
+    team2_common_games = list(filter(lambda game: contains_common_opponents(team2, team1, game), completed_games))
+
+    team1_victories = list(filter(lambda game: filter_team_victories(team1, game), team1_common_games))
+    team2_victories = list(filter(lambda game: filter_team_victories(team2, game), team2_common_games))
+
+    return len(team1_victories) - len(team2_victories)
+
+
+def compare_conference_record(team1, team2):
+    team1_conference_games = list(filter(lambda game: contains_conference_teams(team1, game), completed_games))
+    team2_conference_games = list(filter(lambda game: contains_conference_teams(team2, game), completed_games))
+
+    team1_victories = list(filter(lambda game: filter_team_victories(team1, game), team1_conference_games))
+    team2_victories = list(filter(lambda game: filter_team_victories(team2, game), team2_conference_games))
+
+    if len(team1_victories) - len(team2_victories) == 0:
+        return compare_strength_of_victory(team1, team2)
+    return len(team1_victories) - len(team2_victories)
+
+
+def compare_strength_of_victory(team1, team2):
+    team1_games = list(filter(lambda g: contains_team(team1, g), completed_games))
+    team2_games = list(filter(lambda g: contains_team(team2, g), completed_games))
+
+    team1_victories = list(filter(lambda g: filter_team_victories(team1, g), team1_games))
+    team2_victories = list(filter(lambda g: filter_team_victories(team2, g), team2_games))
+
+    team1_opponent_victories = list()
+    team2_opponent_victories = list()
+    for game in team1_victories:
+        if game[0] == team1[0]:
+            opponent = game[2]
         else:
-            return game[1] < game[3]
+            opponent = game[0]
+        opponent_games = list(filter(lambda g: contains_team(opponent, g), completed_games))
+        opponent_victories = list(filter(lambda g: filter_team_victories(opponent, g), opponent_games))
+        team1_opponent_victories.append(len(opponent_victories))
 
-    team1_victories = list(filter(lambda g: get_team_victories(team1, g), head_to_head_games))
-    team2_victories = list(filter(lambda g: get_team_victories(team2, g), head_to_head_games))
-
-    if team1_victories > team2_victories:
-        return team1
-    elif team1_victories < team2_victories:
-        return team2
-    else:
-        return get_divisional_record(team1, team2)
-
-
-def get_divisional_record(team1, team2):
-    def contains_divisional_teams(team, game):
-        def get_division(team):
-            name = team[0]
-            league = get_league_structure()
-            for conf_name, conference in league.items():
-                for div_name, division in conference.items():
-                    if name in division:
-                        return division
-
-        return game[0] == team and game[2] in get_division(team) or game[0] in get_division(team) and game[2] == team
-
-    team1_divisional_games = list(filter(lambda g: contains_divisional_teams(team1, g), completed_games))
-    team2_divisional_games = list(filter(lambda g: contains_divisional_teams(team2, g), completed_games))
-
-    def get_team_victories(team, game):
-        if game[0] == team[0]:
-            return game[1] > game[3]
+    for game in team2_victories:
+        if game[0] == team2[0]:
+            opponent = game[2]
         else:
-            return game[1] < game[3]
+            opponent = game[0]
+        opponent_games = list(filter(lambda g: contains_team(opponent, g), completed_games))
+        opponent_victories = list(filter(lambda g: filter_team_victories(opponent, g), opponent_games))
+        team2_opponent_victories.append(len(opponent_victories))
 
-    team1_victories = list(filter(lambda g: get_team_victories(team1, g), team1_divisional_games))
-    team2_victories = list(filter(lambda g: get_team_victories(team2, g), team2_divisional_games))
+    if sum(team1_opponent_victories) - sum(team2_opponent_victories) == 0:
+        return compare_strength_of_schedule(team1, team2)
+    return sum(team1_opponent_victories) - sum(team2_opponent_victories)
 
-    if team1_victories > team2_victories:
-        return team1
-    elif team1_victories < team2_victories:
-        return team2
+
+def compare_strength_of_schedule(team1, team2):
+    team1_games = list(filter(lambda g: contains_team(team1, g), completed_games))
+    team2_games = list(filter(lambda g: contains_team(team2, g), completed_games))
+
+    team1_opponent_victories = list()
+    team2_opponent_victories = list()
+    for game in team1_games:
+        if game[0] == team1[0]:
+            opponent = game[2]
+        else:
+            opponent = game[0]
+        opponent_games = list(filter(lambda g: contains_team(opponent, g), completed_games))
+        opponent_victories = list(filter(lambda g: filter_team_victories(opponent, game), opponent_games))
+        team1_opponent_victories.append(len(opponent_victories))
+
+    for game in team2_games:
+        if game[0] == team2[0]:
+            opponent = game[2]
+        else:
+            opponent = game[0]
+        opponent_games = list(filter(lambda g: contains_team(opponent, g), completed_games))
+        opponent_victories = list(filter(lambda g: filter_team_victories(opponent, g), opponent_games))
+        team2_opponent_victories.append(len(opponent_victories))
+
+    if sum(team1_opponent_victories) - sum(team2_opponent_victories) == 0:
+        return compare_point_diff
+    return sum(team1_opponent_victories) - sum(team2_opponent_victories)
+
+
+def compare_point_diff(team1, team2):
+    team1_point_diff = team1[5] - team1[6]
+    team2_point_diff = team2[5] - team2[6]
+
+    return team1_point_diff - team2_point_diff
+
+
+def filter_team_victories(team, game):
+    if game[0] == team[0]:
+        return game[1] > game[3]
     else:
-        return get_divisional_record(team1, team2)
+        return game[1] < game[3]
+
+
+def contains_team(team, game):
+    return game[0] == team[0] or game[2] == team[0]
+
+
+def contains_both_teams(team1, team2, game):
+    return contains_team(team1, game) and contains_team(team2, game)
+
+
+def contains_divisional_teams(team, game):
+    name = team[0]
+    league = get_league_structure()
+    teams_division = None
+    for conf_name, conference in league.items():
+        for div_name, division in conference.items():
+            if name in division:
+                teams_division = division
+
+    return (game[0] == name and game[2] in teams_division) or (game[0] in teams_division and game[2] == name)
+
+
+def contains_conference_teams(team, game):
+    name = team[0]
+    league = get_league_structure()
+    teams_conference = None
+    for conf_name, conference in league.items():
+        for div_name, division in conference.items():
+            if name in division:
+                teams_conference = conference
+
+    conf_teams = list()
+    for div_name, division in teams_conference.items():
+        conf_teams.extend(division)
+
+    return (game[0] == name and game[2] in conf_teams) or (game[0] in conf_teams and game[2] == name)
+
+
+def contains_common_opponents(team1, team2, game):
+    team1_opponents = set()
+    team2_opponents = set()
+    for game in completed_games:
+        if game[0] == team1[0]:
+            team1_opponents.add(game[2])
+        if game[2] == team1[0]:
+            team1_opponents.add(game[0])
+        if game[0] == team2[0]:
+            team2_opponents.add(game[2])
+        if game[2] == team2[0]:
+            team2_opponents.add(game[0])
+    common = team1_opponents.intersection(team2_opponents)
+    return (game[0] == team1[0] and game[2] in common) or (game[0] in common and game[2] == team1[0])
