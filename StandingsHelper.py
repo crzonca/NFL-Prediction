@@ -49,18 +49,16 @@ def print_elo_rankings(teams, eliminated_teams, include_title=True):
 
 
 def print_standings(teams, eliminated_teams, include_title=True):
-    # Sort the teams by wins, then least losses, then point differential, then total yards
-    sorted_by_yards = sorted(teams, reverse=True, key=lambda tup: tup[13])
-    sorted_by_point_diff = sorted(sorted_by_yards, reverse=True, key=lambda tup: tup[5] - tup[6])
-    sorted_by_losses = sorted(sorted_by_point_diff, key=lambda tup: tup[2])
-    sorted_by_wins = sorted(sorted_by_losses, reverse=True, key=lambda tup: tup[1])
+    # Sort the teams by playoff tiebreakers
+    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    teams = Playoffs.sort_by_tiebreakers(teams)
 
     # Create the table header
     table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo'])
     table.float_format = '0.3'
 
     # Add the info to the rows
-    for rank, team in enumerate(sorted_by_wins):
+    for rank, team in enumerate(teams):
         row = list()
         row.append(rank + 1)
         team_info = list()
@@ -83,11 +81,9 @@ def print_standings(teams, eliminated_teams, include_title=True):
 
 
 def print_full_standings(teams, eliminated_teams, include_title=True):
-    # Sort the teams by wins, then least losses, then point differential, then total yards
-    sorted_by_yards = sorted(teams, reverse=True, key=lambda tup: tup[13])
-    sorted_by_point_diff = sorted(sorted_by_yards, reverse=True, key=lambda tup: tup[5] - tup[6])
-    sorted_by_losses = sorted(sorted_by_point_diff, key=lambda tup: tup[2])
-    sorted_by_wins = sorted(sorted_by_losses, reverse=True, key=lambda tup: tup[1])
+    # Sort the teams by playoff tiebreakers
+    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    teams = Playoffs.sort_by_tiebreakers(teams)
 
     # Create the table header
     table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo', 'Points', 'Points Against', 'Point Diff.',
@@ -95,7 +91,7 @@ def print_full_standings(teams, eliminated_teams, include_title=True):
     table.float_format = '0.3'
 
     # Add the info to the rows
-    for rank, team in enumerate(sorted_by_wins):
+    for rank, team in enumerate(teams):
         row = list()
         row.append(rank + 1)
         team_info = list()
