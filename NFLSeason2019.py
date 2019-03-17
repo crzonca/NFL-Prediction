@@ -9,9 +9,9 @@ def season():
     eliminated_teams = list()
 
     Standings.print_league_details(teams, eliminated_teams, full_standings=False)
-    teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
+    # teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
 
-    # Playoffs.monte_carlo(teams)
+    Playoffs.monte_carlo(teams)
     Playoffs.get_playoff_picture(teams)
 
 
@@ -119,18 +119,6 @@ def week_1(teams):
     teams = set_game_outcome(teams,
                              'Packers', 7, 1, 386, 19, 22, 1, 0, 440, 28, 11, 18,
                              'Bears', 14, 2, 182, 14, 24, 0, 0, 355, 26, 10, 15)
-
-    teams = set_game_outcome(teams,
-                             'Vikings', 7, 1, 386, 19, 22, 1, 0, 440, 28, 11, 18,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355, 26, 10, 15)
-
-    teams = set_game_outcome(teams,
-                             'Packers', 7, 1, 386, 19, 22, 1, 0, 440, 28, 11, 18,
-                             'Vikings', 14, 2, 182, 14, 24, 0, 0, 355, 26, 10, 15)
-
-    teams = set_game_outcome(teams,
-                            'Bears', 7, 1, 386, 19, 22, 1, 0, 440, 28, 11, 18,
-                            'Lions', 14, 2, 182, 14, 24, 0, 0, 355, 26, 10, 15)
 
     return teams
 
