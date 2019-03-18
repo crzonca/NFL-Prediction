@@ -230,9 +230,9 @@ def print_monte_carlo_simulation(teams):
         row.append(rank + 1)
         team_info = list()
         team_info.append(team[0])
-        team_info.append(round(team[1]))
-        team_info.append(round(team[2]))
-        team_info.append(round(team[3]))
+        team_info.append(team[1])
+        team_info.append(team[2])
+        team_info.append(team[3])
         team_info.append(team[4])
         row = row + team_info
 

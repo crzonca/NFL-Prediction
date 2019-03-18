@@ -296,8 +296,8 @@ def monte_carlo(teams):
         # Get just the name, record and elo of each team
         pseudo_teams = [(team[0], team[1], team[2], team[3], team[4]) for team in teams]
 
-        # For each game in the list of games
-        for game in get_2019_schedule():
+        # For each game in the list of games yet to be played
+        for game in get_2019_schedule()[len(completed_games):]:
             # Get the home and away teams
             home = game[0]
             away = game[1]
