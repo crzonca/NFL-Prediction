@@ -275,13 +275,12 @@ def update_teams(teams, home_name, home_score, home_touchdowns, home_net_pass_ya
     if home_victory:
         home_wins = home_wins + 1
         away_losses = away_losses + 1
+    elif draw:
+        home_ties = home_ties + 1
+        away_ties = away_ties + 1
     else:
         home_losses = home_losses + 1
         away_wins = away_wins + 1
-
-    if draw:
-        home_ties = home_ties + 1
-        away_ties = away_ties + 1
 
     home_games_played = home_games_played + 1
     away_games_played = away_games_played + 1

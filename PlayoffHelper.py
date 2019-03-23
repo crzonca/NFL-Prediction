@@ -658,6 +658,9 @@ def get_schedule_difficulty(teams, team_name):
 def get_remaining_schedule_difficulty(teams, team_name):
     teams_schedule = list(filter(lambda g: g[0] == team_name or g[1] == team_name,
                                  get_2019_schedule()[len(completed_games):]))
+    if len(teams_schedule) == 0:
+        return 0
+
     opponent_elos = list()
     for game in teams_schedule:
         opponent = None
