@@ -10,8 +10,10 @@ def season():
 
     Standings.print_league_details(teams, eliminated_teams, full_standings=False)
     Standings.print_schedule_difficulty(teams)
+    print('*' * 120, '\n')
 
     teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
+    teams = handle_week(teams, 'Week 2', week_2, eliminated_teams)
 
     Standings.print_schedule_difficulty(teams, remaining=True)
     Playoffs.monte_carlo(teams, trials=100)
@@ -78,6 +80,8 @@ def handle_week(teams,
                                    divisional_view=divisional_view,
                                    model_rankings=model_rankings)
 
+    print('*' * 120, '\n')
+
     # Return the updated teams
     return teams
 
@@ -86,6 +90,50 @@ def week_1(teams):
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     probabilities = list()
     probabilities.append(Predictor.predict_game_outcome(teams, 'Vikings', 'Lions', -6, verbose=True))
+    probabilities.append(Predictor.predict_game_outcome(teams, 'Packers', 'Bears', 3))
+
+    probabilities.sort(key=lambda outcome: outcome[0], reverse=True)
+    for game in probabilities:
+        print(game[1])
+    print()
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             home_first_downs=28,
+                             home_third_down_conversions=9,
+                             home_third_downs=15,
+                             away_name='Lions',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322,
+                             away_first_downs=21,
+                             away_third_down_conversions=7,
+                             away_third_downs=13)
+
+    teams = set_game_outcome(teams,
+                             'Packers', 7, 1, 386, 19, 22, 1, 0, 440, 28, 11, 18,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355, 26, 10, 15)
+
+    return teams
+
+
+def week_2(teams):
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    probabilities = list()
+    probabilities.append(Predictor.predict_game_outcome(teams, 'Vikings', 'Lions', -6))
     probabilities.append(Predictor.predict_game_outcome(teams, 'Packers', 'Bears', 3))
 
     probabilities.sort(key=lambda outcome: outcome[0], reverse=True)
