@@ -276,7 +276,10 @@ def print_schedule_difficulty(teams, remaining=False):
         table.add_row(row)
 
     # Print the table
-    print('Schedule Difficulties')
+    if remaining:
+        print('Remaining Schedule Difficulties')
+    else:
+        print('Schedule Difficulties')
     print(table)
     print()
 

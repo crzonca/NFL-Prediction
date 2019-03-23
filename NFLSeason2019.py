@@ -13,6 +13,7 @@ def season():
 
     teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
 
+    Standings.print_schedule_difficulty(teams, remaining=True)
     Playoffs.monte_carlo(teams, trials=100)
     Playoffs.get_playoff_picture(teams)
 
