@@ -30,7 +30,7 @@ def print_elo_rankings(teams, eliminated_teams, include_title=True):
         team_info.append(round(team[1]))
         team_info.append(round(team[2]))
         team_info.append(round(team[3]))
-        team_info.append(team[4])
+        team_info.append(round(team[4], 3))
         team_info.append(get_tier(teams, team))
         row = row + team_info
 
@@ -240,6 +240,43 @@ def print_monte_carlo_simulation(teams):
 
     # Print the table
     print('Projected Standings')
+    print(table)
+    print()
+
+
+def print_schedule_difficulty(teams, remaining=False):
+    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    team_tuples = list()
+    for team in teams:
+        if remaining:
+            schedule_difficulty = Playoffs.get_remaining_schedule_difficulty(teams, team[0])
+        else:
+            schedule_difficulty = Playoffs.get_schedule_difficulty(teams, team[0])
+        team_tuples.append((team, schedule_difficulty))
+
+    sorted_by_schedule = sorted(team_tuples, key=lambda tup: tup[1], reverse=True)
+
+    # Create the table header
+    table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo', 'Schedule Diff.'])
+    table.float_format = '0.3'
+
+    # Add the info to the rows
+    for rank, team_tuple in enumerate(sorted_by_schedule):
+        row = list()
+        row.append(rank + 1)
+        team_info = list()
+        team_info.append(team_tuple[0][0])
+        team_info.append(team_tuple[0][1])
+        team_info.append(team_tuple[0][2])
+        team_info.append(team_tuple[0][3])
+        team_info.append(team_tuple[0][4])
+        team_info.append(team_tuple[1])
+        row = row + team_info
+
+        table.add_row(row)
+
+    # Print the table
+    print('Schedule Difficulties')
     print(table)
     print()
 

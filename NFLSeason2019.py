@@ -9,9 +9,11 @@ def season():
     eliminated_teams = list()
 
     Standings.print_league_details(teams, eliminated_teams, full_standings=False)
+    Standings.print_schedule_difficulty(teams)
+
     teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
 
-    Playoffs.monte_carlo(teams)
+    Playoffs.monte_carlo(teams, trials=100)
     Playoffs.get_playoff_picture(teams)
 
 

@@ -1,4 +1,5 @@
 import random
+import statistics
 from functools import cmp_to_key
 
 import Projects.nfl.NFL_Prediction.NFL as NFL
@@ -289,10 +290,10 @@ def get_2019_schedule():
     return games
 
 
-def monte_carlo(teams):
+def monte_carlo(teams, trials=1000000):
     all_trials = list()
     # 1,000,000 Trials
-    for trial in range(1000000):
+    for trial in range(trials):
         # Get just the name, record and elo of each team
         pseudo_teams = [(team[0], team[1], team[2], team[3], team[4]) for team in teams]
 
@@ -308,20 +309,23 @@ def monte_carlo(teams):
             # Get the home teams chance of victory and simulate the outcome
             chance = get_pct_chance(home[4], away[4])
             monte = random.random()
-            home_victory = monte <= chance
+            home_victory = monte < chance
+            draw = monte == chance
 
             # Update the teams records based on the simulated outcome
             home_wins = home[1] + 1 if home_victory else home[1]
             home_losses = home[2] + 1 if not home_victory else home[2]
             away_wins = away[1] + 1 if not home_victory else away[1]
             away_losses = away[2] + 1 if home_victory else away[2]
+            home_ties = home[3] + 1 if draw else home[3]
+            away_ties = away[3] + 1 if draw else away[3]
 
             # Update the teams elo based on the simulated outcome
             home_elo, away_elo = NFL.get_new_elos(home[4], away[4], home_victory, False, 42)
 
             # Create an updated team
-            new_home = (home[0], home_wins, home_losses, home[3], home_elo)
-            new_away = (away[0], away_wins, away_losses, away[3], away_elo)
+            new_home = (home[0], home_wins, home_losses, home_ties, home_elo)
+            new_away = (away[0], away_wins, away_losses, away_ties, away_elo)
 
             # Update the pseudo teams with the new teams
             pseudo_teams = [new_home if team == home else team for team in pseudo_teams]
@@ -635,3 +639,32 @@ def contains_common_opponents(team1, team2, game):
     common = team1_opponents.intersection(team2_opponents)
 
     return (home_team == team1_name and away_team in common) or (home_team in common and away_team == team1_name)
+
+
+def get_schedule_difficulty(teams, team_name):
+    teams_schedule = list(filter(lambda g: g[0] == team_name or g[1] == team_name, get_2019_schedule()))
+    opponent_elos = list()
+    for game in teams_schedule:
+        opponent = None
+        if game[0] == team_name:
+            opponent = get_team(teams, game[1])
+        elif game[1] == team_name:
+            opponent = get_team(teams, game[0])
+        opponent_elos.append(opponent[4])
+
+    return statistics.mean(opponent_elos)
+
+
+def get_remaining_schedule_difficulty(teams, team_name):
+    teams_schedule = list(filter(lambda g: g[0] == team_name or g[1] == team_name,
+                                 get_2019_schedule()[len(completed_games):]))
+    opponent_elos = list()
+    for game in teams_schedule:
+        opponent = None
+        if game[0] == team_name:
+            opponent = get_team(teams, game[1])
+        elif game[1] == team_name:
+            opponent = get_team(teams, game[0])
+        opponent_elos.append(opponent[4])
+
+    return statistics.mean(opponent_elos)
