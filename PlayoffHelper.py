@@ -315,9 +315,9 @@ def monte_carlo(teams, trials=1000000):
             # Update the teams records based on the simulated outcome
             home_wins = home[1] + 1 if home_victory else home[1]
             home_losses = home[2] + 1 if not home_victory else home[2]
+            home_ties = home[3] + 1 if draw else home[3]
             away_wins = away[1] + 1 if not home_victory else away[1]
             away_losses = away[2] + 1 if home_victory else away[2]
-            home_ties = home[3] + 1 if draw else home[3]
             away_ties = away[3] + 1 if draw else away[3]
 
             # Update the teams elo based on the simulated outcome
@@ -357,11 +357,18 @@ def monte_carlo(teams, trials=1000000):
         # Get a list of the pseudo teams losses for each trial
         losses = [team[2] for team in team_trials]
 
+        # Get a list of the pseudo teams ties for each trial
+        ties = [team[3] for team in team_trials]
+
         # Get a list of the pseudo teams elos for each trial
         elos = [team[4] for team in team_trials]
 
         # Create a new pseudo team with the average of each stat
-        averaged_team = (team_name, sum(wins) / len(wins), sum(losses) / len(losses), 0, sum(elos) / len(elos))
+        averaged_team = (team_name,
+                         sum(wins) / len(wins),
+                         sum(losses) / len(losses),
+                         round(sum(ties) / len(ties)),
+                         sum(elos) / len(elos))
 
         # Add it to a final list
         averaged_teams.append(averaged_team)
