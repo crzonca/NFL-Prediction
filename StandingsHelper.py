@@ -257,7 +257,7 @@ def print_schedule_difficulty(teams, remaining=False):
     sorted_by_schedule = sorted(team_tuples, key=lambda tup: tup[1], reverse=True)
 
     # Create the table header
-    table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo', 'Schedule Diff.'])
+    table = PrettyTable(['Rank', 'Name', 'Games Played', 'Elo', 'Schedule Diff.'])
     table.float_format = '0.3'
 
     # Add the info to the rows
@@ -266,9 +266,8 @@ def print_schedule_difficulty(teams, remaining=False):
         row.append(rank + 1)
         team_info = list()
         team_info.append(team_tuple[0][0])
-        team_info.append(team_tuple[0][1])
-        team_info.append(team_tuple[0][2])
-        team_info.append(team_tuple[0][3])
+        games_played = team_tuple[0][1] + team_tuple[0][2] + team_tuple[0][3]
+        team_info.append(games_played)
         team_info.append(team_tuple[0][4])
         team_info.append(team_tuple[1])
         row = row + team_info
