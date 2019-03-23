@@ -1,3 +1,5 @@
+import numpy as np
+
 import Projects.nfl.NFL_Prediction.NFLPredictor as Predictor
 import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
 import Projects.nfl.NFL_Prediction.StandingsHelper as Standings
@@ -12,8 +14,8 @@ def season():
     Standings.print_schedule_difficulty(teams)
     print('*' * 120, '\n')
 
-    teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
-    teams = handle_week(teams, 'Week 2', week_2, eliminated_teams)
+    # teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
+    teams = handle_week(teams, 'Random Season', random_season, eliminated_teams)
 
     Standings.print_schedule_difficulty(teams, remaining=True)
     Playoffs.monte_carlo(teams, trials=100)
@@ -130,46 +132,11 @@ def week_1(teams):
     return teams
 
 
-def week_2(teams):
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
-    probabilities = list()
-    probabilities.append(Predictor.predict_game_outcome(teams, 'Vikings', 'Lions', -6))
-    probabilities.append(Predictor.predict_game_outcome(teams, 'Packers', 'Bears', 3))
-
-    probabilities.sort(key=lambda outcome: outcome[0], reverse=True)
-    for game in probabilities:
-        print(game[1])
-    print()
-
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             home_first_downs=28,
-                             home_third_down_conversions=9,
-                             home_third_downs=15,
-                             away_name='Lions',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322,
-                             away_first_downs=21,
-                             away_third_down_conversions=7,
-                             away_third_downs=13)
-
-    teams = set_game_outcome(teams,
-                             'Packers', 7, 1, 386, 19, 22, 1, 0, 440, 28, 11, 18,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355, 26, 10, 15)
+def random_season(teams):
+    for game_num, game in enumerate(Playoffs.get_2019_schedule()[:128]):
+        home = game[0]
+        away = game[1]
+        teams = set_random_outcome(teams, home, away)
 
     return teams
 
@@ -195,5 +162,46 @@ def set_game_outcome(teams, home_name, home_score, home_touchdowns, home_net_pas
                                    away_first_downs, away_third_down_conversions, away_third_downs)
 
     Playoffs.completed_games.append((home_name, home_score, away_name, away_score))
+
+    return teams
+
+
+def set_random_outcome(teams, home, away):
+    random_scores = np.random.normal(23.32, 10.37, 2)
+    random_tds = np.random.normal(2.48, 1.06, 2)
+    random_pass_yards = np.random.normal(225.2, 78.02, 2)
+    random_pass_comps = np.random.normal(20.73, 6.02, 2)
+    random_pass_atts = np.random.normal(33.6, 8.46, 2)
+    random_pass_tds = np.random.normal(1.51, 1.16, 2)
+    random_ints = np.random.normal(.92, 1, 2)
+    random_total_yards = np.random.normal(343.18, 84, 2)
+    random_first_downs = np.random.normal(19.76, 4.97, 2)
+    random_third_conv = np.random.normal(5.25, 2.27, 2)
+    random_third_atts = np.random.normal(13.26, 2.58, 2)
+    teams = set_game_outcome(teams,
+                             home_name=home,
+                             home_score=round(random_scores[0]),
+                             home_touchdowns=round(random_tds[0]),
+                             home_net_pass_yards=round(random_pass_yards[0]),
+                             home_pass_completions=round(random_pass_comps[0]),
+                             home_pass_attempts=round(random_pass_atts[0]),
+                             home_pass_tds=round(random_pass_tds[0]),
+                             home_interceptions_thrown=round(random_ints[0]),
+                             home_total_yards=round(random_total_yards[0]),
+                             home_first_downs=round(random_first_downs[0]),
+                             home_third_down_conversions=round(random_third_conv[0]),
+                             home_third_downs=round(random_third_atts[0]),
+                             away_name=away,
+                             away_score=round(random_scores[1]),
+                             away_touchdowns=round(random_tds[1]),
+                             away_net_pass_yards=round(random_pass_yards[1]),
+                             away_pass_completions=round(random_pass_comps[1]),
+                             away_pass_attempts=round(random_pass_atts[1]),
+                             away_pass_tds=round(random_pass_tds[1]),
+                             away_interceptions_thrown=round(random_ints[1]),
+                             away_total_yards=round(random_total_yards[1]),
+                             away_first_downs=round(random_first_downs[1]),
+                             away_third_down_conversions=round(random_third_conv[1]),
+                             away_third_downs=round(random_third_atts[1]))
 
     return teams
