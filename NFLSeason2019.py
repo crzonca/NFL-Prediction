@@ -19,7 +19,14 @@ def season():
 
     Standings.print_schedule_difficulty(teams, remaining=True)
     Playoffs.monte_carlo(teams, trials=100)
-    Playoffs.get_playoff_picture(teams)
+
+    print('Current Playoff Picture')
+    afc_playoff_teams, nfc_playoff_teams = Playoffs.get_playoff_picture(teams, verbose=False)
+    print('-' * 15 + 'AFC' + '-' * 15)
+    Playoffs.create_playoff_bracket(afc_playoff_teams)
+    print()
+    print('-' * 15 + 'NFC' + '-' * 15)
+    Playoffs.create_playoff_bracket(nfc_playoff_teams)
 
 
 def set_up_teams():

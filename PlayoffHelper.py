@@ -386,12 +386,19 @@ def get_pct_chance(home_elo, away_elo):
     return e_home
 
 
-def get_playoff_picture(teams):
+def get_playoff_picture(teams, verbose=True):
     teams = sort_by_tiebreakers(teams)
     league = get_league_structure()
+
     first_round_byes = list()
     division_leaders = list()
     wild_cards = list()
+
+    afc_division_leaders = list()
+    afc_wild_cards = list()
+
+    nfc_division_leaders = list()
+    nfc_wild_cards = list()
 
     for conf_name, conference in league.items():
         conference_teams = list()
@@ -399,7 +406,13 @@ def get_playoff_picture(teams):
         for div_name, division in conference.items():
             division_teams = [get_team(teams, team_name) for team_name in division]
             division_teams = sort_by_tiebreakers(division_teams)
+
+            if conf_name == 'AFC':
+                afc_division_leaders.append(division_teams[0])
+            elif conf_name == 'NFC':
+                nfc_division_leaders.append(division_teams[0])
             division_leaders.append(division_teams[0])
+
             conference_teams.extend(division_teams)
 
         conference_teams = sort_by_tiebreakers(conference_teams)
@@ -423,23 +436,41 @@ def get_playoff_picture(teams):
         other_teams = conference_teams.copy()
         other_teams = list(set(other_teams) - set(division_leaders))
         other_teams = sort_by_tiebreakers(other_teams)
+
+        if conf_name == 'AFC':
+            afc_wild_cards.append(other_teams[0])
+            afc_wild_cards.append(other_teams[1])
+        elif conf_name == 'NFC':
+            nfc_wild_cards.append(other_teams[0])
+            nfc_wild_cards.append(other_teams[1])
         wild_cards.append(other_teams[0])
         wild_cards.append(other_teams[1])
 
-    print('First Round Byes:')
-    first_round_byes = [team[0] for team in first_round_byes]
-    print('\n'.join(first_round_byes))
-    print()
+    if verbose:
+        print(Standings.Colors.UNDERLINE + 'First Round Byes:' + Standings.Colors.ENDC)
+        first_round_byes = [team[0] for team in first_round_byes]
+        print('\n'.join(first_round_byes))
+        print()
 
-    print('Division Leaders:')
-    division_leaders = [team[0] for team in division_leaders]
-    print('\n'.join(division_leaders))
-    print()
+        print(Standings.Colors.UNDERLINE + 'Division Leaders:' + Standings.Colors.ENDC)
+        division_leaders = [team[0] for team in division_leaders]
+        print('\n'.join(division_leaders))
+        print()
 
-    print('Wild Cards:')
-    wild_cards = [team[0] for team in wild_cards]
-    print('\n'.join(wild_cards))
-    print()
+        print(Standings.Colors.UNDERLINE + 'Wild Cards:' + Standings.Colors.ENDC)
+        wild_cards = [team[0] for team in wild_cards]
+        print('\n'.join(wild_cards))
+        print()
+
+    afc_playoff_teams = list()
+    afc_playoff_teams.extend(sort_by_tiebreakers(afc_division_leaders))
+    afc_playoff_teams.extend(sort_by_tiebreakers(afc_wild_cards))
+
+    nfc_playoff_teams = list()
+    nfc_playoff_teams.extend(sort_by_tiebreakers(nfc_division_leaders))
+    nfc_playoff_teams.extend(sort_by_tiebreakers(nfc_wild_cards))
+
+    return afc_playoff_teams, nfc_playoff_teams
 
 
 def sort_by_tiebreakers(teams):
@@ -678,3 +709,35 @@ def get_remaining_schedule_difficulty(teams, team_name):
         opponent_elos.append(opponent[4])
 
     return statistics.mean(opponent_elos)
+
+
+def create_playoff_bracket(teams):
+    seeded_teams = list()
+    for seed, team in enumerate(teams):
+        seeded_teams.append((seed, team))
+
+    max_name_length = max([len(team[0]) for team in teams[2:]]) + 1
+
+    padded_team_names = [team[0].rjust(max_name_length) for team in teams]
+    for index, name in enumerate(padded_team_names):
+        if index == 4 or index == 5:
+            name = name.strip()
+            name = '*' + name
+            name = name.rjust(max_name_length)
+            padded_team_names[index] = name
+
+    print(' ' * 5 + padded_team_names[0] + '--|')
+    print(' ' * (max_name_length + 7) + '|')
+    print(' ' * (max_name_length + 7) + '|----|')
+    print(padded_team_names[4] + '--|' + ' ' * 4 + '|' + ' ' * 4 + '|')
+    print(' ' * (max_name_length + 2) + '|----|' + ' ' * 4 + '|')
+    print(padded_team_names[3] + '--|' + ' ' * 9 + '|')
+    print(' ' * (max_name_length + 12) + '|')
+    print(' ' * (max_name_length + 12) + '|----')
+    print(' ' * (max_name_length + 12) + '|')
+    print(padded_team_names[5] + '--|' + ' ' * 9 + '|')
+    print(' ' * (max_name_length + 2) + '|----|' + ' ' * 4 + '|')
+    print(padded_team_names[2] + '--|' + ' ' * 4 + '|' + ' ' * 4 + '|')
+    print(' ' * (max_name_length + 7) + '|----|')
+    print(' ' * (max_name_length + 7) + '|')
+    print(' ' * 5 + padded_team_names[1] + '--|')
