@@ -87,7 +87,7 @@ def print_full_standings(teams, eliminated_teams, include_title=True):
 
     # Create the table header
     table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo', 'Points', 'Points Against', 'Point Diff.',
-                         'Touchdowns', 'Passer Rating', 'Total Yards', 'First Downs', '3rd Down %'])
+                         'Touchdowns', 'Passer Rating', 'Total Yards'])
     table.float_format = '0.3'
 
     # Add the info to the rows
@@ -115,11 +115,6 @@ def print_full_standings(teams, eliminated_teams, include_title=True):
         passer_rating = ((a + b + c + d) / 6) * 100
         team_info.append(round(passer_rating, 2))
         team_info.append(round(team[13], 1))
-        team_info.append(round(team[14], 1))
-        if team[16] == 0:
-            team_info.append('--')
-        else:
-            team_info.append(round(100 * (team[15] / team[16]), 1))
         row = row + team_info
 
         # Add the row to the table if the team isnt eliminated
@@ -407,9 +402,6 @@ def get_average_team(teams):
     all_total_pass_tds = list()
     all_total_interceptions_thrown = list()
     all_average_total_yards = list()
-    all_average_first_downs = list()
-    all_total_third_down_conversions = list()
-    all_total_third_downs = list()
 
     for team in teams:
         all_wins.append(team[1])
@@ -425,9 +417,6 @@ def get_average_team(teams):
         all_total_pass_tds.append(team[11])
         all_total_interceptions_thrown.append(team[12])
         all_average_total_yards.append(team[13])
-        all_average_first_downs.append(team[14])
-        all_total_third_down_conversions.append(team[15])
-        all_total_third_downs.append(team[16])
 
     avg_wins = statistics.mean(all_wins)
     avg_losses = statistics.mean(all_losses)
@@ -442,14 +431,10 @@ def get_average_team(teams):
     avg_total_pass_tds = statistics.mean(all_total_pass_tds)
     avg_total_interceptions_thrown = statistics.mean(all_total_interceptions_thrown)
     avg_average_total_yards = statistics.mean(all_average_total_yards)
-    avg_average_first_downs = statistics.mean(all_average_first_downs)
-    avg_total_third_down_conversions = statistics.mean(all_total_third_down_conversions)
-    avg_total_third_downs = statistics.mean(all_total_third_downs)
 
     return ('Average', avg_wins, avg_losses, avg_ties, avg_elo, avg_average_points_for, avg_average_points_against,
             avg_average_tds, avg_total_net_pass_yards, avg_total_pass_completions, avg_total_pass_attempts,
-            avg_total_pass_tds, avg_total_interceptions_thrown, avg_average_total_yards, avg_average_total_yards,
-            avg_average_first_downs, avg_total_third_down_conversions, avg_total_third_downs)
+            avg_total_pass_tds, avg_total_interceptions_thrown, avg_average_total_yards, avg_average_total_yards)
 
 
 def get_chance_against_average(teams, team):

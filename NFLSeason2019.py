@@ -14,8 +14,8 @@ def season():
     Standings.print_schedule_difficulty(teams)
     print('*' * 120, '\n')
 
-    # teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
-    # teams = handle_week(teams, 'Random Season', random_season, eliminated_teams)
+    teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
+    teams = handle_week(teams, 'Random Season', random_season, eliminated_teams)
 
     Standings.print_schedule_difficulty(teams, remaining=True)
     Playoffs.monte_carlo(teams, trials=100)
@@ -31,7 +31,7 @@ def season():
 
 def set_up_teams():
     def create_base_team(team_name, elo):
-        return team_name, 0, 0, 0, elo, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        return team_name, 0, 0, 0, elo, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
     teams = list()
     teams.append(create_base_team('49ers', 1431.803))
@@ -116,9 +116,6 @@ def week_1(teams):
                              home_pass_tds=1,
                              home_interceptions_thrown=0,
                              home_total_yards=407,
-                             home_first_downs=28,
-                             home_third_down_conversions=9,
-                             home_third_downs=15,
                              away_name='Lions',
                              away_score=13,
                              away_touchdowns=1,
@@ -127,14 +124,11 @@ def week_1(teams):
                              away_pass_attempts=22,
                              away_pass_tds=0,
                              away_interceptions_thrown=1,
-                             away_total_yards=322,
-                             away_first_downs=21,
-                             away_third_down_conversions=7,
-                             away_third_downs=13)
+                             away_total_yards=322)
 
     teams = set_game_outcome(teams,
-                             'Packers', 7, 1, 386, 19, 22, 1, 0, 440, 28, 11, 18,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355, 26, 10, 15)
+                             'Packers', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
 
     return teams
 
@@ -155,18 +149,14 @@ def get_team(teams, team_name):
 
 
 def set_game_outcome(teams, home_name, home_score, home_touchdowns, home_net_pass_yards, home_pass_completions,
-                     home_pass_attempts, home_pass_tds, home_interceptions_thrown, home_total_yards, home_first_downs,
-                     home_third_down_conversions, home_third_downs,
+                     home_pass_attempts, home_pass_tds, home_interceptions_thrown, home_total_yards,
                      away_name, away_score, away_touchdowns, away_net_pass_yards, away_pass_completions,
-                     away_pass_attempts, away_pass_tds, away_interceptions_thrown, away_total_yards, away_first_downs,
-                     away_third_down_conversions, away_third_downs):
+                     away_pass_attempts, away_pass_tds, away_interceptions_thrown, away_total_yards):
     teams = Predictor.update_teams(teams,
                                    home_name, home_score, home_touchdowns, home_net_pass_yards, home_pass_completions,
                                    home_pass_attempts, home_pass_tds, home_interceptions_thrown, home_total_yards,
-                                   home_first_downs, home_third_down_conversions, home_third_downs,
                                    away_name, away_score, away_touchdowns, away_net_pass_yards, away_pass_completions,
-                                   away_pass_attempts, away_pass_tds, away_interceptions_thrown, away_total_yards,
-                                   away_first_downs, away_third_down_conversions, away_third_downs)
+                                   away_pass_attempts, away_pass_tds, away_interceptions_thrown, away_total_yards)
 
     Playoffs.completed_games.append((home_name, home_score, away_name, away_score))
 
@@ -182,9 +172,6 @@ def set_random_outcome(teams, home, away):
     random_pass_tds = np.random.normal(1.51, 1.16, 2)
     random_ints = np.random.normal(.92, 1, 2)
     random_total_yards = np.random.normal(343.18, 84, 2)
-    random_first_downs = np.random.normal(19.76, 4.97, 2)
-    random_third_conv = np.random.normal(5.25, 2.27, 2)
-    random_third_atts = np.random.normal(13.26, 2.58, 2)
     teams = set_game_outcome(teams,
                              home_name=home,
                              home_score=round(random_scores[0]),
@@ -195,9 +182,6 @@ def set_random_outcome(teams, home, away):
                              home_pass_tds=round(random_pass_tds[0]),
                              home_interceptions_thrown=round(random_ints[0]),
                              home_total_yards=round(random_total_yards[0]),
-                             home_first_downs=round(random_first_downs[0]),
-                             home_third_down_conversions=round(random_third_conv[0]),
-                             home_third_downs=round(random_third_atts[0]),
                              away_name=away,
                              away_score=round(random_scores[1]),
                              away_touchdowns=round(random_tds[1]),
@@ -206,9 +190,6 @@ def set_random_outcome(teams, home, away):
                              away_pass_attempts=round(random_pass_atts[1]),
                              away_pass_tds=round(random_pass_tds[1]),
                              away_interceptions_thrown=round(random_ints[1]),
-                             away_total_yards=round(random_total_yards[1]),
-                             away_first_downs=round(random_first_downs[1]),
-                             away_third_down_conversions=round(random_third_conv[1]),
-                             away_third_downs=round(random_third_atts[1]))
+                             away_total_yards=round(random_total_yards[1]))
 
     return teams

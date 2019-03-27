@@ -29,9 +29,6 @@ def predict_game(home_info, away_info, home_spread=0):
     home_total_pass_tds = home_info[11]
     home_total_interceptions_thrown = home_info[12]
     home_average_total_yards = home_info[13]
-    home_average_first_downs = home_info[14]
-    home_total_third_down_conversions = home_info[15]
-    home_total_third_downs = home_info[16]
 
     # Get the away team's info
     away_wins = away_info[1]
@@ -47,9 +44,6 @@ def predict_game(home_info, away_info, home_spread=0):
     away_total_pass_tds = away_info[11]
     away_total_interceptions_thrown = away_info[12]
     away_average_total_yards = away_info[13]
-    away_average_first_downs = away_info[14]
-    away_total_third_down_conversions = away_info[15]
-    away_total_third_downs = away_info[16]
 
     # Calculate the features for the prediction
     home_games_played = home_wins + home_losses + home_ties
@@ -107,14 +101,6 @@ def predict_game(home_info, away_info, home_spread=0):
     average_passer_rating_diff = home_average_passer_rating - away_average_passer_rating
 
     average_total_yards_diff = home_average_total_yards - away_average_total_yards
-    average_first_downs_diff = home_average_first_downs - away_average_first_downs
-    average_yards_per_pass_attempt_diff = home_average_yards_per_pass_attempt - away_average_yards_per_pass_attempt
-
-    home_average_third_down_pct = home_total_third_down_conversions / home_total_third_downs \
-        if home_total_third_downs > 0 else 0
-    away_average_third_down_pct = away_total_third_down_conversions / away_total_third_downs \
-        if away_total_third_downs > 0 else 0
-    average_third_down_pct_diff = home_average_third_down_pct - away_average_third_down_pct
 
     # Organize the features
     game_features = (home_spread,
@@ -124,10 +110,7 @@ def predict_game(home_info, away_info, home_spread=0):
                      average_points_for_diff,
                      average_touchdowns_diff,
                      average_passer_rating_diff,
-                     average_total_yards_diff,
-                     average_first_downs_diff,
-                     average_yards_per_pass_attempt_diff,
-                     average_third_down_pct_diff)
+                     average_total_yards_diff)
 
     # Convert the features to a data frame and scale it
     game = pd.DataFrame([game_features])
@@ -207,11 +190,9 @@ def predict_game_outcome(teams, home_name, away_name, home_spread, verbose=False
 
 
 def update_teams(teams, home_name, home_score, home_touchdowns, home_net_pass_yards, home_pass_completions,
-                 home_pass_attempts, home_pass_tds, home_interceptions_thrown, home_total_yards, home_first_downs,
-                 home_third_down_conversions, home_third_downs,
+                 home_pass_attempts, home_pass_tds, home_interceptions_thrown, home_total_yards,
                  away_name, away_score, away_touchdowns, away_net_pass_yards, away_pass_completions, away_pass_attempts,
-                 away_pass_tds, away_interceptions_thrown, away_total_yards, away_first_downs,
-                 away_third_down_conversions, away_third_downs):
+                 away_pass_tds, away_interceptions_thrown, away_total_yards):
     # Get the home team info
     home = get_team(teams, home_name)
     home_wins = home[1]
@@ -227,9 +208,6 @@ def update_teams(teams, home_name, home_score, home_touchdowns, home_net_pass_ya
     home_total_pass_tds = home[11]
     home_total_interceptions_thrown = home[12]
     home_average_total_yards = home[13]
-    home_average_first_downs = home[14]
-    home_total_third_down_conversions = home[15]
-    home_total_third_downs = home[16]
 
     # Get the away team info
     away = get_team(teams, away_name)
@@ -246,9 +224,6 @@ def update_teams(teams, home_name, home_score, home_touchdowns, home_net_pass_ya
     away_total_pass_tds = away[11]
     away_total_interceptions_thrown = away[12]
     away_average_total_yards = away[13]
-    away_average_first_downs = away[14]
-    away_total_third_down_conversions = away[15]
-    away_total_third_downs = away[16]
 
     # Get the game result
     home_victory = home_score > away_score
@@ -263,13 +238,11 @@ def update_teams(teams, home_name, home_score, home_touchdowns, home_net_pass_ya
     home_total_points_against = home_average_points_against * home_games_played
     home_total_tds = home_average_tds * home_games_played
     home_total_total_yards = home_average_total_yards * home_games_played
-    home_total_first_downs = home_average_first_downs * home_games_played
 
     away_total_points_for = away_average_points_for * away_games_played
     away_total_points_against = away_average_points_against * away_games_played
     away_total_tds = away_average_tds * away_games_played
     away_total_total_yards = away_average_total_yards * away_games_played
-    away_total_first_downs = away_average_first_downs * away_games_played
 
     # Update each teams record and the number of games played
     if home_victory:
@@ -302,9 +275,6 @@ def update_teams(teams, home_name, home_score, home_touchdowns, home_net_pass_ya
     home_total_pass_tds = home_total_pass_tds + home_pass_tds
     home_total_interceptions_thrown = home_total_interceptions_thrown + home_interceptions_thrown
     home_total_total_yards = home_total_total_yards + home_total_yards
-    home_total_first_downs = home_total_first_downs + home_first_downs
-    home_total_third_down_conversions = home_total_third_down_conversions + home_third_down_conversions
-    home_total_third_downs = home_total_third_downs + home_third_downs
 
     # Update the totals for all other stats for the away team
     away_total_points_for = away_total_points_for + away_score
@@ -316,36 +286,29 @@ def update_teams(teams, home_name, home_score, home_touchdowns, home_net_pass_ya
     away_total_pass_tds = away_total_pass_tds + away_pass_tds
     away_total_interceptions_thrown = away_total_interceptions_thrown + away_interceptions_thrown
     away_total_total_yards = away_total_total_yards + away_total_yards
-    away_total_first_downs = away_total_first_downs + away_first_downs
-    away_total_third_down_conversions = away_total_third_down_conversions + away_third_down_conversions
-    away_total_third_downs = away_total_third_downs + away_third_downs
 
     # Average the home teams averaged stats
     home_average_points_for = home_total_points_for / home_games_played
     home_average_points_against = home_total_points_against / home_games_played
     home_average_tds = home_total_tds / home_games_played
     home_average_total_yards = home_total_total_yards / home_games_played
-    home_average_first_downs = home_total_first_downs / home_games_played
 
     # Average the away teams averaged stats
     away_average_points_for = away_total_points_for / away_games_played
     away_average_points_against = away_total_points_against / away_games_played
     away_average_tds = away_total_tds / away_games_played
     away_average_total_yards = away_total_total_yards / away_games_played
-    away_average_first_downs = away_total_first_downs / away_games_played
 
     # Create new teams with the updated stats
     new_home = (home[0], home_wins, home_losses, home_ties, home_elo, home_average_points_for,
                 home_average_points_against, home_average_tds, home_total_net_pass_yards, home_total_pass_completions,
                 home_total_pass_attempts, home_total_pass_tds, home_total_interceptions_thrown,
-                home_average_total_yards, home_average_first_downs, home_total_third_down_conversions,
-                home_total_third_downs)
+                home_average_total_yards)
 
     new_away = (away[0], away_wins, away_losses, away_ties, away_elo, away_average_points_for,
                 away_average_points_against, away_average_tds, away_total_net_pass_yards, away_total_pass_completions,
                 away_total_pass_attempts, away_total_pass_tds, away_total_interceptions_thrown,
-                away_average_total_yards, away_average_first_downs, away_total_third_down_conversions,
-                away_total_third_downs)
+                away_average_total_yards)
 
     # Update each team in the list and return the list
     teams = [new_home if team == home else team for team in teams]
