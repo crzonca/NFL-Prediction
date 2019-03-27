@@ -20,10 +20,12 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
+import seaborn as sns
 
 from Projects.nfl.NFL_Prediction import StatsHelper as Stats
 
-base_dir = '..\\Projects\\nfl\\NFL_Prediction\\Game Data\\'
+game_data_dir = '..\\Projects\\nfl\\NFL_Prediction\\Game Data\\'
+other_dir = '..\\Projects\\nfl\\NFL_Prediction\\Other\\'
 
 
 def run_all():
@@ -53,11 +55,11 @@ def get_all_data_frames():
     """Gets all of the csv files in the directory and converts them to pandas DataFrames."""
     frames = list()
 
-    for file in os.listdir(base_dir):
+    for file in os.listdir(game_data_dir):
         if (os.path.splitext(file)[1] == '.csv'
                 and os.path.splitext(file)[0] != '20022018'
                 and os.path.splitext(file)[0] != '20022017'):
-            with open(base_dir + file, 'r') as season_csv:
+            with open(game_data_dir + file, 'r') as season_csv:
                 df = pd.read_csv(season_csv, encoding='utf-8')
                 df = df.rename(index=str, columns={'ï»¿home_team': 'home_team'})
                 frames.append(df)
@@ -840,14 +842,14 @@ def combine_frames(frames):
 
     combined = pd.concat(frames, sort=False)
     print(combined.shape)
-    combined.to_csv(base_dir + '20022018.csv', index=False)
+    combined.to_csv(game_data_dir + '20022018.csv', index=False)
     return combined
 
 
 def plot_corr():
     """Gets the correlation between all relevant features and the home_victory label."""
     # Get the data frame for all seasons
-    df = pd.read_csv(base_dir + '20022018.csv')
+    df = pd.read_csv(game_data_dir + '20022018.csv')
 
     # Drop all columns that arent the label, the spread or a team difference
     columns_to_keep = list()
@@ -897,7 +899,7 @@ def plot_corr():
 
     # Draw y tick marks
     plt.yticks(range(len(corr.columns)), corr.columns)
-    # plt.show()
+    plt.show()
 
     # Return the series containing the sorted correlations between each feature and the home_victory label
     return won_series
@@ -906,7 +908,7 @@ def plot_corr():
 def get_best_features():
     """Gets the set of at least 10 features that explains the variance for the y label."""
     # Get the data frame for all seasons
-    df = pd.read_csv(base_dir + '20022018.csv')
+    df = pd.read_csv(game_data_dir + '20022018.csv')
 
     # Drop all columns that arent the label, the spread or a team difference
     columns_to_keep = list()
@@ -926,45 +928,58 @@ def get_best_features():
     X = df[feature_col_names].values
     y = df[predicted_class_name].values
 
-    # For each amount of explained variance required
-    for n in [1 - 1 * 10 ** x for x in range(-1, -6, -1)]:
-        # Fit the PCA
-        pca = PCA(n_components=n).fit(X)
+    # Fit the PCA
+    n = .997
+    pca = PCA(n_components=n).fit(X)
 
-        # Get the number of features required to explain the variance
-        print('\n' + str(n * 100) + '% coverage: ' + str(len(pca.explained_variance_)) + ' features')
-        num_comp = len(pca.explained_variance_)
+    # Plot the total percentage of variance explained by the number of features used
+    ratios = pca.explained_variance_ratio_
+    ratios = np.cumsum(ratios)
+    plt.plot(ratios)
+    plt.xlabel('Dimension')
+    plt.ylabel('Ratio')
+    plt.show()
 
-        # Select the top features that explain the variance
-        skb = SelectKBest(f_classif, k=num_comp)
-        skb.fit(X, y.ravel())
+    # Get the number of features required to explain the variance
+    print('\n' + str(n * 100) + '% coverage: ' + str(len(pca.explained_variance_)) + ' features')
+    num_comp = len(pca.explained_variance_)
 
-        # Get the mask array
-        features = list(skb.get_support())
+    # Select the top features that explain the variance
+    skb = SelectKBest(f_classif, k=num_comp)
+    skb.fit(X, y.ravel())
 
-        # For each feature in the list
-        contributing_features = list()
-        for i in range(0, len(features)):
-            # If the feature is one of the top features, add it to the list
-            if features[i]:
-                contributing_features.append(feature_col_names[i])
+    # Get the mask array
+    features = list(skb.get_support())
 
-        # Print the list of the top features
-        print('The top ' + str(num_comp) + ' features are: ')
-        for feature in contributing_features:
-            print(feature)
+    # For each feature in the list
+    contributing_features = list()
+    for i in range(0, len(features)):
+        # If the feature is one of the top features, add it to the list
+        if features[i]:
+            contributing_features.append(feature_col_names[i])
 
-        # If the list has more than 10 features, return the list of the top features
-        if len(contributing_features) > 10:
-            print()
-            return contributing_features
+    # Print the list of the top features
+    print('The top ' + str(num_comp) + ' features are: ')
+    for feature in contributing_features:
+        print(feature)
+
+    # Plot the correlation between the top 8 features
+    columns_to_drop = list(set(feature_col_names) - set(contributing_features))
+    relevant = df.drop(columns=columns_to_drop)
+    corrmat = relevant.corr().abs()
+    f, ax = plt.subplots(figsize=(9, 9))
+    sns.set(font_scale=0.9)
+    sns.heatmap(corrmat, vmax=.8, square=True, annot=True, fmt='.2f', cmap='winter')
+    plt.show()
+
+    return contributing_features
 
 
 def evaluate_model_parameters(contributing_features):
     """Does a grid search on 6 different models to find the best parameters,
     evaluates each set of parameters on brier loss score and accuracy."""
     # Get the data frame for all seasons
-    df = pd.read_csv(base_dir + '20022018.csv')
+    df = pd.read_csv(game_data_dir + '20022018.csv')
 
     # Filter the columns to keep
     columns_to_keep = list()
@@ -1309,7 +1324,7 @@ def print_grid_search_details(clf, filename):
     """Prints the results of the grid search to a file and the console."""
 
     # Set the directory to write files to
-    filename = base_dir + 'Other\\Scores\\' + filename
+    filename = other_dir + 'Scores\\' + filename
 
     # Print the best parameter found in the search along with its score
     print('Best parameters set found on development set:')
@@ -1340,7 +1355,7 @@ def print_grid_search_details(clf, filename):
 def get_best_logistic_regression():
     """Gets the logistic regression model that yielded the best result."""
 
-    return LogisticRegression(C=0.05,
+    return LogisticRegression(C=0.04,
                               class_weight=None,
                               multi_class='ovr',
                               penalty='l1',
@@ -1361,8 +1376,8 @@ def get_best_svc():
 def get_best_random_forest():
     """Gets the random forest model that yielded the best result."""
 
-    return RandomForestClassifier(n_estimators=100,
-                                  max_features=11,
+    return RandomForestClassifier(n_estimators=1000,
+                                  max_features=7,
                                   max_depth=3,
                                   random_state=42)
 
@@ -1372,7 +1387,7 @@ def get_voting_classifier(contributing_features):
     estimators are weighted by the normalized inverse of their respective briers."""
 
     # Get the data frame for all seasons
-    df = pd.read_csv(base_dir + '20022018.csv')
+    df = pd.read_csv(game_data_dir + '20022018.csv')
 
     # Drop all columns except for the most important features, and the predicted label
     columns_to_keep = list()
@@ -1403,18 +1418,18 @@ def get_voting_classifier(contributing_features):
     X = scaler.transform(X)
 
     # Pickle the scaler
-    joblib.dump(scaler, base_dir + 'Other\\2018Scaler.pkl')
+    joblib.dump(scaler, other_dir + '2018Scaler.pkl')
 
     # Get the classification models
     logistic_regression = get_best_logistic_regression()
     svc = get_best_svc()
     random_forest = get_best_random_forest()
 
-    # Create a voting classifier from the 3 estimators, weighted by the invers of the briers, soft voting
+    # Create a voting classifier from the 3 estimators, weighted by the inverse of the briers, soft voting
     voting_classifier = VotingClassifier(estimators=[('Logistic Regression', logistic_regression),
                                                      ('SVC', svc),
                                                      ('Random Forest', random_forest)],
-                                         weights=[.5783, .5778, .5760],
+                                         weights=[0.578519, 0.577674, 0.575855],
                                          voting='soft',
                                          flatten_transform=False)
 
@@ -1422,6 +1437,6 @@ def get_voting_classifier(contributing_features):
     voting_classifier.fit(X, y.ravel())
 
     # Pickle the voting classifier
-    joblib.dump(voting_classifier, base_dir + 'Other\\2018VotingClassifier.pkl')
+    joblib.dump(voting_classifier, other_dir + '2018VotingClassifier.pkl')
 
     return voting_classifier

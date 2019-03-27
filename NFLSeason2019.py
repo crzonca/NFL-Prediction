@@ -15,7 +15,7 @@ def season():
     print('*' * 120, '\n')
 
     # teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
-    teams = handle_week(teams, 'Random Season', random_season, eliminated_teams)
+    # teams = handle_week(teams, 'Random Season', random_season, eliminated_teams)
 
     Standings.print_schedule_difficulty(teams, remaining=True)
     Playoffs.monte_carlo(teams, trials=100)

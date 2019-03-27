@@ -1,0 +1,48 @@
+Best parameters set found on development set:
+0.66468 (+/-0.019) for {'C': 10, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True}
+
+Grid scores on development set:
+0.66468 (+/-0.019) for {'C': 10, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True}
+0.66468 (+/-0.018) for {'C': 100, 'gamma': 0.0001, 'kernel': 'rbf', 'probability': True}
+0.66468 (+/-0.019) for {'C': 100, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True}
+0.66446 (+/-0.016) for {'C': 100, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True}
+0.66446 (+/-0.016) for {'C': 0.1, 'kernel': 'linear', 'probability': True}
+0.66446 (+/-0.017) for {'C': 10, 'kernel': 'linear', 'probability': True}
+0.66424 (+/-0.017) for {'C': 1, 'kernel': 'linear', 'probability': True}
+0.66402 (+/-0.018) for {'C': 100, 'kernel': 'linear', 'probability': True}
+0.66380 (+/-0.015) for {'C': 100, 'gamma': 1e-05, 'kernel': 'rbf', 'probability': True}
+0.66358 (+/-0.020) for {'C': 10, 'gamma': 0.001, 'kernel': 'rbf', 'probability': True}
+0.66336 (+/-0.014) for {'C': 10, 'gamma': 0.0001, 'kernel': 'rbf', 'probability': True}
+0.66292 (+/-0.018) for {'C': 1, 'gamma': 0.001, 'kernel': 'rbf', 'probability': True}
+0.66028 (+/-0.024) for {'C': 100, 'gamma': 0.001, 'kernel': 'rbf', 'probability': True}
+0.65918 (+/-0.014) for {'C': 10, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True}
+0.65918 (+/-0.014) for {'C': 100, 'gamma': 1e-05, 'kernel': 'sigmoid', 'probability': True}
+0.65896 (+/-0.014) for {'C': 1, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True}
+0.58669 (+/-0.009) for {'C': 1, 'gamma': 0.0001, 'kernel': 'rbf', 'probability': True}
+0.58669 (+/-0.009) for {'C': 10, 'gamma': 1e-05, 'kernel': 'rbf', 'probability': True}
+0.58669 (+/-0.009) for {'C': 100, 'gamma': 1e-06, 'kernel': 'rbf', 'probability': True}
+0.58581 (+/-0.008) for {'C': 0.1, 'gamma': 0.001, 'kernel': 'rbf', 'probability': True}
+0.57303 (+/-0.001) for {'C': 0.1, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True}
+0.57303 (+/-0.001) for {'C': 0.1, 'gamma': 0.0001, 'kernel': 'rbf', 'probability': True}
+0.57303 (+/-0.001) for {'C': 0.1, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True}
+0.57303 (+/-0.001) for {'C': 0.1, 'gamma': 1e-05, 'kernel': 'rbf', 'probability': True}
+0.57303 (+/-0.001) for {'C': 0.1, 'gamma': 1e-05, 'kernel': 'sigmoid', 'probability': True}
+0.57303 (+/-0.001) for {'C': 0.1, 'gamma': 1e-06, 'kernel': 'rbf', 'probability': True}
+0.57303 (+/-0.001) for {'C': 0.1, 'gamma': 1e-06, 'kernel': 'sigmoid', 'probability': True}
+0.57303 (+/-0.001) for {'C': 0.1, 'gamma': 1e-07, 'kernel': 'rbf', 'probability': True}
+0.57303 (+/-0.001) for {'C': 0.1, 'gamma': 1e-07, 'kernel': 'sigmoid', 'probability': True}
+0.57303 (+/-0.001) for {'C': 1, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True}
+0.57303 (+/-0.001) for {'C': 1, 'gamma': 1e-05, 'kernel': 'rbf', 'probability': True}
+0.57303 (+/-0.001) for {'C': 1, 'gamma': 1e-05, 'kernel': 'sigmoid', 'probability': True}
+0.57303 (+/-0.001) for {'C': 1, 'gamma': 1e-06, 'kernel': 'rbf', 'probability': True}
+0.57303 (+/-0.001) for {'C': 1, 'gamma': 1e-06, 'kernel': 'sigmoid', 'probability': True}
+0.57303 (+/-0.001) for {'C': 1, 'gamma': 1e-07, 'kernel': 'rbf', 'probability': True}
+0.57303 (+/-0.001) for {'C': 1, 'gamma': 1e-07, 'kernel': 'sigmoid', 'probability': True}
+0.57303 (+/-0.001) for {'C': 10, 'gamma': 1e-05, 'kernel': 'sigmoid', 'probability': True}
+0.57303 (+/-0.001) for {'C': 10, 'gamma': 1e-06, 'kernel': 'rbf', 'probability': True}
+0.57303 (+/-0.001) for {'C': 10, 'gamma': 1e-06, 'kernel': 'sigmoid', 'probability': True}
+0.57303 (+/-0.001) for {'C': 10, 'gamma': 1e-07, 'kernel': 'rbf', 'probability': True}
+0.57303 (+/-0.001) for {'C': 10, 'gamma': 1e-07, 'kernel': 'sigmoid', 'probability': True}
+0.57303 (+/-0.001) for {'C': 100, 'gamma': 1e-06, 'kernel': 'sigmoid', 'probability': True}
+0.57303 (+/-0.001) for {'C': 100, 'gamma': 1e-07, 'kernel': 'rbf', 'probability': True}
+0.57303 (+/-0.001) for {'C': 100, 'gamma': 1e-07, 'kernel': 'sigmoid', 'probability': True}
