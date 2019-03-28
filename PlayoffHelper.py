@@ -376,7 +376,7 @@ def monte_carlo(teams, trials=1000000):
     # Get the teams in the playoffs for each trial
     playoff_teams = list()
     for trial in all_trials:
-        afc_playoff_teams, nfc_playoff_teams = get_playoff_picture(trial, default_sorter=False)
+        afc_playoff_teams, nfc_playoff_teams = get_playoff_picture(trial)
         trial_playoff_teams = list()
         trial_playoff_teams.extend(afc_playoff_teams)
         trial_playoff_teams.extend(nfc_playoff_teams)
@@ -403,17 +403,8 @@ def get_pct_chance(home_elo, away_elo):
     return e_home
 
 
-def get_playoff_picture(teams, default_sorter=True, verbose=False):
-    def win_pct_sorter(teams_to_sort):
-        teams_to_sort = sorted(teams_to_sort, key=lambda t: t[1] / (t[1] + t[2] + t[3]), reverse=True)
-        return teams_to_sort
-
-    if default_sorter:
-        sorter = sort_by_tiebreakers
-    else:
-        sorter = win_pct_sorter
-
-    teams = sorter(teams)
+def get_playoff_picture(teams, verbose=False):
+    teams = sort_by_tiebreakers(teams)
     league = get_league_structure()
 
     first_round_byes = list()
@@ -431,7 +422,7 @@ def get_playoff_picture(teams, default_sorter=True, verbose=False):
 
         for div_name, division in conference.items():
             division_teams = [get_team(teams, team_name) for team_name in division]
-            division_teams = sorter(division_teams)
+            division_teams = sort_by_tiebreakers(division_teams)
 
             if conf_name == 'AFC':
                 afc_division_leaders.append(division_teams[0])
@@ -441,7 +432,7 @@ def get_playoff_picture(teams, default_sorter=True, verbose=False):
 
             conference_teams.extend(division_teams)
 
-        conference_teams = sorter(conference_teams)
+        conference_teams = sort_by_tiebreakers(conference_teams)
         first_round_byes.append(conference_teams[0])
 
         conf_leader = conference_teams[0][0]
@@ -461,7 +452,7 @@ def get_playoff_picture(teams, default_sorter=True, verbose=False):
 
         other_teams = conference_teams.copy()
         other_teams = list(set(other_teams) - set(division_leaders))
-        other_teams = sorter(other_teams)
+        other_teams = sort_by_tiebreakers(other_teams)
 
         if conf_name == 'AFC':
             afc_wild_cards.append(other_teams[0])
@@ -489,12 +480,12 @@ def get_playoff_picture(teams, default_sorter=True, verbose=False):
         print()
 
     afc_playoff_teams = list()
-    afc_playoff_teams.extend(sorter(afc_division_leaders))
-    afc_playoff_teams.extend(sorter(afc_wild_cards))
+    afc_playoff_teams.extend(sort_by_tiebreakers(afc_division_leaders))
+    afc_playoff_teams.extend(sort_by_tiebreakers(afc_wild_cards))
 
     nfc_playoff_teams = list()
-    nfc_playoff_teams.extend(sorter(nfc_division_leaders))
-    nfc_playoff_teams.extend(sorter(nfc_wild_cards))
+    nfc_playoff_teams.extend(sort_by_tiebreakers(nfc_division_leaders))
+    nfc_playoff_teams.extend(sort_by_tiebreakers(nfc_wild_cards))
 
     return afc_playoff_teams, nfc_playoff_teams
 
@@ -505,8 +496,8 @@ def sort_by_tiebreakers(teams):
 
 
 def compare_win_pct(team1, team2):
-    team1_games_played = team1[1] + team1[2] + team1[3]
-    team2_games_played = team2[1] + team2[2] + team2[3]
+    team1_games_played = team1[1] + team1[2]
+    team2_games_played = team2[1] + team2[2]
     team1_pct = team1[1] / team1_games_played if team1_games_played > 0 else 0
     team2_pct = team2[1] / team2_games_played if team2_games_played > 0 else 0
 

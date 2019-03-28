@@ -14,11 +14,11 @@ def season():
     Standings.print_schedule_difficulty(teams)
     print('*' * 120, '\n')
 
-    teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
+    # teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
     teams = handle_week(teams, 'Random Season', random_season, eliminated_teams)
 
     Standings.print_schedule_difficulty(teams, remaining=True)
-    Playoffs.monte_carlo(teams, trials=100000)
+    Playoffs.monte_carlo(teams, trials=100)
 
     print('Current Playoff Picture')
     afc_playoff_teams, nfc_playoff_teams = Playoffs.get_playoff_picture(teams)
@@ -134,7 +134,7 @@ def week_1(teams):
 
 
 def random_season(teams):
-    for game_num, game in enumerate(Playoffs.get_2019_schedule()[:128]):
+    for game_num, game in enumerate(Playoffs.get_2019_schedule()[:200]):
         home = game[0]
         away = game[1]
         teams = set_random_outcome(teams, home, away)
