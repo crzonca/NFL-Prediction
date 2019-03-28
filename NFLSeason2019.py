@@ -18,10 +18,10 @@ def season():
     teams = handle_week(teams, 'Random Season', random_season, eliminated_teams)
 
     Standings.print_schedule_difficulty(teams, remaining=True)
-    Playoffs.monte_carlo(teams, trials=100)
+    Playoffs.monte_carlo(teams, trials=100000)
 
     print('Current Playoff Picture')
-    afc_playoff_teams, nfc_playoff_teams = Playoffs.get_playoff_picture(teams, verbose=False)
+    afc_playoff_teams, nfc_playoff_teams = Playoffs.get_playoff_picture(teams)
     print('-' * 15 + 'AFC' + '-' * 15)
     Playoffs.create_playoff_bracket(afc_playoff_teams)
     print()

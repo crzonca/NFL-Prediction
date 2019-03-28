@@ -216,7 +216,7 @@ def print_monte_carlo_simulation(teams):
     sorted_by_wins = sorted(sorted_by_losses, reverse=True, key=lambda tup: tup[1])
 
     # Create the table header
-    table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo'])
+    table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo', 'Playoff Chances'])
     table.float_format = '0.3'
 
     # Add the info to the rows
@@ -229,6 +229,7 @@ def print_monte_carlo_simulation(teams):
         team_info.append(team[2])
         team_info.append(team[3])
         team_info.append(team[4])
+        team_info.append(team[5])
         row = row + team_info
 
         table.add_row(row)
