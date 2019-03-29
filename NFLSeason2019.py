@@ -14,8 +14,8 @@ def season():
     Standings.print_schedule_difficulty(teams)
     print('*' * 120, '\n')
 
-    # teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
-    teams = handle_week(teams, 'Random Season', random_season, eliminated_teams)
+    teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
+    # teams = handle_week(teams, 'Random Season', random_season, eliminated_teams)
 
     Standings.print_schedule_difficulty(teams, remaining=True)
     Playoffs.monte_carlo(teams, trials=100)
@@ -98,8 +98,9 @@ def handle_week(teams,
 def week_1(teams):
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     probabilities = list()
-    probabilities.append(Predictor.predict_game_outcome(teams, 'Vikings', 'Lions', -6, verbose=True))
-    probabilities.append(Predictor.predict_game_outcome(teams, 'Packers', 'Bears', 3))
+    probabilities.append(Predictor.predict_game_outcome(teams, 'Lions', 'Vikings', 3))
+    probabilities.append(Predictor.predict_game_outcome(teams, 'Bears', 'Packers', -6))
+    probabilities.append(Predictor.predict_game_outcome(teams, 'Panthers', 'Falcons', 0, verbose=True))
 
     probabilities.sort(key=lambda outcome: outcome[0], reverse=True)
     for game in probabilities:
