@@ -733,7 +733,7 @@ def create_playoff_bracket(teams):
     for seed, team in enumerate(teams):
         seeded_teams.append((seed, team))
 
-    max_name_length = max([len(team[0]) for team in teams[2:]]) + 1
+    max_name_length = max([len(team[0]) for team in teams]) + 3
 
     padded_team_names = [team[0].rjust(max_name_length) for team in teams]
     for index, name in enumerate(padded_team_names):
