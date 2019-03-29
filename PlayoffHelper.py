@@ -295,7 +295,7 @@ def monte_carlo(teams, trials=1000000):
     # 1,000,000 Trials
     for trial in range(trials):
         # Get just the name, record and elo of each team
-        pseudo_teams = [(team[0], team[1], team[2], team[3], team[4]) for team in teams]
+        pseudo_teams = [(team[0], team[1], team[2], team[3], team[4], 0, 0) for team in teams]
 
         # For each game in the list of games yet to be played
         for game in get_2019_schedule()[len(completed_games):]:
@@ -324,8 +324,8 @@ def monte_carlo(teams, trials=1000000):
             home_elo, away_elo = NFL.get_new_elos(home[4], away[4], home_victory, False, 42)
 
             # Create an updated team
-            new_home = (home[0], home_wins, home_losses, home_ties, home_elo)
-            new_away = (away[0], away_wins, away_losses, away_ties, away_elo)
+            new_home = (home[0], home_wins, home_losses, home_ties, home_elo, 0, 0)
+            new_away = (away[0], away_wins, away_losses, away_ties, away_elo, 0, 0)
 
             # Update the pseudo teams with the new teams
             pseudo_teams = [new_home if team == home else team for team in pseudo_teams]
@@ -368,7 +368,8 @@ def monte_carlo(teams, trials=1000000):
                          sum(wins) / len(wins),
                          sum(losses) / len(losses),
                          round(sum(ties) / len(ties)),
-                         sum(elos) / len(elos))
+                         sum(elos) / len(elos),
+                         0, 0)
 
         # Add it to a final list
         averaged_teams.append(averaged_team)
