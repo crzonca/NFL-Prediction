@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import maya
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import VotingClassifier
@@ -20,7 +21,6 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
-import seaborn as sns
 
 from Projects.nfl.NFL_Prediction import StatsHelper as Stats
 
@@ -181,10 +181,10 @@ def add_team_elos(frames, regression_factor=.41, k_factor=42):
 
             # Calculate each teams new elo based on the game result
             home_elo, away_elo = get_new_elos(team_elos.get(team),
-                                                  team_elos.get(opponent),
-                                                  row[df.columns.get_loc('home_victory')] == 1,
-                                                  row[df.columns.get_loc('home_draw')] == 1,
-                                                  k_factor)
+                                              team_elos.get(opponent),
+                                              row[df.columns.get_loc('home_victory')] == 1,
+                                              row[df.columns.get_loc('home_draw')] == 1,
+                                              k_factor)
 
             # Update the dictionary
             team_elos[team] = home_elo
@@ -1443,7 +1443,7 @@ def get_voting_classifier(contributing_features):
 
 
 def evaluate_2018_season(contributing_features):
-    # get_voting_classifier(contributing_features)
+    get_voting_classifier(contributing_features)
     voting_classifier = joblib.load(other_dir + '2017VotingClassifier.pkl')
     scaler = joblib.load(other_dir + '2017Scaler.pkl')
 
@@ -1489,4 +1489,3 @@ def evaluate_2018_season(contributing_features):
 
         results = results.append(game_df)
     results.to_csv(other_dir + 'Scores\\8 Features\\2017Predictions.csv', index=False)
-
