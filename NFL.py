@@ -1440,3 +1440,53 @@ def get_voting_classifier(contributing_features):
     joblib.dump(voting_classifier, other_dir + '2018VotingClassifier.pkl')
 
     return voting_classifier
+
+
+def evaluate_2018_season(contributing_features):
+    # get_voting_classifier(contributing_features)
+    voting_classifier = joblib.load(other_dir + '2017VotingClassifier.pkl')
+    scaler = joblib.load(other_dir + '2017Scaler.pkl')
+
+    last_season = pd.read_csv(game_data_dir + '20022018.csv').values[-267:]
+    last_season = pd.DataFrame(last_season)
+
+    results = pd.DataFrame(columns=['rf_prob', 'svc_prob', 'lr_prob', 'vote_prob', 'outcome'])
+    for game in last_season.values:
+        home_victory = game[71]
+        home_spread = game[7]
+        elo_diff = game[240]
+        average_scoring_margin_diff = game[285]
+        win_pct_diff = game[239]
+        average_points_for_diff = game[241]
+        average_touchdowns_diff = game[283]
+        average_passer_rating_diff = game[282]
+        average_total_yards_diff = game[255]
+
+        game_features = (home_spread,
+                         elo_diff,
+                         average_scoring_margin_diff,
+                         win_pct_diff,
+                         average_points_for_diff,
+                         average_touchdowns_diff,
+                         average_passer_rating_diff,
+                         average_total_yards_diff)
+
+        # Convert the features to a data frame and scale it
+        game = pd.DataFrame([game_features])
+        game = scaler.transform(game)
+
+        # Get the voting classifier probability
+        vote_prob = voting_classifier.predict_proba(game)[0][1]
+
+        # Get the individual estimator probabilities
+        estimator_probs = voting_classifier.transform(game)
+        lr_prob = estimator_probs[0][0][1]
+        svc_prob = estimator_probs[1][0][1]
+        rf_prob = estimator_probs[2][0][1]
+
+        game_df = pd.DataFrame([[rf_prob, svc_prob, lr_prob, vote_prob, home_victory]],
+                               columns=['rf_prob', 'svc_prob', 'lr_prob', 'vote_prob', 'outcome'])
+
+        results = results.append(game_df)
+    results.to_csv(other_dir + 'Scores\\8 Features\\2017Predictions.csv', index=False)
+

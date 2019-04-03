@@ -31,6 +31,7 @@ def get_league_structure():
 
 def get_2019_schedule():
     games = list()
+    # games.append(('HOME', 'AWAY'))
     games.append(('Saints', 'Vikings'))
     games.append(('Bears', 'Lions'))
     games.append(('Giants', 'Panthers'))
