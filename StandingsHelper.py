@@ -244,10 +244,7 @@ def print_schedule_difficulty(teams, remaining=False):
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
     team_tuples = list()
     for team in teams:
-        if remaining:
-            schedule_difficulty = Playoffs.get_remaining_schedule_difficulty(teams, team[0])
-        else:
-            schedule_difficulty = Playoffs.get_schedule_difficulty(teams, team[0])
+        schedule_difficulty = Playoffs.get_schedule_difficulty(teams, team[0], remaining)
         team_tuples.append((team, schedule_difficulty))
 
     sorted_by_schedule = sorted(team_tuples, key=lambda tup: tup[1], reverse=True)

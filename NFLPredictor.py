@@ -12,8 +12,8 @@ base_dir = '..\\Projects\\nfl\\NFL_Prediction\\'
 
 def predict_game(home_info, away_info, home_spread=0):
     # Load the classifier and scaler
-    voting_classifier = joblib.load(base_dir + 'Other\\2018VotingClassifier.pkl')
-    scaler = joblib.load(base_dir + 'Other\\2018Scaler.pkl')
+    voting_classifier = joblib.load(base_dir + 'Other\\8 Features\\2018VotingClassifier.pkl')
+    scaler = joblib.load(base_dir + 'Other\\8 Features\\2018Scaler.pkl')
 
     # Get the home team's info
     home_wins = home_info[1]
@@ -314,6 +314,20 @@ def update_teams(teams, home_name, home_score, home_touchdowns, home_net_pass_ya
     teams = [new_home if team == home else team for team in teams]
     teams = [new_away if team == away else team for team in teams]
     return teams
+
+
+def get_week_probabilities(teams, games):
+    probabilities = list()
+    for game in games:
+        probabilities.append(predict_game_outcome(teams, game[0][0], game[0][1], game[1]))
+
+    probabilities.sort(key=lambda outcome: outcome[0], reverse=True)
+
+    for game in probabilities:
+        print(game[1])
+    print()
+
+    return probabilities
 
 
 def get_team(teams, team_name):
