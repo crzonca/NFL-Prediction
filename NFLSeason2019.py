@@ -115,7 +115,7 @@ def handle_week(teams,
 
 def week_1(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week1_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week1_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -146,7 +146,7 @@ def week_1(teams, suppress_probabilities):
 
 def week_2(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week2_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week2_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -177,7 +177,7 @@ def week_2(teams, suppress_probabilities):
 
 def week_3(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week3_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week3_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -208,7 +208,7 @@ def week_3(teams, suppress_probabilities):
 
 def week_4(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week4_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week4_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -239,7 +239,7 @@ def week_4(teams, suppress_probabilities):
 
 def week_5(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week5_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week5_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -270,7 +270,7 @@ def week_5(teams, suppress_probabilities):
 
 def week_6(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week6_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week6_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -301,7 +301,7 @@ def week_6(teams, suppress_probabilities):
 
 def week_7(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week7_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week7_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -332,7 +332,7 @@ def week_7(teams, suppress_probabilities):
 
 def week_8(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week8_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week8_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -363,7 +363,7 @@ def week_8(teams, suppress_probabilities):
 
 def week_9(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week9_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week9_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -394,7 +394,7 @@ def week_9(teams, suppress_probabilities):
 
 def week_10(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week10_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week10_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -425,7 +425,7 @@ def week_10(teams, suppress_probabilities):
 
 def week_11(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week11_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week11_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -456,7 +456,7 @@ def week_11(teams, suppress_probabilities):
 
 def week_12(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week12_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week12_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -487,7 +487,7 @@ def week_12(teams, suppress_probabilities):
 
 def week_13(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week13_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week13_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -518,7 +518,7 @@ def week_13(teams, suppress_probabilities):
 
 def week_14(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week14_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week14_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -549,7 +549,7 @@ def week_14(teams, suppress_probabilities):
 
 def week_15(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week15_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week15_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -580,7 +580,7 @@ def week_15(teams, suppress_probabilities):
 
 def week_16(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week16_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week16_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -611,7 +611,7 @@ def week_16(teams, suppress_probabilities):
 
 def week_17(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week17_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_week17_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -642,7 +642,7 @@ def week_17(teams, suppress_probabilities):
 
 def wildcard(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_wildcard_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_wildcard_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -673,7 +673,7 @@ def wildcard(teams, suppress_probabilities):
 
 def divisional(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_divisional_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_divisional_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -704,7 +704,7 @@ def divisional(teams, suppress_probabilities):
 
 def conference(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_conference_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_conference_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',
@@ -735,7 +735,7 @@ def conference(teams, suppress_probabilities):
 
 def superbowl(teams, suppress_probabilities):
     if not suppress_probabilities:
-        Predictor.get_week_probabilities(teams, Playoffs.get_2019_superbowl_schedule())
+        Predictor.get_week_probabilities(teams, Playoffs.get_superbowl_schedule())
 
     teams = set_game_outcome(teams,
                              home_name='Vikings',

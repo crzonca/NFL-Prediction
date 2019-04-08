@@ -29,60 +29,37 @@ def get_league_structure():
     return nfl
 
 
-def get_2019_schedule():
+def get_schedule():
     games = list()
-    games.extend(get_2019_week1_schedule())
-    games.extend(get_2019_week2_schedule())
-    games.extend(get_2019_week3_schedule())
-    games.extend(get_2019_week4_schedule())
+    games.extend(get_week1_schedule())
+    games.extend(get_week2_schedule())
+    games.extend(get_week3_schedule())
+    games.extend(get_week4_schedule())
 
-    games.extend(get_2019_week5_schedule())
-    games.extend(get_2019_week6_schedule())
-    games.extend(get_2019_week7_schedule())
-    games.extend(get_2019_week8_schedule())
+    games.extend(get_week5_schedule())
+    games.extend(get_week6_schedule())
+    games.extend(get_week7_schedule())
+    games.extend(get_week8_schedule())
 
-    games.extend(get_2019_week9_schedule())
-    games.extend(get_2019_week10_schedule())
-    games.extend(get_2019_week11_schedule())
-    games.extend(get_2019_week12_schedule())
+    games.extend(get_week9_schedule())
+    games.extend(get_week10_schedule())
+    games.extend(get_week11_schedule())
+    games.extend(get_week12_schedule())
 
-    games.extend(get_2019_week13_schedule())
-    games.extend(get_2019_week14_schedule())
-    games.extend(get_2019_week15_schedule())
-    games.extend(get_2019_week16_schedule())
+    games.extend(get_week13_schedule())
+    games.extend(get_week14_schedule())
+    games.extend(get_week15_schedule())
+    games.extend(get_week16_schedule())
 
-    games.extend(get_2019_week17_schedule())
-    games.extend(get_2019_wildcard_schedule())
-    games.extend(get_2019_divisional_schedule())
-    games.extend(get_2019_conference_schedule())
-    games.extend(get_2019_superbowl_schedule())
+    games.extend(get_week17_schedule())
+    games.extend(get_wildcard_schedule())
+    games.extend(get_divisional_schedule())
+    games.extend(get_conference_schedule())
+    games.extend(get_superbowl_schedule())
     return games
 
 
-def get_2019_week1_schedule():
-    games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
-    games.append((('Saints', 'Vikings'), 0))
-    games.append((('Bears', 'Lions'), 0))
-    games.append((('Giants', 'Panthers'), 0))
-    games.append((('Seahawks', '49ers'), 0))
-    games.append((('Buccaneers', 'Browns'), 0))
-    games.append((('Steelers', 'Falcons'), 0))
-    games.append((('Bills', 'Dolphins'), 0))
-    games.append((('Rams', 'Cardinals'), 0))
-    games.append((('Jaguars', 'Broncos'), 0))
-    games.append((('Titans', 'Raiders'), 0))
-    games.append((('Eagles', 'Packers'), 0))
-    games.append((('Redskins', 'Cowboys'), 0))
-    games.append((('Texans', 'Colts'), 0))
-    games.append((('Patriots', 'Bengals'), 0))
-    games.append((('Chiefs', 'Chargers'), 0))
-    games.append((('Jets', 'Ravens'), 0))
-
-    return games
-
-
-def get_2019_week2_schedule():
+def get_week1_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -105,7 +82,7 @@ def get_2019_week2_schedule():
     return games
 
 
-def get_2019_week3_schedule():
+def get_week2_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -128,7 +105,7 @@ def get_2019_week3_schedule():
     return games
 
 
-def get_2019_week4_schedule():
+def get_week3_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -151,7 +128,7 @@ def get_2019_week4_schedule():
     return games
 
 
-def get_2019_week5_schedule():
+def get_week4_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -174,7 +151,7 @@ def get_2019_week5_schedule():
     return games
 
 
-def get_2019_week6_schedule():
+def get_week5_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -197,7 +174,7 @@ def get_2019_week6_schedule():
     return games
 
 
-def get_2019_week7_schedule():
+def get_week6_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -220,7 +197,7 @@ def get_2019_week7_schedule():
     return games
 
 
-def get_2019_week8_schedule():
+def get_week7_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -243,7 +220,7 @@ def get_2019_week8_schedule():
     return games
 
 
-def get_2019_week9_schedule():
+def get_week8_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -266,7 +243,7 @@ def get_2019_week9_schedule():
     return games
 
 
-def get_2019_week10_schedule():
+def get_week9_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -289,7 +266,7 @@ def get_2019_week10_schedule():
     return games
 
 
-def get_2019_week11_schedule():
+def get_week10_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -312,7 +289,7 @@ def get_2019_week11_schedule():
     return games
 
 
-def get_2019_week12_schedule():
+def get_week11_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -335,7 +312,7 @@ def get_2019_week12_schedule():
     return games
 
 
-def get_2019_week13_schedule():
+def get_week12_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -358,7 +335,7 @@ def get_2019_week13_schedule():
     return games
 
 
-def get_2019_week14_schedule():
+def get_week13_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -381,7 +358,7 @@ def get_2019_week14_schedule():
     return games
 
 
-def get_2019_week15_schedule():
+def get_week14_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -404,7 +381,7 @@ def get_2019_week15_schedule():
     return games
 
 
-def get_2019_week16_schedule():
+def get_week15_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -427,7 +404,7 @@ def get_2019_week16_schedule():
     return games
 
 
-def get_2019_week17_schedule():
+def get_week16_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -450,7 +427,30 @@ def get_2019_week17_schedule():
     return games
 
 
-def get_2019_wildcard_schedule():
+def get_week17_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_wildcard_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -461,7 +461,7 @@ def get_2019_wildcard_schedule():
     return games
 
 
-def get_2019_divisional_schedule():
+def get_divisional_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -472,7 +472,7 @@ def get_2019_divisional_schedule():
     return games
 
 
-def get_2019_conference_schedule():
+def get_conference_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -481,7 +481,7 @@ def get_2019_conference_schedule():
     return games
 
 
-def get_2019_superbowl_schedule():
+def get_superbowl_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
     games.append((('Saints', 'Vikings'), 0))
@@ -497,7 +497,7 @@ def monte_carlo(teams, trials=1000000):
         pseudo_teams = [(team[0], team[1], team[2], team[3], team[4], 0, 0) for team in teams]
 
         # For each game in the list of games yet to be played
-        schedule, spreads = zip(*get_2019_schedule())
+        schedule, spreads = zip(*get_schedule())
         for game in schedule[len(completed_games):]:
             # Get the home and away teams
             home = game[0]
@@ -898,7 +898,7 @@ def contains_common_opponents(team1, team2, game):
 
 
 def get_schedule_difficulty(teams, team_name, remaining=False):
-    schedule, spreads = zip(*get_2019_schedule())
+    schedule, spreads = zip(*get_schedule())
     if remaining:
         schedule = schedule[len(completed_games):]
 
