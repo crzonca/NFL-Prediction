@@ -4,46 +4,57 @@ import Projects.nfl.NFL_Prediction.StandingsHelper as Standings
 
 
 def season():
+    # Preseason Setup
     print('Preseason')
     teams = set_up_teams()
     eliminated_teams = list()
 
+    # Preseason Info
     Standings.print_league_details(teams, eliminated_teams, full_standings=False)
     Standings.print_schedule_difficulty(teams)
     print('*' * 120, '\n')
 
+    # Regular Season
     teams = handle_week(teams, 'Week 1', week_1, eliminated_teams, suppress_probabilities=False)
-    teams = handle_week(teams, 'Week 2', week_2, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Week 3', week_3, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Week 4', week_4, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Week 5', week_5, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Week 6', week_6, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Week 7', week_7, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Week 8', week_8, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Week 9', week_9, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Week 10', week_10, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Week 11', week_11, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Week 12', week_12, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Week 13', week_13, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Week 14', week_14, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Week 15', week_15, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Week 16', week_16, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Week 17', week_17, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Wildcard Weekend', wildcard, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Divisional Round', divisional, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Conference Finals', conference, eliminated_teams, suppress_probabilities=True)
-    teams = handle_week(teams, 'Superbowl', superbowl, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Week 2', week_2, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Week 3', week_3, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Week 4', week_4, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Week 5', week_5, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Week 6', week_6, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Week 7', week_7, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Week 8', week_8, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Week 9', week_9, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Week 10', week_10, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Week 11', week_11, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Week 12', week_12, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Week 13', week_13, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Week 14', week_14, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Week 15', week_15, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Week 16', week_16, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Week 17', week_17, eliminated_teams, suppress_probabilities=True)
 
+    # Regular Season Info
     Standings.print_schedule_difficulty(teams, remaining=True)
-    Playoffs.monte_carlo(teams, trials=100)
 
-    print('Current Playoff Picture')
+    # Playoff Info
     afc_playoff_teams, nfc_playoff_teams = Playoffs.get_playoff_picture(teams)
+    print('Current Playoff Picture')
     print('-' * 15 + 'AFC' + '-' * 15)
     Playoffs.create_playoff_bracket(afc_playoff_teams)
     print()
     print('-' * 15 + 'NFC' + '-' * 15)
     Playoffs.create_playoff_bracket(nfc_playoff_teams)
+    print()
+    print('*' * 120, '\n')
+
+    # Playoffs
+    # teams = handle_week(teams, 'Wildcard Weekend', wildcard, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Divisional Round', divisional, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Conference Finals', conference, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Superbowl', superbowl, eliminated_teams, suppress_probabilities=True)
+
+    # Final Outcome
+    Playoffs.monte_carlo(teams, trials=100)
 
 
 def set_up_teams():

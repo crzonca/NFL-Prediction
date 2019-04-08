@@ -453,10 +453,10 @@ def get_week17_schedule():
 def get_wildcard_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
-    games.append((('Saints', 'Vikings'), 0))
-    games.append((('Bears', 'Lions'), 0))
-    games.append((('Giants', 'Panthers'), 0))
-    games.append((('Seahawks', '49ers'), 0))
+    # games.append((('Saints', 'Vikings'), 0))
+    # games.append((('Bears', 'Lions'), 0))
+    # games.append((('Giants', 'Panthers'), 0))
+    # games.append((('Seahawks', '49ers'), 0))
 
     return games
 
@@ -464,10 +464,10 @@ def get_wildcard_schedule():
 def get_divisional_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
-    games.append((('Saints', 'Vikings'), 0))
-    games.append((('Bears', 'Lions'), 0))
-    games.append((('Giants', 'Panthers'), 0))
-    games.append((('Seahawks', '49ers'), 0))
+    # games.append((('Saints', 'Vikings'), 0))
+    # games.append((('Bears', 'Lions'), 0))
+    # games.append((('Giants', 'Panthers'), 0))
+    # games.append((('Seahawks', '49ers'), 0))
 
     return games
 
@@ -475,8 +475,8 @@ def get_divisional_schedule():
 def get_conference_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
-    games.append((('Saints', 'Vikings'), 0))
-    games.append((('Bears', 'Lions'), 0))
+    # games.append((('Saints', 'Vikings'), 0))
+    # games.append((('Bears', 'Lions'), 0))
 
     return games
 
@@ -484,7 +484,7 @@ def get_conference_schedule():
 def get_superbowl_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
-    games.append((('Saints', 'Vikings'), 0))
+    # games.append((('Saints', 'Vikings'), 0))
 
     return games
 
