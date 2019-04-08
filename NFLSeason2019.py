@@ -27,6 +27,8 @@ def season():
     # teams = handle_week(teams, 'Week 10', week_10, eliminated_teams, suppress_probabilities=True)
     # teams = handle_week(teams, 'Week 11', week_11, eliminated_teams, suppress_probabilities=True)
     # teams = handle_week(teams, 'Week 12', week_12, eliminated_teams, suppress_probabilities=True)
+    # Teams eliminated after week 12
+    eliminated_teams.extend([])
     # teams = handle_week(teams, 'Week 13', week_13, eliminated_teams, suppress_probabilities=True)
     # teams = handle_week(teams, 'Week 14', week_14, eliminated_teams, suppress_probabilities=True)
     # teams = handle_week(teams, 'Week 15', week_15, eliminated_teams, suppress_probabilities=True)

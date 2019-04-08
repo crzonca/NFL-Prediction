@@ -12,17 +12,21 @@ def get_team(teams, team_name):
 
 
 def print_elo_rankings(teams, eliminated_teams, include_title=True):
-    # Sort the teams by elo, then by playoff tiebreakers
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+
+    # Sort the teams by elo, then by playoff tiebreakers
     teams = Playoffs.sort_by_tiebreakers(teams)
     sorted_by_elo = sorted(teams, reverse=True, key=lambda tup: tup[4])
+
+    # Remove the eliminated teams
+    remaining_teams = list(filter(lambda t: t[0] not in eliminated_teams, sorted_by_elo))
 
     # Create the table header
     table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo', 'Tier'])
     table.float_format = '0.3'
 
-    # Add the info to the rows
-    for rank, team in enumerate(sorted_by_elo):
+    # Add the info to the rows for each team that isnt eliminated
+    for rank, team in enumerate(remaining_teams):
         row = list()
         row.append(rank + 1)
         team_info = list()
@@ -36,10 +40,7 @@ def print_elo_rankings(teams, eliminated_teams, include_title=True):
 
         # Color the row based of the teams tier
         row = [get_tier_color(row[-1], val) for val in row]
-
-        # Add the row to the table if the team isnt eliminated
-        if team[0] not in eliminated_teams:
-            table.add_row(row)
+        table.add_row(row)
 
     # Print the table
     if include_title:
@@ -49,15 +50,19 @@ def print_elo_rankings(teams, eliminated_teams, include_title=True):
 
 
 def print_standings(teams, eliminated_teams, include_title=True):
-    # Sort the teams by playoff tiebreakers
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+
+    # Remove the eliminated teams
+    teams = list(filter(lambda t: t[0] not in eliminated_teams, teams))
+
+    # Sort the teams by playoff tiebreakers
     teams = Playoffs.sort_by_tiebreakers(teams)
 
     # Create the table header
     table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo'])
     table.float_format = '0.3'
 
-    # Add the info to the rows
+    # Add the info to the rows for each team that isnt eliminated
     for rank, team in enumerate(teams):
         row = list()
         row.append(rank + 1)
@@ -68,10 +73,7 @@ def print_standings(teams, eliminated_teams, include_title=True):
         team_info.append(round(team[3]))
         team_info.append(team[4])
         row = row + team_info
-
-        # Add the row to the table if the team isnt eliminated
-        if team[0] not in eliminated_teams:
-            table.add_row(row)
+        table.add_row(row)
 
     # Print the table
     if include_title:
@@ -81,8 +83,12 @@ def print_standings(teams, eliminated_teams, include_title=True):
 
 
 def print_full_standings(teams, eliminated_teams, include_title=True):
-    # Sort the teams by playoff tiebreakers
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+
+    # Remove the eliminated teams
+    teams = list(filter(lambda t: t[0] not in eliminated_teams, teams))
+
+    # Sort the teams by playoff tiebreakers
     teams = Playoffs.sort_by_tiebreakers(teams)
 
     # Create the table header
@@ -90,7 +96,7 @@ def print_full_standings(teams, eliminated_teams, include_title=True):
                          'Touchdowns', 'Passer Rating', 'Total Yards'])
     table.float_format = '0.3'
 
-    # Add the info to the rows
+    # Add the info to the rows for each team that isnt eliminated
     for rank, team in enumerate(teams):
         row = list()
         row.append(rank + 1)
@@ -116,10 +122,7 @@ def print_full_standings(teams, eliminated_teams, include_title=True):
         team_info.append(round(passer_rating, 2))
         team_info.append(round(team[13], 1))
         row = row + team_info
-
-        # Add the row to the table if the team isnt eliminated
-        if team[0] not in eliminated_teams:
-            table.add_row(row)
+        table.add_row(row)
 
     # Print the table
     if include_title:
@@ -180,12 +183,15 @@ def print_model_rankings(teams, eliminated_teams):
     # Remove the victory probability from the team info
     teams = [team[0] for team in team_probs]
 
+    # Remove the eliminated teams
+    remaining_teams = list(filter(lambda t: t[0] not in eliminated_teams, teams))
+
     # Create the table header
     table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo', 'Tier'])
     table.float_format = '0.3'
 
-    # Add the info to the rows
-    for rank, team in enumerate(teams):
+    # Add the info to the rows for each team that isnt eliminated
+    for rank, team in enumerate(remaining_teams):
         row = list()
         row.append(rank + 1)
         team_info = list()
@@ -199,10 +205,7 @@ def print_model_rankings(teams, eliminated_teams):
 
         # Color the row based of the teams tier
         row = [get_tier_color(row[-1], val) for val in row]
-
-        # Add the row to the table if the team isnt eliminated
-        if team[0] not in eliminated_teams:
-            table.add_row(row)
+        table.add_row(row)
 
     # Print the table
     print('Model Rankings')
