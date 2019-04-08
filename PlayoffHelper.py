@@ -32,6 +32,30 @@ def get_league_structure():
 def get_2019_schedule():
     games = list()
     games.extend(get_2019_week1_schedule())
+    games.extend(get_2019_week2_schedule())
+    games.extend(get_2019_week3_schedule())
+    games.extend(get_2019_week4_schedule())
+
+    games.extend(get_2019_week5_schedule())
+    games.extend(get_2019_week6_schedule())
+    games.extend(get_2019_week7_schedule())
+    games.extend(get_2019_week8_schedule())
+
+    games.extend(get_2019_week9_schedule())
+    games.extend(get_2019_week10_schedule())
+    games.extend(get_2019_week11_schedule())
+    games.extend(get_2019_week12_schedule())
+
+    games.extend(get_2019_week13_schedule())
+    games.extend(get_2019_week14_schedule())
+    games.extend(get_2019_week15_schedule())
+    games.extend(get_2019_week16_schedule())
+
+    games.extend(get_2019_week17_schedule())
+    games.extend(get_2019_wildcard_schedule())
+    games.extend(get_2019_divisional_schedule())
+    games.extend(get_2019_conference_schedule())
+    games.extend(get_2019_superbowl_schedule())
     return games
 
 
@@ -54,6 +78,413 @@ def get_2019_week1_schedule():
     games.append((('Patriots', 'Bengals'), 0))
     games.append((('Chiefs', 'Chargers'), 0))
     games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_week2_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_week3_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_week4_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_week5_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_week6_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_week7_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_week8_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_week9_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_week10_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_week11_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_week12_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_week13_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_week14_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_week15_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_week16_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_week17_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Steelers', 'Falcons'), 0))
+    games.append((('Bills', 'Dolphins'), 0))
+    games.append((('Rams', 'Cardinals'), 0))
+    games.append((('Jaguars', 'Broncos'), 0))
+    games.append((('Titans', 'Raiders'), 0))
+    games.append((('Eagles', 'Packers'), 0))
+    games.append((('Redskins', 'Cowboys'), 0))
+    games.append((('Texans', 'Colts'), 0))
+    games.append((('Patriots', 'Bengals'), 0))
+    games.append((('Chiefs', 'Chargers'), 0))
+    games.append((('Jets', 'Ravens'), 0))
+
+    return games
+
+
+def get_2019_wildcard_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+
+    return games
+
+
+def get_2019_divisional_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+    games.append((('Giants', 'Panthers'), 0))
+    games.append((('Seahawks', '49ers'), 0))
+
+    return games
+
+
+def get_2019_conference_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Bears', 'Lions'), 0))
+
+    return games
+
+
+def get_2019_superbowl_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Saints', 'Vikings'), 0))
 
     return games
 

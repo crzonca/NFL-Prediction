@@ -13,6 +13,26 @@ def season():
     print('*' * 120, '\n')
 
     teams = handle_week(teams, 'Week 1', week_1, eliminated_teams, suppress_probabilities=False)
+    teams = handle_week(teams, 'Week 2', week_2, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Week 3', week_3, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Week 4', week_4, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Week 5', week_5, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Week 6', week_6, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Week 7', week_7, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Week 8', week_8, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Week 9', week_9, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Week 10', week_10, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Week 11', week_11, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Week 12', week_12, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Week 13', week_13, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Week 14', week_14, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Week 15', week_15, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Week 16', week_16, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Week 17', week_17, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Wildcard Weekend', wildcard, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Divisional Round', divisional, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Conference Finals', conference, eliminated_teams, suppress_probabilities=True)
+    teams = handle_week(teams, 'Superbowl', superbowl, eliminated_teams, suppress_probabilities=True)
 
     Standings.print_schedule_difficulty(teams, remaining=True)
     Playoffs.monte_carlo(teams, trials=100)
@@ -120,6 +140,622 @@ def week_1(teams, suppress_probabilities):
     teams = set_game_outcome(teams,
                              'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
                              'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def week_2(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week2_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def week_3(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week3_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def week_4(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week4_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def week_5(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week5_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def week_6(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week6_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def week_7(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week7_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def week_8(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week8_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def week_9(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week9_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def week_10(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week10_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def week_11(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week11_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def week_12(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week12_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def week_13(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week13_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def week_14(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week14_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def week_15(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week15_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def week_16(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week16_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def week_17(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_week17_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def wildcard(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_wildcard_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def divisional(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_divisional_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def conference(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_conference_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
+
+    teams = set_game_outcome(teams,
+                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+
+    return teams
+
+
+def superbowl(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_2019_superbowl_schedule())
+
+    teams = set_game_outcome(teams,
+                             home_name='Vikings',
+                             home_score=17,
+                             home_touchdowns=2,
+                             home_net_pass_yards=264,
+                             home_pass_completions=17,
+                             home_pass_attempts=26,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=407,
+                             away_name='Saints',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=217,
+                             away_pass_completions=15,
+                             away_pass_attempts=22,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=322)
 
     return teams
 
