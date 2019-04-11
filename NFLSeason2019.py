@@ -4,10 +4,16 @@ import Projects.nfl.NFL_Prediction.StandingsHelper as Standings
 
 
 def season():
-    # Preseason Setup
-    print('Preseason')
+    # Setup
     teams = set_up_teams()
     eliminated_teams = list()
+
+    # Preseason
+    print('Preseason')
+    teams = handle_week(teams, 'Preseason Week 1', pre_week_1, eliminated_teams, suppress_probabilities=False)
+    teams = handle_week(teams, 'Preseason Week 2', pre_week_2, eliminated_teams, suppress_probabilities=False)
+    teams = handle_week(teams, 'Preseason Week 3', pre_week_3, eliminated_teams, suppress_probabilities=False)
+    teams = handle_week(teams, 'Preseason Week 4', pre_week_4, eliminated_teams, suppress_probabilities=False)
 
     # Preseason Info
     Standings.print_league_details(teams, eliminated_teams, full_standings=False)
@@ -15,6 +21,7 @@ def season():
     print('*' * 120, '\n')
 
     # Regular Season
+    print('Regular Season')
     teams = handle_week(teams, 'Week 1', week_1, eliminated_teams, suppress_probabilities=False)
     # teams = handle_week(teams, 'Week 2', week_2, eliminated_teams, suppress_probabilities=True)
     # teams = handle_week(teams, 'Week 3', week_3, eliminated_teams, suppress_probabilities=True)
@@ -50,6 +57,7 @@ def season():
     print('*' * 120, '\n')
 
     # Playoffs
+    print('Playoffs')
     # teams = handle_week(teams, 'Wildcard Weekend', wildcard, eliminated_teams, suppress_probabilities=True)
     # teams = handle_week(teams, 'Divisional Round', divisional, eliminated_teams, suppress_probabilities=True)
     # teams = handle_week(teams, 'Conference Finals', conference, eliminated_teams, suppress_probabilities=True)
@@ -126,33 +134,61 @@ def handle_week(teams,
     return teams
 
 
+def pre_week_1(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_pre_week1_schedule())
+
+    return teams
+
+
+def pre_week_2(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_pre_week2_schedule())
+
+    return teams
+
+
+def pre_week_3(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_pre_week3_schedule())
+
+    return teams
+
+
+def pre_week_4(teams, suppress_probabilities):
+    if not suppress_probabilities:
+        Predictor.get_week_probabilities(teams, Playoffs.get_pre_week4_schedule())
+
+    return teams
+
+
 def week_1(teams, suppress_probabilities):
     if not suppress_probabilities:
         Predictor.get_week_probabilities(teams, Playoffs.get_week1_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # teams = set_game_outcome(teams,
+    #                          home_name='Vikings',
+    #                          home_score=17,
+    #                          home_touchdowns=2,
+    #                          home_net_pass_yards=264,
+    #                          home_pass_completions=17,
+    #                          home_pass_attempts=26,
+    #                          home_pass_tds=1,
+    #                          home_interceptions_thrown=0,
+    #                          home_total_yards=407,
+    #                          away_name='Saints',
+    #                          away_score=13,
+    #                          away_touchdowns=1,
+    #                          away_net_pass_yards=217,
+    #                          away_pass_completions=15,
+    #                          away_pass_attempts=22,
+    #                          away_pass_tds=0,
+    #                          away_interceptions_thrown=1,
+    #                          away_total_yards=322)
+    #
+    # teams = set_game_outcome(teams,
+    #                          'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
+    #                          'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
 
     return teams
 

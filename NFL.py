@@ -1324,7 +1324,7 @@ def print_grid_search_details(clf, filename):
     """Prints the results of the grid search to a file and the console."""
 
     # Set the directory to write files to
-    filename = other_dir + 'Scores\\' + filename
+    filename = other_dir + '8 Features\\Scores\\' + filename
 
     # Print the best parameter found in the search along with its score
     print('Best parameters set found on development set:')

@@ -59,6 +59,98 @@ def get_schedule():
     return games
 
 
+def get_pre_week1_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Giants', 'Jets'), 0))
+    games.append((('Eagles', 'Titans'), 0))
+    games.append((('Bears', 'Panthers'), 0))
+    games.append((('Lions', 'Patriots'), 0))
+    games.append((('Packers', 'Texans'), 0))
+    games.append((('Saints', 'Vikings'), 0))
+    games.append((('Cardinals', 'Chargers'), 0))
+    games.append((('49ers', 'Cowboys'), 0))
+    games.append((('Seahawks', 'Broncos'), 0))
+    games.append((('Bills', 'Colts'), 0))
+    games.append((('Dolphins', 'Falcons'), 0))
+    games.append((('Ravens', 'Jaguars'), 0))
+    games.append((('Browns', 'Redskins'), 0))
+    games.append((('Steelers', 'Buccaneers'), 0))
+    games.append((('Chiefs', 'Bengals'), 0))
+    games.append((('Raiders', 'Rams'), 0))
+
+    return games
+
+
+def get_pre_week2_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Giants', 'Bears'), 0))
+    games.append((('Redskins', 'Bengals'), 0))
+    games.append((('Vikings', 'Seahawks'), 0))
+    games.append((('Falcons', 'Jets'), 0))
+    games.append((('Panthers', 'Bills'), 0))
+    games.append((('Buccaneers', 'Dolphins'), 0))
+    games.append((('Cardinals', 'Raiders'), 0))
+    games.append((('Rams', 'Cowboys'), 0))
+    games.append((('Ravens', 'Packers'), 0))
+    games.append((('Steelers', 'Chiefs'), 0))
+    games.append((('Texans', 'Lions'), 0))
+    games.append((('Colts', 'Browns'), 0))
+    games.append((('Jaguars', 'Eagles'), 0))
+    games.append((('Titans', 'Patriots'), 0))
+    games.append((('Broncos', '49ers'), 0))
+    games.append((('Chargers', 'Saints'), 0))
+
+    return games
+
+
+def get_pre_week3_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Cowboys', 'Texans'), 0))
+    games.append((('Eagles', 'Ravens'), 0))
+    games.append((('Lions', 'Bills'), 0))
+    games.append((('Vikings', 'Cardinals'), 0))
+    games.append((('Falcons', 'Redskins'), 0))
+    games.append((('Buccaneers', 'Browns'), 0))
+    games.append((('Rams', 'Broncos'), 0))
+    games.append((('Dolphins', 'Jaguars'), 0))
+    games.append((('Patriots', 'Panthers'), 0))
+    games.append((('Jets', 'Saints'), 0))
+    games.append((('Bengals', 'Giants'), 0))
+    games.append((('Colts', 'Bears'), 0))
+    games.append((('Titans', 'Steelers'), 0))
+    games.append((('Chiefs', '49ers'), 0))
+    games.append((('Raiders', 'Packers'), 0))
+    games.append((('Chargers', 'Seahawks'), 0))
+
+    return games
+
+
+def get_pre_week4_schedule():
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    games.append((('Cowboys', 'Buccaneers'), 0))
+    games.append((('Redskins', 'Ravens'), 0))
+    games.append((('Bears', 'Titans'), 0))
+    games.append((('Packers', 'Chiefs'), 0))
+    games.append((('Panthers', 'Steelers'), 0))
+    games.append((('Saints', 'Dolphins'), 0))
+    games.append((('Chargers', '49ers'), 0))
+    games.append((('Seahawks', 'Raiders'), 0))
+    games.append((('Bills', 'Vikings'), 0))
+    games.append((('Patriots', 'Giants'), 0))
+    games.append((('Jets', 'Eagles'), 0))
+    games.append((('Bengals', 'Colts'), 0))
+    games.append((('Browns', 'Lions'), 0))
+    games.append((('Texans', 'Rams'), 0))
+    games.append((('Jaguars', 'Falcons'), 0))
+    games.append((('Broncos', 'Cardinals'), 0))
+
+    return games
+
+
 def get_week1_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
