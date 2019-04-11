@@ -1,3 +1,5 @@
+import maya
+
 import Projects.nfl.NFL_Prediction.NFLPredictor as Predictor
 import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
 import Projects.nfl.NFL_Prediction.StandingsHelper as Standings
@@ -10,37 +12,37 @@ def season():
 
     # Preseason
     print('Preseason')
-    teams = handle_week(teams, 'Preseason Week 1', pre_week_1, eliminated_teams, suppress_probabilities=False)
-    teams = handle_week(teams, 'Preseason Week 2', pre_week_2, eliminated_teams, suppress_probabilities=False)
-    teams = handle_week(teams, 'Preseason Week 3', pre_week_3, eliminated_teams, suppress_probabilities=False)
-    teams = handle_week(teams, 'Preseason Week 4', pre_week_4, eliminated_teams, suppress_probabilities=False)
+    teams = handle_week(teams, 'Preseason Week 1', pre_week_1, eliminated_teams)
+    teams = handle_week(teams, 'Preseason Week 2', pre_week_2, eliminated_teams)
+    teams = handle_week(teams, 'Preseason Week 3', pre_week_3, eliminated_teams)
+    teams = handle_week(teams, 'Preseason Week 4', pre_week_4, eliminated_teams)
 
     # Preseason Info
     Standings.print_league_details(teams, eliminated_teams, full_standings=False)
     Standings.print_schedule_difficulty(teams)
     print('*' * 120, '\n')
 
-    # Regular Season
-    print('Regular Season')
-    teams = handle_week(teams, 'Week 1', week_1, eliminated_teams, suppress_probabilities=False)
-    # teams = handle_week(teams, 'Week 2', week_2, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Week 3', week_3, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Week 4', week_4, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Week 5', week_5, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Week 6', week_6, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Week 7', week_7, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Week 8', week_8, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Week 9', week_9, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Week 10', week_10, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Week 11', week_11, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Week 12', week_12, eliminated_teams, suppress_probabilities=True)
-    # Teams eliminated after week 12
-    eliminated_teams.extend([])
-    # teams = handle_week(teams, 'Week 13', week_13, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Week 14', week_14, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Week 15', week_15, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Week 16', week_16, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Week 17', week_17, eliminated_teams, suppress_probabilities=True)
+    # # Regular Season
+    # print('Regular Season')
+    # teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
+    # teams = handle_week(teams, 'Week 2', week_2, eliminated_teams)
+    # teams = handle_week(teams, 'Week 3', week_3, eliminated_teams)
+    # teams = handle_week(teams, 'Week 4', week_4, eliminated_teams)
+    # teams = handle_week(teams, 'Week 5', week_5, eliminated_teams)
+    # teams = handle_week(teams, 'Week 6', week_6, eliminated_teams)
+    # teams = handle_week(teams, 'Week 7', week_7, eliminated_teams)
+    # teams = handle_week(teams, 'Week 8', week_8, eliminated_teams)
+    # teams = handle_week(teams, 'Week 9', week_9, eliminated_teams)
+    # teams = handle_week(teams, 'Week 10', week_10, eliminated_teams)
+    # teams = handle_week(teams, 'Week 11', week_11, eliminated_teams)
+    # teams = handle_week(teams, 'Week 12', week_12, eliminated_teams)
+    # # Teams eliminated after week 12
+    # eliminated_teams.extend([])
+    # teams = handle_week(teams, 'Week 13', week_13, eliminated_teams)
+    # teams = handle_week(teams, 'Week 14', week_14, eliminated_teams)
+    # teams = handle_week(teams, 'Week 15', week_15, eliminated_teams)
+    # teams = handle_week(teams, 'Week 16', week_16, eliminated_teams)
+    # teams = handle_week(teams, 'Week 17', week_17, eliminated_teams)
 
     # Regular Season Info
     Standings.print_schedule_difficulty(teams, remaining=True)
@@ -58,10 +60,10 @@ def season():
 
     # Playoffs
     print('Playoffs')
-    # teams = handle_week(teams, 'Wildcard Weekend', wildcard, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Divisional Round', divisional, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Conference Finals', conference, eliminated_teams, suppress_probabilities=True)
-    # teams = handle_week(teams, 'Superbowl', superbowl, eliminated_teams, suppress_probabilities=True)
+    # teams = handle_week(teams, 'Wildcard Weekend', wildcard, eliminated_teams)
+    # teams = handle_week(teams, 'Divisional Round', divisional, eliminated_teams)
+    # teams = handle_week(teams, 'Conference Finals', conference, eliminated_teams)
+    # teams = handle_week(teams, 'Superbowl', superbowl, eliminated_teams)
 
     # Final Outcome
     Playoffs.monte_carlo(teams, trials=100)
@@ -111,7 +113,6 @@ def handle_week(teams,
                 week_name,
                 week,
                 eliminated_teams,
-                suppress_probabilities=False,
                 full_standings=True,
                 divisional_view=False,
                 model_rankings=False):
@@ -119,7 +120,7 @@ def handle_week(teams,
     print(week_name)
 
     # Handle the week
-    teams = week(teams, suppress_probabilities)
+    teams = week(teams)
 
     # Print the tables
     Standings.print_league_details(teams,
@@ -134,38 +135,39 @@ def handle_week(teams,
     return teams
 
 
-def pre_week_1(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def pre_week_1(teams):
+    if maya.now() < maya.when('13 August 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_pre_week1_schedule())
 
     return teams
 
 
-def pre_week_2(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def pre_week_2(teams):
+    if maya.when('13 August 2019') <= maya.now() < maya.when('20 August 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_pre_week2_schedule())
 
     return teams
 
 
-def pre_week_3(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def pre_week_3(teams):
+    if maya.when('20 August 2019') <= maya.now() < maya.when('27 August 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_pre_week3_schedule())
 
     return teams
 
 
-def pre_week_4(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def pre_week_4(teams):
+    if maya.when('27 August 2019') <= maya.now() < maya.when('3 September 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_pre_week4_schedule())
 
     return teams
 
 
-def week_1(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_1(teams):
+    if maya.when('3 September 2019') <= maya.now() < maya.when('10 September 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week1_schedule())
 
+    # Results
     # teams = set_game_outcome(teams,
     #                          home_name='Vikings',
     #                          home_score=17,
@@ -193,597 +195,179 @@ def week_1(teams, suppress_probabilities):
     return teams
 
 
-def week_2(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_2(teams):
+    if maya.when('10 September 2019') <= maya.now() < maya.when('17 September 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week2_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def week_3(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_3(teams):
+    if maya.when('17 September 2019') <= maya.now() < maya.when('24 September 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week3_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def week_4(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_4(teams):
+    if maya.when('24 September 2019') <= maya.now() < maya.when('1 October 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week4_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def week_5(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_5(teams):
+    if maya.when('1 October 2019') <= maya.now() < maya.when('8 October 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week5_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def week_6(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_6(teams):
+    if maya.when('8 October 2019') <= maya.now() < maya.when('15 October 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week6_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def week_7(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_7(teams):
+    if maya.when('15 October 2019') <= maya.now() < maya.when('22 October 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week7_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def week_8(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_8(teams):
+    if maya.when('22 October 2019') <= maya.now() < maya.when('29 October 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week8_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def week_9(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_9(teams):
+    if maya.when('29 October 2019') <= maya.now() < maya.when('5 November 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week9_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def week_10(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_10(teams):
+    if maya.when('5 November 2019') <= maya.now() < maya.when('12 November 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week10_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def week_11(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_11(teams):
+    if maya.when('12 November 2019') <= maya.now() < maya.when('19 November 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week11_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def week_12(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_12(teams):
+    if maya.when('19 November 2019') <= maya.now() < maya.when('26 November 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week12_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def week_13(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_13(teams):
+    if maya.when('26 November 2019') <= maya.now() < maya.when('3 December 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week13_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def week_14(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_14(teams):
+    if maya.when('3 December 2019') <= maya.now() < maya.when('10 December 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week14_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def week_15(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_15(teams):
+    if maya.when('10 December 2019') <= maya.now() < maya.when('17 December 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week15_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def week_16(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_16(teams):
+    if maya.when('17 December 2019') <= maya.now() < maya.when('24 December 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week16_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def week_17(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def week_17(teams):
+    if maya.when('24 December 2019') <= maya.now() < maya.when('31 December 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_week17_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def wildcard(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def wildcard(teams):
+    if maya.when('13 August 2019') <= maya.now() < maya.when('20 August 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_wildcard_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def divisional(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def divisional(teams):
+    if maya.when('13 August 2019') <= maya.now() < maya.when('20 August 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_divisional_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def conference(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def conference(teams):
+    if maya.when('13 August 2019') <= maya.now() < maya.when('20 August 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_conference_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
-
-    teams = set_game_outcome(teams,
-                             'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-                             'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    # Results
 
     return teams
 
 
-def superbowl(teams, suppress_probabilities):
-    if not suppress_probabilities:
+def superbowl(teams):
+    if maya.when('13 August 2019') <= maya.now() < maya.when('20 August 2019'):
         Predictor.get_week_probabilities(teams, Playoffs.get_superbowl_schedule())
 
     teams = set_game_outcome(teams,
