@@ -34,7 +34,7 @@ def print_elo_rankings(teams, eliminated_teams, include_title=True):
         team_info.append(round(team[1]))
         team_info.append(round(team[2]))
         team_info.append(round(team[3]))
-        team_info.append(round(team[4], 3))
+        team_info.append('{0:.3f}'.format(team[4]))
         team_info.append(get_tier(teams, team))
         row = row + team_info
 
