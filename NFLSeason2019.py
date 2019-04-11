@@ -15,7 +15,10 @@ def season():
     teams = handle_week(teams, 'Preseason Week 1', pre_week_1, eliminated_teams)
     teams = handle_week(teams, 'Preseason Week 2', pre_week_2, eliminated_teams)
     teams = handle_week(teams, 'Preseason Week 3', pre_week_3, eliminated_teams)
-    teams = handle_week(teams, 'Preseason Week 4', pre_week_4, eliminated_teams)
+    handle_week(teams, 'Preseason Week 4', pre_week_4, eliminated_teams)
+
+    # Reset teams after preseason
+    teams = set_up_teams()
 
     # Preseason Info
     Standings.print_league_details(teams, eliminated_teams, full_standings=False)
@@ -66,7 +69,7 @@ def season():
     # teams = handle_week(teams, 'Superbowl', superbowl, eliminated_teams)
 
     # Final Outcome
-    Playoffs.monte_carlo(teams, trials=100)
+    Playoffs.monte_carlo(teams, trials=10000)
 
 
 def set_up_teams():
