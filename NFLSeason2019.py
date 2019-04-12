@@ -12,40 +12,55 @@ def season():
 
     # Preseason
     print('Preseason')
-    teams = handle_week(teams, 'Preseason Week 1', pre_week_1, eliminated_teams)
-    # teams = handle_week(teams, 'Preseason Week 2', pre_week_2, eliminated_teams)
-    # teams = handle_week(teams, 'Preseason Week 3', pre_week_3, eliminated_teams)
-    # handle_week(teams, 'Preseason Week 4', pre_week_4, eliminated_teams)
+    teams = handle_week(teams, 'Preseason Week 1', pre_week_1, eliminated_teams, '6 August 2019')
+    teams = handle_week(teams, 'Preseason Week 2', pre_week_2, eliminated_teams, '13 August 2019')
+    teams = handle_week(teams, 'Preseason Week 3', pre_week_3, eliminated_teams, '20 August 2019')
+    handle_week(teams, 'Preseason Week 4', pre_week_4, eliminated_teams, '27 August 2019')
 
     # Reset teams after preseason
     teams = set_up_teams()
 
     # Preseason Info
-    Standings.print_league_details(teams, eliminated_teams, full_standings=False)
+    Standings.print_league_details(teams, eliminated_teams)
     Standings.print_schedule_difficulty(teams)
     print('*' * 120, '\n')
 
-    # # Regular Season
-    # print('Regular Season')
-    # teams = handle_week(teams, 'Week 1', week_1, eliminated_teams)
-    # teams = handle_week(teams, 'Week 2', week_2, eliminated_teams)
-    # teams = handle_week(teams, 'Week 3', week_3, eliminated_teams)
-    # teams = handle_week(teams, 'Week 4', week_4, eliminated_teams)
-    # teams = handle_week(teams, 'Week 5', week_5, eliminated_teams)
-    # teams = handle_week(teams, 'Week 6', week_6, eliminated_teams)
-    # teams = handle_week(teams, 'Week 7', week_7, eliminated_teams)
-    # teams = handle_week(teams, 'Week 8', week_8, eliminated_teams)
-    # teams = handle_week(teams, 'Week 9', week_9, eliminated_teams)
-    # teams = handle_week(teams, 'Week 10', week_10, eliminated_teams)
-    # teams = handle_week(teams, 'Week 11', week_11, eliminated_teams)
-    # teams = handle_week(teams, 'Week 12', week_12, eliminated_teams)
-    # # Teams eliminated after week 12
-    # eliminated_teams.extend([])
-    # teams = handle_week(teams, 'Week 13', week_13, eliminated_teams)
-    # teams = handle_week(teams, 'Week 14', week_14, eliminated_teams)
-    # teams = handle_week(teams, 'Week 15', week_15, eliminated_teams)
-    # teams = handle_week(teams, 'Week 16', week_16, eliminated_teams)
-    # teams = handle_week(teams, 'Week 17', week_17, eliminated_teams)
+    # Regular Season
+    print('Regular Season')
+    teams = handle_week(teams, 'Week 1', week_1, eliminated_teams, '3 September 2019')
+
+    teams = handle_week(teams, 'Week 2', week_2, eliminated_teams, '10 September 2019')
+
+    teams = handle_week(teams, 'Week 3', week_3, eliminated_teams, '17 September 2019')
+
+    teams = handle_week(teams, 'Week 4', week_4, eliminated_teams, '24 September 2019')
+
+    teams = handle_week(teams, 'Week 5', week_5, eliminated_teams, '1 October 2019')
+
+    teams = handle_week(teams, 'Week 6', week_6, eliminated_teams, '8 October 2019')
+
+    teams = handle_week(teams, 'Week 7', week_7, eliminated_teams, '15 October 2019')
+
+    teams = handle_week(teams, 'Week 8', week_8, eliminated_teams, '22 October 2019')
+
+    teams = handle_week(teams, 'Week 9', week_9, eliminated_teams, '29 October 2019')
+
+    teams = handle_week(teams, 'Week 10', week_10, eliminated_teams, '5 November 2019')
+
+    teams = handle_week(teams, 'Week 11', week_11, eliminated_teams, '12 November 2019')
+
+    teams = handle_week(teams, 'Week 12', week_12, eliminated_teams, '19 November 2019')
+    eliminated_teams.extend([])
+
+    teams = handle_week(teams, 'Week 13', week_13, eliminated_teams, '26 November 2019')
+
+    teams = handle_week(teams, 'Week 14', week_14, eliminated_teams, '3 December 2019')
+
+    teams = handle_week(teams, 'Week 15', week_15, eliminated_teams, '10 December 2019')
+
+    teams = handle_week(teams, 'Week 16', week_16, eliminated_teams, '17 December 2019')
+
+    teams = handle_week(teams, 'Week 17', week_17, eliminated_teams, '24 December 2019')
 
     # Regular Season Info
     Standings.print_schedule_difficulty(teams, remaining=True)
@@ -63,10 +78,13 @@ def season():
 
     # Playoffs
     print('Playoffs')
-    # teams = handle_week(teams, 'Wildcard Weekend', wildcard, eliminated_teams)
-    # teams = handle_week(teams, 'Divisional Round', divisional, eliminated_teams)
-    # teams = handle_week(teams, 'Conference Finals', conference, eliminated_teams)
-    # teams = handle_week(teams, 'Superbowl', superbowl, eliminated_teams)
+    teams = handle_week(teams, 'Wildcard Weekend', wildcard, eliminated_teams, '31 December 2019')
+
+    teams = handle_week(teams, 'Divisional Round', divisional, eliminated_teams, '7 January 2020')
+
+    teams = handle_week(teams, 'Conference Finals', conference, eliminated_teams, '14 January 2020')
+    
+    teams = handle_week(teams, 'Superbowl', superbowl, eliminated_teams, '28 January 2020')
 
     # Final Outcome
     Playoffs.monte_carlo(teams, trials=10000)
@@ -116,58 +134,78 @@ def handle_week(teams,
                 week_name,
                 week,
                 eliminated_teams,
+                week_start_date,
                 full_standings=True,
                 divisional_view=False,
                 model_rankings=False):
-    # Print the week name
-    print(week_name)
+    # Get the starting time of the week
+    week_start = maya.when(week_start_date, timezone='US/Central')
 
-    # Handle the week
-    teams = week(teams)
+    # If the week has started
+    if maya.now() >= week_start:
+        
+        # Get the ending time of the week
+        week_end_date = week_start.add(weeks=1)
 
-    # Print the tables
-    Standings.print_league_details(teams,
-                                   eliminated_teams,
-                                   full_standings=full_standings,
-                                   divisional_view=divisional_view,
-                                   model_rankings=model_rankings)
+        # Print the week name
+        print(week_name)
 
-    print('*' * 120, '\n')
+        # Handle the week
+        teams = week(teams, week_end_date)
+
+        # Print the tables
+        Standings.print_league_details(teams,
+                                       eliminated_teams,
+                                       full_standings=full_standings,
+                                       divisional_view=divisional_view,
+                                       model_rankings=model_rankings)
+
+        # Print a separator
+        print('*' * 120, '\n')
 
     # Return the updated teams
     return teams
 
 
-def pre_week_1(teams):
-    if maya.now() < maya.when('13 August 2019'):
+def pre_week_1(teams, week_end_date):   
+    # If the week has not ended
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_pre_week1_schedule())
 
+    # Results
+
     return teams
 
 
-def pre_week_2(teams):
-    if maya.when('13 August 2019') <= maya.now() < maya.when('20 August 2019'):
+def pre_week_2(teams, week_end_date):  
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_pre_week2_schedule())
 
+    # Results
+
     return teams
 
 
-def pre_week_3(teams):
-    if maya.when('20 August 2019') <= maya.now() < maya.when('27 August 2019'):
+def pre_week_3(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_pre_week3_schedule())
 
+    # Results
+
     return teams
 
 
-def pre_week_4(teams):
-    if maya.when('27 August 2019') <= maya.now() < maya.when('3 September 2019'):
+def pre_week_4(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_pre_week4_schedule())
 
+    # Results
+
     return teams
 
 
-def week_1(teams):
-    if maya.when('3 September 2019') <= maya.now() < maya.when('10 September 2019'):
+def week_1(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week1_schedule())
 
     # Results
@@ -198,8 +236,8 @@ def week_1(teams):
     return teams
 
 
-def week_2(teams):
-    if maya.when('10 September 2019') <= maya.now() < maya.when('17 September 2019'):
+def week_2(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week2_schedule())
 
     # Results
@@ -207,8 +245,8 @@ def week_2(teams):
     return teams
 
 
-def week_3(teams):
-    if maya.when('17 September 2019') <= maya.now() < maya.when('24 September 2019'):
+def week_3(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week3_schedule())
 
     # Results
@@ -216,8 +254,8 @@ def week_3(teams):
     return teams
 
 
-def week_4(teams):
-    if maya.when('24 September 2019') <= maya.now() < maya.when('1 October 2019'):
+def week_4(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week4_schedule())
 
     # Results
@@ -225,8 +263,8 @@ def week_4(teams):
     return teams
 
 
-def week_5(teams):
-    if maya.when('1 October 2019') <= maya.now() < maya.when('8 October 2019'):
+def week_5(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week5_schedule())
 
     # Results
@@ -234,8 +272,8 @@ def week_5(teams):
     return teams
 
 
-def week_6(teams):
-    if maya.when('8 October 2019') <= maya.now() < maya.when('15 October 2019'):
+def week_6(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week6_schedule())
 
     # Results
@@ -243,8 +281,8 @@ def week_6(teams):
     return teams
 
 
-def week_7(teams):
-    if maya.when('15 October 2019') <= maya.now() < maya.when('22 October 2019'):
+def week_7(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week7_schedule())
 
     # Results
@@ -252,8 +290,8 @@ def week_7(teams):
     return teams
 
 
-def week_8(teams):
-    if maya.when('22 October 2019') <= maya.now() < maya.when('29 October 2019'):
+def week_8(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week8_schedule())
 
     # Results
@@ -261,8 +299,8 @@ def week_8(teams):
     return teams
 
 
-def week_9(teams):
-    if maya.when('29 October 2019') <= maya.now() < maya.when('5 November 2019'):
+def week_9(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week9_schedule())
 
     # Results
@@ -270,8 +308,8 @@ def week_9(teams):
     return teams
 
 
-def week_10(teams):
-    if maya.when('5 November 2019') <= maya.now() < maya.when('12 November 2019'):
+def week_10(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week10_schedule())
 
     # Results
@@ -279,8 +317,8 @@ def week_10(teams):
     return teams
 
 
-def week_11(teams):
-    if maya.when('12 November 2019') <= maya.now() < maya.when('19 November 2019'):
+def week_11(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week11_schedule())
 
     # Results
@@ -288,8 +326,8 @@ def week_11(teams):
     return teams
 
 
-def week_12(teams):
-    if maya.when('19 November 2019') <= maya.now() < maya.when('26 November 2019'):
+def week_12(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week12_schedule())
 
     # Results
@@ -297,8 +335,8 @@ def week_12(teams):
     return teams
 
 
-def week_13(teams):
-    if maya.when('26 November 2019') <= maya.now() < maya.when('3 December 2019'):
+def week_13(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week13_schedule())
 
     # Results
@@ -306,8 +344,8 @@ def week_13(teams):
     return teams
 
 
-def week_14(teams):
-    if maya.when('3 December 2019') <= maya.now() < maya.when('10 December 2019'):
+def week_14(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week14_schedule())
 
     # Results
@@ -315,8 +353,8 @@ def week_14(teams):
     return teams
 
 
-def week_15(teams):
-    if maya.when('10 December 2019') <= maya.now() < maya.when('17 December 2019'):
+def week_15(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week15_schedule())
 
     # Results
@@ -324,8 +362,8 @@ def week_15(teams):
     return teams
 
 
-def week_16(teams):
-    if maya.when('17 December 2019') <= maya.now() < maya.when('24 December 2019'):
+def week_16(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week16_schedule())
 
     # Results
@@ -333,8 +371,8 @@ def week_16(teams):
     return teams
 
 
-def week_17(teams):
-    if maya.when('24 December 2019') <= maya.now() < maya.when('31 December 2019'):
+def week_17(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week17_schedule())
 
     # Results
@@ -342,8 +380,8 @@ def week_17(teams):
     return teams
 
 
-def wildcard(teams):
-    if maya.when('13 August 2019') <= maya.now() < maya.when('20 August 2019'):
+def wildcard(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_wildcard_schedule())
 
     # Results
@@ -351,8 +389,8 @@ def wildcard(teams):
     return teams
 
 
-def divisional(teams):
-    if maya.when('13 August 2019') <= maya.now() < maya.when('20 August 2019'):
+def divisional(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_divisional_schedule())
 
     # Results
@@ -360,8 +398,8 @@ def divisional(teams):
     return teams
 
 
-def conference(teams):
-    if maya.when('13 August 2019') <= maya.now() < maya.when('20 August 2019'):
+def conference(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_conference_schedule())
 
     # Results
@@ -369,29 +407,11 @@ def conference(teams):
     return teams
 
 
-def superbowl(teams):
-    if maya.when('13 August 2019') <= maya.now() < maya.when('20 August 2019'):
+def superbowl(teams, week_end_date):
+    if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_superbowl_schedule())
 
-    teams = set_game_outcome(teams,
-                             home_name='Vikings',
-                             home_score=17,
-                             home_touchdowns=2,
-                             home_net_pass_yards=264,
-                             home_pass_completions=17,
-                             home_pass_attempts=26,
-                             home_pass_tds=1,
-                             home_interceptions_thrown=0,
-                             home_total_yards=407,
-                             away_name='Saints',
-                             away_score=13,
-                             away_touchdowns=1,
-                             away_net_pass_yards=217,
-                             away_pass_completions=15,
-                             away_pass_attempts=22,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=1,
-                             away_total_yards=322)
+    # Results
 
     return teams
 
