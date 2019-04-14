@@ -12,8 +12,8 @@ base_dir = '..\\Projects\\nfl\\NFL_Prediction\\'
 
 def predict_game(home_info, away_info, home_spread=0):
     # Load the classifier and scaler
-    voting_classifier = joblib.load(base_dir + 'Other\\8 Features\\2018VotingClassifier.pkl')
-    scaler = joblib.load(base_dir + 'Other\\8 Features\\2018Scaler.pkl')
+    voting_classifier = joblib.load(base_dir + 'Other\\7 Features\\2018VotingClassifier.pkl')
+    scaler = joblib.load(base_dir + 'Other\\7 Features\\2018Scaler.pkl')
 
     # Get the home team's info
     home_wins = home_info[1]
@@ -59,7 +59,6 @@ def predict_game(home_info, away_info, home_spread=0):
     away_win_pct = away_wins / away_games_played if away_games_played > 0 else 0
     win_pct_diff = home_win_pct - away_win_pct
 
-    average_points_for_diff = home_average_points_for - away_average_points_for
     average_touchdowns_diff = home_average_tds - away_average_tds
 
     home_average_completion_pct = home_total_pass_completions / home_total_pass_attempts \
@@ -107,7 +106,6 @@ def predict_game(home_info, away_info, home_spread=0):
                      elo_diff,
                      average_scoring_margin_diff,
                      win_pct_diff,
-                     average_points_for_diff,
                      average_touchdowns_diff,
                      average_passer_rating_diff,
                      average_total_yards_diff)

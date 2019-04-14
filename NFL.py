@@ -49,6 +49,7 @@ def run_all():
 
     evaluate_model_parameters(best_features)
     voting_classifier = get_voting_classifier(best_features)
+    evaluate_2018_season()
 
 
 def get_all_data_frames():
@@ -962,6 +963,7 @@ def get_best_features():
     print('The top ' + str(num_comp) + ' features are: ')
     for feature in contributing_features:
         print(feature)
+    print()
 
     # Plot the correlation between the top 8 features
     columns_to_drop = list(set(feature_col_names) - set(contributing_features))
@@ -971,6 +973,9 @@ def get_best_features():
     sns.set(font_scale=0.9)
     sns.heatmap(corrmat, vmax=.8, square=True, annot=True, fmt='.2f', cmap='winter')
     plt.show()
+
+    # Correlation matrix revealed high correlation between points for and touchdowns
+    contributing_features.remove('average_points_for_diff')
 
     return contributing_features
 
@@ -1017,22 +1022,22 @@ def evaluate_model_parameters(contributing_features):
     # Tune the parameters to find the best models based on brier loss and accuracy
     scores = ['brier_score_loss', 'accuracy']
 
-    # Logistic Regression               -0.21192    66.643
+    # Logistic Regression               -0.21185    66.557
     tune_logistic_regression(X, y, skf, scores)
 
-    # C Support Vector Classifier       -0.21210    66.573
+    # C Support Vector Classifier       -0.21214    66.424
     tune_svc_classifier(X, y, skf, scores)
 
-    # Random Forest                     -0.21271    66.667
+    # Random Forest                     -0.21277    66.314
     tune_random_forest(X, y, feature_col_names, skf, scores)
 
-    # K Nearest Neighbors               -0.23838    62.125
+    # K Nearest Neighbors               -0.23918    62.106
     tune_k_nearest_neighbors(X, y, skf, scores)
 
-    # Gaussian Naive Bayes              -0.24793     63.928
+    # Gaussian Naive Bayes              -0.23105     64.397
     tune_gauss_naive_bayes(X, y, skf, scores)
 
-    # Bernoulli Naive Bayes             -0.30135    62.687
+    # Bernoulli Naive Bayes             -0.27513    63.362
     tune_bernoulli_naive_bayes(X, y, skf, scores)
 
 
@@ -1283,6 +1288,10 @@ def tune_svc_classifier(X, y, skf, scores):
                                   'probability': [True],
                                   'C': [1 * 10 ** x for x in range(-1, 3)],
                                   'gamma': [1 * 10 ** x for x in range(-3, -8, -1)]},
+                                 {'kernel': ['rbf', 'sigmoid'],
+                                  'probability': [True],
+                                  'C': [1 * 10 ** x for x in range(-1, 3)],
+                                  'gamma': ['auto', 'scale']},
                                  {'kernel': ['linear'],
                                   'probability': [True],
                                   'C': [1 * 10 ** x for x in range(-1, 3)]}]
@@ -1324,7 +1333,7 @@ def print_grid_search_details(clf, filename):
     """Prints the results of the grid search to a file and the console."""
 
     # Set the directory to write files to
-    filename = other_dir + '8 Features\\Scores\\' + filename
+    filename = other_dir + '7 Features\\Scores\\' + filename
 
     # Print the best parameter found in the search along with its score
     print('Best parameters set found on development set:')
@@ -1377,7 +1386,7 @@ def get_best_random_forest():
     """Gets the random forest model that yielded the best result."""
 
     return RandomForestClassifier(n_estimators=1000,
-                                  max_features=7,
+                                  max_features=6,
                                   max_depth=3,
                                   random_state=42)
 
@@ -1418,18 +1427,18 @@ def get_voting_classifier(contributing_features):
     X = scaler.transform(X)
 
     # Pickle the scaler
-    joblib.dump(scaler, other_dir + '2018Scaler.pkl')
+    joblib.dump(scaler, other_dir + '7 Features\\2018Scaler.pkl')
 
     # Get the classification models
     logistic_regression = get_best_logistic_regression()
     svc = get_best_svc()
     random_forest = get_best_random_forest()
 
-    # Create a voting classifier from the 3 estimators, weighted by the inverse of the briers, soft voting
+    # Create voting classifier from the 3 estimators, weighted by unit vector of the inverse of the briers, soft voting
     voting_classifier = VotingClassifier(estimators=[('Logistic Regression', logistic_regression),
                                                      ('SVC', svc),
                                                      ('Random Forest', random_forest)],
-                                         weights=[0.578519, 0.577674, 0.575855],
+                                         weights=[0.578447, 0.577656, 0.575945],
                                          voting='soft',
                                          flatten_transform=False)
 
@@ -1437,15 +1446,14 @@ def get_voting_classifier(contributing_features):
     voting_classifier.fit(X, y.ravel())
 
     # Pickle the voting classifier
-    joblib.dump(voting_classifier, other_dir + '2018VotingClassifier.pkl')
+    joblib.dump(voting_classifier, other_dir + '7 Features\\2018VotingClassifier.pkl')
 
     return voting_classifier
 
 
-def evaluate_2018_season(contributing_features):
-    get_voting_classifier(contributing_features)
-    voting_classifier = joblib.load(other_dir + '2017VotingClassifier.pkl')
-    scaler = joblib.load(other_dir + '2017Scaler.pkl')
+def evaluate_2018_season():
+    voting_classifier = joblib.load(other_dir + '7 Features\\2017VotingClassifier.pkl')
+    scaler = joblib.load(other_dir + '7 Features\\2017Scaler.pkl')
 
     last_season = pd.read_csv(game_data_dir + '20022018.csv').values[-267:]
     last_season = pd.DataFrame(last_season)
@@ -1457,7 +1465,6 @@ def evaluate_2018_season(contributing_features):
         elo_diff = game[240]
         average_scoring_margin_diff = game[285]
         win_pct_diff = game[239]
-        average_points_for_diff = game[241]
         average_touchdowns_diff = game[283]
         average_passer_rating_diff = game[282]
         average_total_yards_diff = game[255]
@@ -1466,7 +1473,6 @@ def evaluate_2018_season(contributing_features):
                          elo_diff,
                          average_scoring_margin_diff,
                          win_pct_diff,
-                         average_points_for_diff,
                          average_touchdowns_diff,
                          average_passer_rating_diff,
                          average_total_yards_diff)
@@ -1488,4 +1494,41 @@ def evaluate_2018_season(contributing_features):
                                columns=['rf_prob', 'svc_prob', 'lr_prob', 'vote_prob', 'outcome'])
 
         results = results.append(game_df)
-    results.to_csv(other_dir + 'Scores\\8 Features\\2017Predictions.csv', index=False)
+
+    rf_brier = brier_score_loss(results['outcome'], results['rf_prob'])
+    svc_brier = brier_score_loss(results['outcome'], results['svc_prob'])
+    lr_brier = brier_score_loss(results['outcome'], results['lr_prob'])
+    vote_brier = brier_score_loss(results['outcome'], results['vote_prob'])
+
+    print('Random Forest:', (.25 - rf_brier) * 26700)
+    print('SVC:', (.25 - svc_brier) * 26700)
+    print('Linear Regression:', (.25 - lr_brier) * 26700)
+    print('Voting Classifier:', (.25 - vote_brier) * 26700)
+
+    results.to_csv(other_dir + '7 Features\\Scores\\2017Predictions.csv', index=False)
+
+    visualize_2018_season()
+
+
+def visualize_2018_season():
+    predictions = pd.read_csv(other_dir + '7 Features\\Scores\\2017Predictions.csv')
+
+    for num, game in enumerate(predictions.values):
+        vote_prob = int(round(game[3] * 100))
+        home_victory = int(round(game[4] * 100))
+        if home_victory == 0:
+            vote_prob = 100 - vote_prob
+            home_victory = 100
+
+        brier = round((game[3] - game[4]) ** 2, 2)
+
+        slider = ['.' for pct in range(100)]
+
+        slider[49] = slider[49].replace('.', '') + '|'
+        slider[vote_prob - 1] = slider[vote_prob - 1].replace('.', '') + 'V'
+        slider[home_victory - 1] = slider[home_victory - 1].replace('.', '') + 'X'
+
+        if vote_prob < 50:
+            print('\033[31m' + str(num + 2).zfill(3) + ' ' + ''.join(slider) + ' ' + str(brier) + '\033[0m')
+        else:
+            print('\033[32m' + str(num + 2).zfill(3) + ' ' + ''.join(slider) + ' ' + str(brier) + '\033[0m')

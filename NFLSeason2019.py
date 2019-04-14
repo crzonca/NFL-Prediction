@@ -83,7 +83,7 @@ def season():
     teams = handle_week(teams, 'Divisional Round', divisional, eliminated_teams, '7 January 2020')
 
     teams = handle_week(teams, 'Conference Finals', conference, eliminated_teams, '14 January 2020')
-    
+
     teams = handle_week(teams, 'Superbowl', superbowl, eliminated_teams, '28 January 2020')
 
     # Final Outcome
