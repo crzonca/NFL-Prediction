@@ -136,7 +136,7 @@ def predict_away_victory(home_info, away_info, home_spread=0):
     return vote_prob[0], lr_prob[0], svc_prob[0], rf_prob[0]
 
 
-def predict_game_outcome(teams, home_name, away_name, home_spread, verbose=False):
+def predict_game_outcome(teams, home_name, away_name, home_spread, neutral_location=False, verbose=False):
     # Get each team
     home = get_team(teams, home_name)
     away = get_team(teams, away_name)
@@ -153,6 +153,19 @@ def predict_game_outcome(teams, home_name, away_name, home_spread, verbose=False
     away_lr_prob = lr_probs[0]
     away_svc_prob = svc_probs[0]
     away_rf_prob = rf_probs[0]
+
+    if neutral_location:
+        vote_probs, lr_probs, svc_probs, rf_probs = predict_game(away, home, -home_spread)
+
+        home_vote_prob = (home_vote_prob + vote_probs[0]) / 2
+        home_lr_prob = (home_lr_prob + lr_probs[0]) / 2
+        home_svc_prob = (home_svc_prob + svc_probs[0]) / 2
+        home_rf_prob = (home_rf_prob + rf_probs[0]) / 2
+
+        away_vote_prob = (away_vote_prob + vote_probs[1]) / 2
+        away_lr_prob = (away_lr_prob + lr_probs[1]) / 2
+        away_svc_prob = (away_svc_prob + svc_probs[1]) / 2
+        away_rf_prob = (away_rf_prob + rf_probs[1]) / 2
 
     # Write the favored teams chance of winning
     home_vote_prob_formatted = round(home_vote_prob * 100, 2)
@@ -317,7 +330,7 @@ def update_teams(teams, home_name, home_score, home_touchdowns, home_net_pass_ya
 def get_week_probabilities(teams, games):
     probabilities = list()
     for game in games:
-        probabilities.append(predict_game_outcome(teams, game[0][0], game[0][1], game[1]))
+        probabilities.append(predict_game_outcome(teams, game[0][0], game[0][1], game[1], neutral_location=game[2]))
 
     probabilities.sort(key=lambda outcome: outcome[0], reverse=True)
 

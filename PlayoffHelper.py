@@ -59,55 +59,59 @@ def get_schedule():
     return games
 
 
+def create_match_up(home_name, away_name, home_spread, neutral_location=False):
+    return (home_name, away_name), home_spread, neutral_location
+
+
 def get_pre_week1_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
-    games.append((('Giants', 'Jets'), 0))
-    games.append((('Eagles', 'Titans'), 0))
-    games.append((('Bears', 'Panthers'), 0))
-    games.append((('Lions', 'Patriots'), 0))
-    games.append((('Packers', 'Texans'), 0))
-    games.append((('Saints', 'Vikings'), 0))
-    games.append((('Cardinals', 'Chargers'), 0))
-    games.append((('49ers', 'Cowboys'), 0))
-    games.append((('Seahawks', 'Broncos'), 0))
-    games.append((('Bills', 'Colts'), 0))
-    games.append((('Dolphins', 'Falcons'), 0))
-    games.append((('Ravens', 'Jaguars'), 0))
-    games.append((('Browns', 'Redskins'), 0))
-    games.append((('Steelers', 'Buccaneers'), 0))
-    games.append((('Chiefs', 'Bengals'), 0))
-    games.append((('Raiders', 'Rams'), 0))
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
+    games.append(create_match_up('Giants', 'Jets', 0))
+    games.append(create_match_up('Eagles', 'Titans', 0))
+    games.append(create_match_up('Bears', 'Panthers', 0))
+    games.append(create_match_up('Lions', 'Patriots', 0))
+    games.append(create_match_up('Packers', 'Texans', 0))
+    games.append(create_match_up('Saints', 'Vikings', 0))
+    games.append(create_match_up('Cardinals', 'Chargers', 0))
+    games.append(create_match_up('49ers', 'Cowboys', 0))
+    games.append(create_match_up('Seahawks', 'Broncos', 0))
+    games.append(create_match_up('Bills', 'Colts', 0))
+    games.append(create_match_up('Dolphins', 'Falcons', 0))
+    games.append(create_match_up('Ravens', 'Jaguars', 0))
+    games.append(create_match_up('Browns', 'Redskins', 0))
+    games.append(create_match_up('Steelers', 'Buccaneers', 0))
+    games.append(create_match_up('Chiefs', 'Bengals', 0))
+    games.append(create_match_up('Raiders', 'Rams', 0))
 
     return games
 
 
 def get_pre_week2_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
-    games.append((('Giants', 'Bears'), 0))
-    games.append((('Redskins', 'Bengals'), 0))
-    games.append((('Vikings', 'Seahawks'), 0))
-    games.append((('Falcons', 'Jets'), 0))
-    games.append((('Panthers', 'Bills'), 0))
-    games.append((('Buccaneers', 'Dolphins'), 0))
-    games.append((('Cardinals', 'Raiders'), 0))
-    games.append((('Rams', 'Cowboys'), 0))
-    games.append((('Ravens', 'Packers'), 0))
-    games.append((('Steelers', 'Chiefs'), 0))
-    games.append((('Texans', 'Lions'), 0))
-    games.append((('Colts', 'Browns'), 0))
-    games.append((('Jaguars', 'Eagles'), 0))
-    games.append((('Titans', 'Patriots'), 0))
-    games.append((('Broncos', '49ers'), 0))
-    games.append((('Chargers', 'Saints'), 0))
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
+    games.append(create_match_up('Giants', 'Bears', 0))
+    games.append(create_match_up('Redskins', 'Bengals', 0))
+    games.append(create_match_up('Vikings', 'Seahawks', 0))
+    games.append(create_match_up('Falcons', 'Jets', 0))
+    games.append(create_match_up('Panthers', 'Bills', 0))
+    games.append(create_match_up('Buccaneers', 'Dolphins', 0))
+    games.append(create_match_up('Cardinals', 'Raiders', 0))
+    games.append(create_match_up('Rams', 'Cowboys', 0))
+    games.append(create_match_up('Ravens', 'Packers', 0))
+    games.append(create_match_up('Steelers', 'Chiefs', 0))
+    games.append(create_match_up('Texans', 'Lions', 0))
+    games.append(create_match_up('Colts', 'Browns', 0))
+    games.append(create_match_up('Jaguars', 'Eagles', 0))
+    games.append(create_match_up('Titans', 'Patriots', 0))
+    games.append(create_match_up('Broncos', '49ers', 0))
+    games.append(create_match_up('Chargers', 'Saints', 0))
 
     return games
 
 
 def get_pre_week3_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Cowboys', 'Texans'), 0))
     games.append((('Eagles', 'Ravens'), 0))
     games.append((('Lions', 'Bills'), 0))
@@ -130,7 +134,7 @@ def get_pre_week3_schedule():
 
 def get_pre_week4_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Cowboys', 'Buccaneers'), 0))
     games.append((('Redskins', 'Ravens'), 0))
     games.append((('Bears', 'Titans'), 0))
@@ -153,7 +157,7 @@ def get_pre_week4_schedule():
 
 def get_week1_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -176,7 +180,7 @@ def get_week1_schedule():
 
 def get_week2_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -199,7 +203,7 @@ def get_week2_schedule():
 
 def get_week3_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -222,7 +226,7 @@ def get_week3_schedule():
 
 def get_week4_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -245,7 +249,7 @@ def get_week4_schedule():
 
 def get_week5_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -268,7 +272,7 @@ def get_week5_schedule():
 
 def get_week6_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -291,7 +295,7 @@ def get_week6_schedule():
 
 def get_week7_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -314,7 +318,7 @@ def get_week7_schedule():
 
 def get_week8_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -337,7 +341,7 @@ def get_week8_schedule():
 
 def get_week9_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -360,7 +364,7 @@ def get_week9_schedule():
 
 def get_week10_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -383,7 +387,7 @@ def get_week10_schedule():
 
 def get_week11_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -406,7 +410,7 @@ def get_week11_schedule():
 
 def get_week12_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -429,7 +433,7 @@ def get_week12_schedule():
 
 def get_week13_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -452,7 +456,7 @@ def get_week13_schedule():
 
 def get_week14_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -475,7 +479,7 @@ def get_week14_schedule():
 
 def get_week15_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -498,7 +502,7 @@ def get_week15_schedule():
 
 def get_week16_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -521,7 +525,7 @@ def get_week16_schedule():
 
 def get_week17_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append((('Saints', 'Vikings'), 0))
     games.append((('Bears', 'Lions'), 0))
     games.append((('Giants', 'Panthers'), 0))
@@ -544,7 +548,7 @@ def get_week17_schedule():
 
 def get_wildcard_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     # games.append((('Saints', 'Vikings'), 0))
     # games.append((('Bears', 'Lions'), 0))
     # games.append((('Giants', 'Panthers'), 0))
@@ -555,7 +559,7 @@ def get_wildcard_schedule():
 
 def get_divisional_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     # games.append((('Saints', 'Vikings'), 0))
     # games.append((('Bears', 'Lions'), 0))
     # games.append((('Giants', 'Panthers'), 0))
@@ -566,7 +570,7 @@ def get_divisional_schedule():
 
 def get_conference_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     # games.append((('Saints', 'Vikings'), 0))
     # games.append((('Bears', 'Lions'), 0))
 
@@ -575,7 +579,7 @@ def get_conference_schedule():
 
 def get_superbowl_schedule():
     games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise)
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     # games.append((('Saints', 'Vikings'), 0))
 
     return games
