@@ -524,7 +524,8 @@ def get_week17_schedule():
     games.append(create_match_up('Vikings', 'Bears', 0))
     games.append(create_match_up('Patriots', 'Dolphins', 0))
     games.append(create_match_up('Broncos', 'Raiders', 0))
-    games.append(create_match_up('Rams', '49ers', 0))
+    games.append(create_match_up('Rams', 'Cardinals', 0))
+    games.append(create_match_up('Seahawks', '49ers', 0))
     return games
 
 
