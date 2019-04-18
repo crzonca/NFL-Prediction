@@ -87,7 +87,7 @@ def season():
     teams = handle_week(teams, 'Superbowl', superbowl, eliminated_teams, '28 January 2020')
 
     # Final Outcome
-    Playoffs.monte_carlo(teams, trials=10000)
+    Playoffs.monte_carlo(teams, trials=100000)
 
 
 def set_up_teams():
