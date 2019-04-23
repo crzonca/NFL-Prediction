@@ -210,28 +210,84 @@ def week_1(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          home_name='Vikings',
-    #                          home_score=17,
-    #                          home_touchdowns=2,
-    #                          home_net_pass_yards=264,
-    #                          home_pass_completions=17,
-    #                          home_pass_attempts=26,
-    #                          home_pass_tds=1,
+    #                          home_name='Bears',
+    #                          home_score=0,
+    #                          home_touchdowns=0,
+    #                          home_net_pass_yards=0,
+    #                          home_pass_completions=0,
+    #                          home_pass_attempts=0,
+    #                          home_pass_tds=0,
     #                          home_interceptions_thrown=0,
-    #                          home_total_yards=407,
-    #                          away_name='Saints',
-    #                          away_score=13,
-    #                          away_touchdowns=1,
-    #                          away_net_pass_yards=217,
-    #                          away_pass_completions=15,
-    #                          away_pass_attempts=22,
+    #                          home_total_yards=0,
+    #                          away_name='Packers',
+    #                          away_score=0,
+    #                          away_touchdowns=0,
+    #                          away_net_pass_yards=0,
+    #                          away_pass_completions=0,
+    #                          away_pass_attempts=0,
     #                          away_pass_tds=0,
-    #                          away_interceptions_thrown=1,
-    #                          away_total_yards=322)
+    #                          away_interceptions_thrown=0,
+    #                          away_total_yards=0)
     #
     # teams = set_game_outcome(teams,
-    #                          'Lions', 7, 1, 386, 19, 22, 1, 0, 440,
-    #                          'Bears', 14, 2, 182, 14, 24, 0, 0, 355)
+    #                          'Panthers', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Rams', 0, 0, 0, 0, 0, 0, 0, 0)
+    #
+    # teams = set_game_outcome(teams,
+    #                          'Eagles', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Redskins', 0, 0, 0, 0, 0, 0, 0, 0)
+    #
+    # teams = set_game_outcome(teams,
+    #                          'Jets', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Bills', 0, 0, 0, 0, 0, 0, 0, 0)
+    #
+    # teams = set_game_outcome(teams,
+    #                          'Vikings', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Falcons', 0, 0, 0, 0, 0, 0, 0, 0)
+    #
+    # teams = set_game_outcome(teams,
+    #                          'Dolphins', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Ravens', 0, 0, 0, 0, 0, 0, 0, 0)
+    #
+    # teams = set_game_outcome(teams,
+    #                          'Jaguars', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Chiefs', 0, 0, 0, 0, 0, 0, 0, 0)
+    #
+    # teams = set_game_outcome(teams,
+    #                          'Browns', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Titans', 0, 0, 0, 0, 0, 0, 0, 0)
+    #
+    # teams = set_game_outcome(teams,
+    #                          'Chargers', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Colts', 0, 0, 0, 0, 0, 0, 0, 0)
+    #
+    # teams = set_game_outcome(teams,
+    #                          'Seahawks', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Bengals', 0, 0, 0, 0, 0, 0, 0, 0)
+    #
+    # teams = set_game_outcome(teams,
+    #                          'Buccaneers', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          '49ers', 0, 0, 0, 0, 0, 0, 0, 0)
+    #
+    # teams = set_game_outcome(teams,
+    #                          'Cowboys', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Giants', 0, 0, 0, 0, 0, 0, 0, 0)
+    #
+    # teams = set_game_outcome(teams,
+    #                          'Cardinals', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Lions', 0, 0, 0, 0, 0, 0, 0, 0)
+    #
+    # teams = set_game_outcome(teams,
+    #                          'Patriots', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Steelers', 0, 0, 0, 0, 0, 0, 0, 0)
+    #
+    # teams = set_game_outcome(teams,
+    #                          'Saints', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Texans', 0, 0, 0, 0, 0, 0, 0, 0)
+    #
+    # teams = set_game_outcome(teams,
+    #                          'Raiders', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Broncos', 0, 0, 0, 0, 0, 0, 0, 0)
 
     return teams
 
