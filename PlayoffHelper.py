@@ -158,22 +158,22 @@ def get_pre_week4_schedule():
 def get_week1_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Bears', 'Packers', 0))
-    games.append(create_match_up('Panthers', 'Rams', 0))
-    games.append(create_match_up('Eagles', 'Redskins', 0))
-    games.append(create_match_up('Jets', 'Bills', 0))
-    games.append(create_match_up('Vikings', 'Falcons', 0))
-    games.append(create_match_up('Dolphins', 'Ravens', 0))
-    games.append(create_match_up('Jaguars', 'Chiefs', 0))
-    games.append(create_match_up('Browns', 'Titans', 0))
-    games.append(create_match_up('Chargers', 'Colts', 0))
-    games.append(create_match_up('Seahawks', 'Bengals', 0))
-    games.append(create_match_up('Buccaneers', '49ers', 0))
-    games.append(create_match_up('Cowboys', 'Giants', 0))
+    games.append(create_match_up('Bears', 'Packers', -3.5))
+    games.append(create_match_up('Panthers', 'Rams', 2.5))
+    games.append(create_match_up('Eagles', 'Redskins', -8))
+    games.append(create_match_up('Jets', 'Bills', -3.5))
+    games.append(create_match_up('Vikings', 'Falcons', -4.5))
+    games.append(create_match_up('Dolphins', 'Ravens', 3.5))
+    games.append(create_match_up('Jaguars', 'Chiefs', 5.5))
+    games.append(create_match_up('Browns', 'Titans', -5))
+    games.append(create_match_up('Chargers', 'Colts', -3.5))
+    games.append(create_match_up('Seahawks', 'Bengals', -7.5))
+    games.append(create_match_up('Buccaneers', '49ers', -2.5))
+    games.append(create_match_up('Cowboys', 'Giants', -7.5))
     games.append(create_match_up('Cardinals', 'Lions', 0))
-    games.append(create_match_up('Patriots', 'Steelers', 0))
-    games.append(create_match_up('Saints', 'Texans', 0))
-    games.append(create_match_up('Raiders', 'Broncos', 0))
+    games.append(create_match_up('Patriots', 'Steelers', -6))
+    games.append(create_match_up('Saints', 'Texans', -7.5))
+    games.append(create_match_up('Raiders', 'Broncos', -2.5))
 
     return games
 
@@ -994,7 +994,12 @@ def get_schedule_difficulty(teams, team_name, remaining=False):
             opponent = get_team(teams, game[0])
         opponent_elos.append(opponent[4])
 
-    return statistics.mean(opponent_elos)
+    if len(opponent_elos) > 1:
+        deviation = statistics.stdev(opponent_elos)
+    else:
+        deviation = 0
+
+    return statistics.mean(opponent_elos), deviation
 
 
 def create_playoff_bracket(teams):
