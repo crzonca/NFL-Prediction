@@ -568,7 +568,7 @@ def get_superbowl_schedule():
     return games
 
 
-def monte_carlo(teams, trials=1000000):
+def monte_carlo(teams, trials=100000):
     all_trials = list()
     # 1,000,000 Trials
     for trial in range(trials):
@@ -576,7 +576,7 @@ def monte_carlo(teams, trials=1000000):
         pseudo_teams = [(team[0], team[1], team[2], team[3], team[4], 0, 0) for team in teams]
 
         # For each game in the list of games yet to be played
-        schedule, spreads, neutral_location= zip(*get_schedule())
+        schedule, spreads, neutral_location = zip(*get_schedule())
         for game in schedule[len(completed_games):]:
             # Get the home and away teams
             home = game[0]
