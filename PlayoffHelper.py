@@ -66,7 +66,7 @@ def create_match_up(home_name, away_name, home_spread, neutral_location=False):
 def get_pre_week1_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Giants', 'Jets', 0, True))
+    games.append(create_match_up('Giants', 'Jets', 0))
     games.append(create_match_up('Eagles', 'Titans', 0))
     games.append(create_match_up('Bears', 'Panthers', 0))
     games.append(create_match_up('Lions', 'Patriots', 0))
@@ -563,7 +563,7 @@ def get_conference_schedule():
 def get_superbowl_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    # games.append(create_match_up('Bears', 'Titans', 0))
+    # games.append(create_match_up('Bears', 'Titans', 0, True))
 
     return games
 
