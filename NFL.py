@@ -13,7 +13,12 @@ from sklearn.externals import joblib
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
 from sklearn.metrics import brier_score_loss
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import f1_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import StratifiedKFold
 from sklearn.naive_bayes import BernoulliNB
@@ -844,6 +849,7 @@ def combine_frames(frames):
     combined = pd.concat(frames, sort=False)
     print(combined.shape)
     combined.to_csv(game_data_dir + '20022018.csv', index=False)
+
     return combined
 
 
@@ -851,6 +857,11 @@ def plot_corr():
     """Gets the correlation between all relevant features and the home_victory label."""
     # Get the data frame for all seasons
     df = pd.read_csv(game_data_dir + '20022018.csv')
+
+    # Print a description of all the games
+    games_description = df.describe()
+    print(games_description.to_string())
+    print()
 
     # Drop all columns that arent the label, the spread or a team difference
     columns_to_keep = list()
@@ -1495,19 +1506,141 @@ def evaluate_2018_season():
 
         results = results.append(game_df)
 
-    rf_brier = brier_score_loss(results['outcome'], results['rf_prob'])
-    svc_brier = brier_score_loss(results['outcome'], results['svc_prob'])
-    lr_brier = brier_score_loss(results['outcome'], results['lr_prob'])
-    vote_brier = brier_score_loss(results['outcome'], results['vote_prob'])
+    outcome = results['outcome']
+    rf = results['rf_prob']
+    svc = results['svc_prob']
+    lr = results['lr_prob']
+    vote = results['vote_prob']
 
-    print('Random Forest:', (.25 - rf_brier) * 26700)
-    print('SVC:', (.25 - svc_brier) * 26700)
-    print('Linear Regression:', (.25 - lr_brier) * 26700)
-    print('Voting Classifier:', (.25 - vote_brier) * 26700)
+    rf_brier = brier_score_loss(outcome, rf)
+    print('Random Forest Brier Score Loss:', round(rf_brier, 4))
 
-    results.to_csv(other_dir + '7 Features\\Scores\\2017Predictions.csv', index=False)
+    svc_brier = brier_score_loss(outcome, svc)
+    print('SVC Brier Score Loss:', round(svc_brier, 4))
 
-    visualize_2018_season()
+    lr_brier = brier_score_loss(outcome, lr)
+    print('Linear Regression Brier Score Loss:', round(lr_brier, 4))
+
+    vote_brier = brier_score_loss(outcome, vote)
+    print('Voting Classifier Brier Score Loss:', round(vote_brier, 4))
+
+    print('Random Forest:', round((.25 - rf_brier) * 26700, 2))
+    print('SVC:', round((.25 - svc_brier) * 26700, 2))
+    print('Linear Regression:', round((.25 - lr_brier) * 26700, 2))
+    print('Voting Classifier:', round((.25 - vote_brier) * 26700, 2))
+
+    # results.to_csv(other_dir + '7 Features\\Scores\\2017Predictions.csv', index=False)
+
+    rounded_rf = rf.apply(lambda row: round(row))
+    rounded_svc = svc.apply(lambda row: round(row))
+    rounded_lr = lr.apply(lambda row: round(row))
+    rounded_vote = vote.apply(lambda row: round(row))
+
+    print('Random Forest')
+    print('-' * 120)
+    get_metrics(outcome, rounded_rf)
+    print('SVC')
+    print('-' * 120)
+    get_metrics(outcome, rounded_svc)
+    print('Linear Regression')
+    print('-' * 120)
+    get_metrics(outcome, rounded_lr)
+    print('Voting Classifier')
+    print('-' * 120)
+    get_metrics(outcome, rounded_vote)
+
+    # visualize_2018_season()
+
+
+def get_metrics(y_true, y_pred):
+    y_true = pd.to_numeric(y_true)
+    outcome_counts = y_true.value_counts()
+    outcome_positive = outcome_counts.loc[1]
+    outcome_negative = outcome_counts.loc[0]
+    total_games = outcome_positive + outcome_negative
+    print('Actual home victories:', outcome_positive)
+    print('Actual home defeats:', outcome_negative)
+
+    prevalence = outcome_positive / (outcome_positive + outcome_negative)
+    print('Home victory prevalence:', round(prevalence * 100, 2),
+          str(outcome_positive) + '/' + str(outcome_positive + outcome_negative))
+    print()
+
+    predicted_counts = y_pred.value_counts()
+    predicted_positive = predicted_counts.loc[1]
+    predicted_negative = predicted_counts.loc[0]
+    print('Predicted home victories:', predicted_positive)
+    print('Predicted home defeats:', predicted_negative)
+    print()
+
+    confusion = confusion_matrix(y_true, y_pred)
+    true_positive = confusion[1][1]
+    false_positive = confusion[0][1]
+    false_negative = confusion[1][0]
+    true_negative = confusion[0][0]
+
+    print('Correctly predicted home victories:', true_positive)
+    print('Home victories predicted as defeats:', false_negative)
+    print('Correctly predicted home defeats:', true_negative)
+    print('Home defeats predicted as victories:', false_positive)
+    print()
+
+    accuracy = accuracy_score(y_true, y_pred)
+    precision = precision_score(y_true, y_pred)
+    recall = recall_score(y_true, y_pred)
+
+    print('Prediction accuracy:', round(accuracy * 100, 2),
+          str(true_positive + true_negative) + '/' + str(total_games))
+    print()
+
+    print('Prediction precision:', round(precision * 100, 2),
+          str(true_positive) + '/' + str(predicted_positive))
+
+    false_discovery = false_positive / predicted_positive
+    print('False discovery rate:', round(false_discovery * 100, 2),
+          str(false_positive) + '/' + str(predicted_positive))
+
+    negative_prediction = true_negative / predicted_negative
+    print('Negative prediction rate:', round(negative_prediction * 100, 2),
+          str(true_negative) + '/' + str(predicted_negative))
+
+    false_omission = false_negative / predicted_negative
+    print('False omission rate:', round(false_omission * 100, 2),
+          str(false_negative) + '/' + str(predicted_negative))
+    print()
+
+    print('Prediction recall:', round(recall * 100, 2),
+          str(true_positive) + '/' + str(outcome_positive))
+
+    miss_rate = false_negative / outcome_positive
+    print('Miss rate:', round(miss_rate * 100, 2),
+          str(false_negative) + '/' + str(outcome_positive))
+
+    specificity = true_negative / outcome_negative
+    print('Specificity:', round(specificity * 100, 2),
+          str(true_negative) + '/' + str(outcome_negative))
+
+    fall_out = false_positive / outcome_negative
+    print('Fall out:', round(fall_out * 100, 2),
+          str(false_positive) + '/' + str(outcome_negative))
+    print()
+
+    positive_likelihood = recall / fall_out
+    print('Positive likelihood ratio:', round(positive_likelihood, 4),
+          str(round(recall * 100, 2)) + '/' + str(round(fall_out * 100, 2)))
+
+    negative_likelihood = miss_rate / specificity
+    print('Negative likelihood ratio:', round(negative_likelihood, 4),
+          str(round(miss_rate * 100, 2)) + '/' + str(round(specificity * 100, 2)))
+    print()
+
+    diagnostic_odds = positive_likelihood / negative_likelihood
+    print('Diagnostic odds ratio:', round(diagnostic_odds, 4),
+          str(round(positive_likelihood, 4)) + '/' + str(round(negative_likelihood, 4)))
+
+    f1 = f1_score(y_true, y_pred)
+    print('F1 score:', round(f1, 4))
+    print()
 
 
 def visualize_2018_season():
