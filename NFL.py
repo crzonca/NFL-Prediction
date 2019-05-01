@@ -26,6 +26,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
+from sklearn.utils import check_consistent_length
 
 from Projects.nfl.NFL_Prediction import StatsHelper as Stats
 
@@ -840,14 +841,68 @@ def add_stat_differences(frames):
 
 def combine_frames(frames):
     """Combines all of the season data frames into a total frame and writes it to a csv file."""
-    seasons = list()
 
-    for df in frames:
-        print(df.shape)
-        seasons.append(df)
+    # Check that all seasons have the same number of columns
+    check_consistent_length(*[frame.T for frame in frames])
 
+    # Check that all seasons have the same number of rows
+    check_consistent_length(*frames)
+
+    # Combine all seasons into one dataframe
     combined = pd.concat(frames, sort=False)
     print(combined.shape)
+    print()
+
+    # Get the percentage of the target variable that is true
+    num_obs = len(combined)
+    num_wins = len(combined.loc[combined['home_victory'] == 1])
+    num_losses = len(combined.loc[combined['home_victory'] == 0])
+    num_ties = len(combined.loc[combined['home_draw'] == 1])
+    print("Number of wins:  {0} ({1:2.2f}%)".format(num_wins, (num_wins / num_obs) * 100))
+    print("Number of losses: {0} ({1:2.2f}%)".format(num_losses, (num_losses / num_obs) * 100))
+    print("Number of ties: {0} ({1:2.2f}%)".format(num_ties, (num_ties / num_obs) * 100))
+    print()
+
+    # Get the percentage of the target variable that is true during regular season games
+    regular_season_games = combined.loc[(combined['week'] < 18)]
+    num_obs = len(regular_season_games)
+    num_wins = len(regular_season_games.loc[regular_season_games['home_victory'] == 1])
+    num_losses = len(regular_season_games.loc[regular_season_games['home_victory'] == 0])
+    num_ties = len(regular_season_games.loc[regular_season_games['home_draw'] == 1])
+    print("Number of regular season wins:  {0} ({1:2.2f}%)".format(num_wins, (num_wins / num_obs) * 100))
+    print("Number of regular season losses: {0} ({1:2.2f}%)".format(num_losses, (num_losses / num_obs) * 100))
+    print("Number of regular season ties: {0} ({1:2.2f}%)".format(num_ties, (num_ties / num_obs) * 100))
+    print()
+
+    # Get the percentage of the target variable that is true during post season games (excluding the superbowls)
+    playoff_games = combined.loc[(combined['week'] == 18) | (combined['week'] == 19) | (combined['week'] == 20)]
+    num_obs = len(playoff_games)
+    num_wins = len(playoff_games.loc[playoff_games['home_victory'] == 1])
+    num_losses = len(playoff_games.loc[playoff_games['home_victory'] == 0])
+    num_ties = len(playoff_games.loc[playoff_games['home_draw'] == 1])
+    print("Number of playoff wins:  {0} ({1:2.2f}%)".format(num_wins, (num_wins / num_obs) * 100))
+    print("Number of playoff losses: {0} ({1:2.2f}%)".format(num_losses, (num_losses / num_obs) * 100))
+    print("Number of playoff ties: {0} ({1:2.2f}%)".format(num_ties, (num_ties / num_obs) * 100))
+    print()
+
+    # Get the percentage of the target variable that is true during the superbowl
+    superbowl_games = combined.loc[(combined['week'] == 21)]
+    num_obs = len(superbowl_games)
+    num_wins = len(superbowl_games.loc[superbowl_games['home_victory'] == 1])
+    num_losses = len(superbowl_games.loc[superbowl_games['home_victory'] == 0])
+    num_ties = len(superbowl_games.loc[superbowl_games['home_draw'] == 1])
+    print("Number of superbowl wins:  {0} ({1:2.2f}%)".format(num_wins, (num_wins / num_obs) * 100))
+    print("Number of superbowl losses: {0} ({1:2.2f}%)".format(num_losses, (num_losses / num_obs) * 100))
+    print("Number of superbowl ties: {0} ({1:2.2f}%)".format(num_ties, (num_ties / num_obs) * 100))
+    print()
+
+    """It's clear that the teams chance of victory is increased when the are playing at home (57.3% chance at home 
+       vs 42.7% chance on the road). This however is not a reflection of the quality of the home teams vs away teams.
+       On average, during the regular season, the strength of the home team is equal to the strength of the away team 
+       (since all teams play an equal number of home and road games). During the post season, the stronger team almost 
+       always has home field advantage. These games however are of minimal impact due to their rarity.  Almost 96% of 
+       the home victories are during the regular season (between teams that are on average of equal strength)."""
+
     combined.to_csv(game_data_dir + '20022018.csv', index=False)
 
     return combined
@@ -1536,6 +1591,7 @@ def evaluate_2018_season():
     rounded_lr = lr.apply(lambda row: round(row))
     rounded_vote = vote.apply(lambda row: round(row))
 
+    print()
     print('Random Forest')
     print('-' * 120)
     get_metrics(outcome, rounded_rf)
