@@ -1,4 +1,8 @@
+import statistics
+
+import matplotlib.pyplot as plt
 import maya
+import numpy as np
 
 import Projects.nfl.NFL_Prediction.NFLPredictor as Predictor
 import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
@@ -88,6 +92,7 @@ def season():
 
     # Final Outcome
     Playoffs.monte_carlo(teams)
+    plot_elo_function(teams)
 
 
 def set_up_teams():
@@ -164,6 +169,87 @@ def handle_week(teams,
 
     # Return the updated teams
     return teams
+
+
+def plot_elo_function(teams):
+    def elo_function(rating):
+        elo = 1 / (1 + 10 ** ((1500 - rating) / 400))
+        return elo * 100
+
+    actual_elos = [round(team[4]) for team in teams]
+    team_names = [team[0] for team in teams]
+    percents = [elo_function(rating) for rating in actual_elos]
+    zipped = list(zip(team_names, actual_elos, percents))
+    zipped.sort(key=lambda tup: tup[1])
+    team_names, actual_elos, percents = zip(*zipped)
+
+    avg_elo = statistics.mean(actual_elos)
+    elo_dev = statistics.stdev(actual_elos)
+    elo_dev_third = elo_dev / 3
+
+    bottom = round(avg_elo - 3 * elo_dev)
+    top = round(avg_elo + 3 * elo_dev)
+
+    s_plus = avg_elo + elo_dev_third * 8
+    s = avg_elo + elo_dev_third * 7
+    s_minus = avg_elo + elo_dev_third * 6
+    a_plus = avg_elo + elo_dev_third * 5
+    a = avg_elo + elo_dev_third * 4
+    a_minus = avg_elo + elo_dev_third * 3
+    b_plus = avg_elo + elo_dev_third * 2
+    b = avg_elo + elo_dev_third * 1
+    b_minus = avg_elo
+    c_plus = avg_elo - elo_dev_third * 1
+    c = avg_elo - elo_dev_third * 2
+    c_minus = avg_elo - elo_dev_third * 3
+    d_plus = avg_elo - elo_dev_third * 4
+    d = avg_elo - elo_dev_third * 5
+    d_minus = avg_elo - elo_dev_third * 6
+    f_plus = avg_elo - elo_dev_third * 4
+    f = avg_elo - elo_dev_third * 5
+    f_minus = avg_elo - elo_dev_third * 6
+
+    vals = range(bottom, top)
+    markers = [vals.index(elo) for elo in actual_elos]
+    vals = np.arange(bottom, top)
+
+    fig, ax = plt.subplots()
+    ax.plot(vals, elo_function(vals), 'k', markevery=markers, marker='|')
+    ax.axvspan(bottom, f_minus, alpha=0.6, color='#000000')
+    ax.axvspan(f_minus, f, alpha=0.6, color='#696969')
+    ax.axvspan(f, f_plus, alpha=0.6, color='#808080')
+    ax.axvspan(f_plus, d_minus, alpha=0.6, color='#A9A9A9')
+    ax.axvspan(d_minus, d, alpha=0.5, color='#C0C0C0')
+    ax.axvspan(d, d_plus, alpha=0.5, color='#FF7F50')
+    ax.axvspan(d_plus, c_minus, alpha=0.5, color='#F08080')
+    ax.axvspan(c_minus, c, alpha=0.5, color='#FFA500')
+    ax.axvspan(c, c_plus, alpha=0.5, color='#FFFF00')
+    ax.axvspan(c_plus, b_minus, alpha=0.5, color='#ADFF2F')
+    ax.axvspan(b_minus, b, alpha=0.5, color='#008B8B')
+    ax.axvspan(b, b_plus, alpha=0.5, color='#00FFFF')
+    ax.axvspan(b_plus, a_minus, alpha=0.5, color='#4169E1')
+    ax.axvspan(a_minus, a, alpha=0.5, color='#6495ED')
+    ax.axvspan(a, a_plus, alpha=0.5, color='#DA70D6')
+    ax.axvspan(a_plus, s_minus, alpha=0.5, color='#EE82EE')
+    ax.axvspan(s_minus, s, alpha=0.5, color='#F5F5DC')
+    ax.axvspan(s, s_plus, alpha=0.5, color='#FFFFF0')
+    ax.axvspan(s_plus, top, alpha=0.5, color='#FFFFFF')
+    for i, percent in enumerate(percents):
+        if i % 2 == 0:
+            offset = (30, -5)
+        else:
+            offset = (-60, 0)
+        ax.annotate(s=team_names[i],
+                    xy=(actual_elos[i], percent),
+                    xytext=offset,
+                    textcoords='offset points',
+                    arrowprops=dict(arrowstyle="-"))
+
+    ax.set_title('Elo Rankings')
+    ax.set_xlabel('Elo Rating')
+    ax.set_ylabel('% Chance to Beat Average Team')
+
+    plt.show()
 
 
 def pre_week_1(teams, week_end_date):
