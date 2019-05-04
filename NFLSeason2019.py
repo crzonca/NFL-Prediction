@@ -184,7 +184,7 @@ def plot_elo_function(teams):
     team_names, actual_elos, percents = zip(*zipped)
 
     avg_elo = statistics.mean(actual_elos)
-    elo_dev = statistics.stdev(actual_elos)
+    elo_dev = statistics.pstdev(actual_elos)
     elo_dev_third = elo_dev / 3
 
     bottom = round(avg_elo - 3 * elo_dev)

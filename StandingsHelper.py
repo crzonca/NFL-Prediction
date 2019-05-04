@@ -311,7 +311,7 @@ def get_tier(teams, team):
     team_elo = team[4]
     elos = [team_info[4] for team_info in teams]
     avg_elo = statistics.mean(elos)
-    elo_dev = statistics.stdev(elos)
+    elo_dev = statistics.pstdev(elos)
     elo_dev_third = elo_dev / 3
 
     if team_elo > avg_elo + elo_dev_third * 8:

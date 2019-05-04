@@ -995,7 +995,7 @@ def get_schedule_difficulty(teams, team_name, remaining=False):
         opponent_elos.append(opponent[4])
 
     if len(opponent_elos) > 1:
-        deviation = statistics.stdev(opponent_elos)
+        deviation = statistics.pstdev(opponent_elos)
     else:
         deviation = 0
 
