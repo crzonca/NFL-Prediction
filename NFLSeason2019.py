@@ -167,29 +167,43 @@ def handle_week(teams,
         # Print a separator
         print('*' * 120, '\n')
 
+        # If the week has not ended
+        if maya.now() < week_end_date:
+            # Plot the team's percentiles based on their elo
+            plot_elo_function(teams, week_name)
+
     # Return the updated teams
     return teams
 
 
-def plot_elo_function(teams):
-    def elo_function(rating):
-        elo = 1 / (1 + 10 ** ((1500 - rating) / 400))
-        return elo * 100
-
+def plot_elo_function(teams, week_name):
+    # Get the elo rating of each team
     actual_elos = [round(team[4]) for team in teams]
-    team_names = [team[0] for team in teams]
-    percents = [elo_function(rating) for rating in actual_elos]
-    zipped = list(zip(team_names, actual_elos, percents))
-    zipped.sort(key=lambda tup: tup[1])
-    team_names, actual_elos, percents = zip(*zipped)
-
     avg_elo = statistics.mean(actual_elos)
     elo_dev = statistics.pstdev(actual_elos)
     elo_dev_third = elo_dev / 3
 
-    bottom = round(avg_elo - 3 * elo_dev)
-    top = round(avg_elo + 3 * elo_dev)
+    # Cumulative distribution function for a normal deviation
+    def cdf(rating):
+        from scipy.stats import norm
+        adj_rating = (rating - avg_elo) / elo_dev
+        x = norm.cdf(adj_rating)
+        return x * 100
 
+    # Get each teams name and percentile
+    team_names = [team[0] for team in teams]
+    percents = [cdf(rating) for rating in actual_elos]
+
+    # Sort the names, ratings and percentiles by the rating
+    zipped = list(zip(team_names, actual_elos, percents))
+    zipped.sort(key=lambda tup: tup[1])
+    team_names, actual_elos, percents = zip(*zipped)
+
+    # Plot everywhere within 3.29 standard deviations of the mean (99.99% coverage)
+    bottom = round(avg_elo - 3.29 * elo_dev)
+    top = round(avg_elo + 3.29 * elo_dev)
+
+    # Get the values that match the boundaries of the tiers
     s_plus = avg_elo + elo_dev_third * 8
     s = avg_elo + elo_dev_third * 7
     s_minus = avg_elo + elo_dev_third * 6
@@ -209,12 +223,16 @@ def plot_elo_function(teams):
     f = avg_elo - elo_dev_third * 5
     f_minus = avg_elo - elo_dev_third * 6
 
+    # Get the range for the curve and the location of each team
     vals = range(bottom, top)
     markers = [vals.index(elo) for elo in actual_elos]
     vals = np.arange(bottom, top)
 
-    fig, ax = plt.subplots()
-    ax.plot(vals, elo_function(vals), 'k', markevery=markers, marker='|')
+    # Plot the CDF and mark each team
+    fig, ax = plt.subplots(figsize=(20, 10))
+    ax.plot(vals, cdf(vals), 'k', markevery=markers, marker='|')
+
+    # Color each section by the tier color
     ax.axvspan(bottom, f_minus, alpha=0.6, color='#000000')
     ax.axvspan(f_minus, f, alpha=0.6, color='#696969')
     ax.axvspan(f, f_plus, alpha=0.6, color='#808080')
@@ -234,6 +252,8 @@ def plot_elo_function(teams):
     ax.axvspan(s_minus, s, alpha=0.5, color='#F5F5DC')
     ax.axvspan(s, s_plus, alpha=0.5, color='#FFFFF0')
     ax.axvspan(s_plus, top, alpha=0.5, color='#FFFFFF')
+
+    # Label each teams marker with the team name
     for i, percent in enumerate(percents):
         if i % 2 == 0:
             offset = (30, -5)
@@ -245,10 +265,14 @@ def plot_elo_function(teams):
                     textcoords='offset points',
                     arrowprops=dict(arrowstyle="-"))
 
-    ax.set_title('Elo Rankings')
+    # Add titles
+    ax.set_title('Elo Ratings: ' + week_name)
     ax.set_xlabel('Elo Rating')
-    ax.set_ylabel('% Chance to Beat Average Team')
+    ax.set_ylabel('Percentile')
 
+    # Plot
+    week_name = week_name.replace(' ', '_')
+    plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\Elo Ratings_' + week_name + '.png', dpi=300)
     plt.show()
 
 
