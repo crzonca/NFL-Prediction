@@ -272,7 +272,7 @@ def plot_elo_function(teams, week_name):
 
     # Plot
     week_name = week_name.replace(' ', '_')
-    plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\Elo Ratings_' + week_name + '.png', dpi=300)
+    plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\Elo_Ratings_' + week_name + '.png', dpi=300)
     plt.show()
 
 
