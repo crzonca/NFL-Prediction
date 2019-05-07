@@ -171,17 +171,22 @@ def handle_week(teams,
         if maya.now() < week_end_date:
             # Plot the team's percentiles based on their elo
             plot_elo_function(teams, week_name)
+            plot_elo_function(teams, week_name, absolute=True)
 
     # Return the updated teams
     return teams
 
 
-def plot_elo_function(teams, week_name):
+def plot_elo_function(teams, week_name, absolute=False):
     # Get the elo rating of each team
     actual_elos = [round(team[4]) for team in teams]
     avg_elo = statistics.mean(actual_elos)
-    elo_dev = statistics.pstdev(actual_elos)
-    elo_dev_third = elo_dev / 3
+
+    if absolute:
+        elo_dev = 82.889
+    else:
+        elo_dev = statistics.pstdev(actual_elos)
+    elo_dev_third = statistics.pstdev(actual_elos) / 3
 
     # Cumulative distribution function for a normal deviation
     def cdf(rating):
@@ -199,9 +204,9 @@ def plot_elo_function(teams, week_name):
     zipped.sort(key=lambda tup: tup[1])
     team_names, actual_elos, percents = zip(*zipped)
 
-    # Plot everywhere within 3.29 standard deviations of the mean (99.99% coverage)
-    bottom = round(avg_elo - 3.29 * elo_dev)
-    top = round(avg_elo + 3.29 * elo_dev)
+    # Plot everywhere within 3.89 standard deviations of the mean (99.99% coverage)
+    bottom = round(avg_elo - 3.89 * elo_dev)
+    top = round(avg_elo + 3.89 * elo_dev)
 
     # Get the values that match the boundaries of the tiers
     s_plus = avg_elo + elo_dev_third * 8
@@ -263,16 +268,25 @@ def plot_elo_function(teams, week_name):
                     xy=(actual_elos[i], percent),
                     xytext=offset,
                     textcoords='offset points',
-                    arrowprops=dict(arrowstyle="-"))
+                    arrowprops=dict(arrowstyle='-'))
 
     # Add titles
     ax.set_title('Elo Ratings: ' + week_name)
     ax.set_xlabel('Elo Rating')
-    ax.set_ylabel('Percentile')
+    if absolute:
+        ax.set_ylabel('Absolute Percentile')
+    else:
+        ax.set_ylabel('Relative Percentile')
 
     # Plot
     week_name = week_name.replace(' ', '_')
-    plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\Elo_Ratings_' + week_name + '.png', dpi=300)
+
+    if absolute:
+        plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\Absolute\\Elo_Ratings_' + week_name + '.png',
+                    dpi=300)
+    else:
+        plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\Relative\\Elo_Ratings_' + week_name + '.png',
+                    dpi=300)
     plt.show()
 
 

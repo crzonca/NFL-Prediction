@@ -915,6 +915,7 @@ def plot_corr():
 
     # Print a description of all the games
     games_description = df.describe()
+    games_description.to_csv(other_dir + '20022018Description.csv')
     print(games_description.to_string())
     print()
 
