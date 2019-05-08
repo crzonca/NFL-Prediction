@@ -177,7 +177,7 @@ def handle_week(teams,
     return teams
 
 
-def plot_elo_function(teams, week_name, absolute=False):
+def plot_elo_function(teams, week_name, absolute=False, classic_colors=False):
     # Get the elo rating of each team
     actual_elos = [round(team[4]) for team in teams]
 
@@ -209,6 +209,11 @@ def plot_elo_function(teams, week_name, absolute=False):
     bottom = round(avg_elo - 3.89 * elo_dev)
     top = round(avg_elo + 3.89 * elo_dev)
 
+    # Get the range for the curve and the location of each team
+    vals = range(bottom, top)
+    markers = [vals.index(elo) for elo in actual_elos]
+    vals = np.arange(bottom, top)
+
     # Get the values that match the boundaries of the tiers
     s_plus = avg_elo + elo_dev_third * 8
     s = avg_elo + elo_dev_third * 7
@@ -229,71 +234,108 @@ def plot_elo_function(teams, week_name, absolute=False):
     f = avg_elo - elo_dev_third * 8
     f_minus = avg_elo - elo_dev_third * 9
 
-    # Get the range for the curve and the location of each team
-    vals = range(bottom, top)
-    markers = [vals.index(elo) for elo in actual_elos]
-    vals = np.arange(bottom, top)
+    # Set the colors of the tiers
+    if classic_colors:
+        s_plus_color = '#FFFFF0'
+        s_color = '#F5F5DC'
+        s_minus_color = '#FAEBD7'
+        a_plus_color = '#EE82EE'
+        a_color = '#DA70D6'
+        a_minus_color = '#6495ED'
+        b_plus_color = '#4169E1'
+        b_color = '#00FFFF'
+        b_minus_color = '#008B8B'
+        c_plus_color = '#ADFF2F'
+        c_color = '#FFFF00'
+        c_minus_color = '#FFA500'
+        d_plus_color = '#FF7F50'
+        d_color = '#FF6347'
+        d_minus_color = '#A9A9A9'
+        f_plus_color = '#808080'
+        f_color = '#606060'
+        f_minus_color = '#404040'
+        bottom_color = '#000000'
+    else:
+        s_plus_color = '#A64CA6'
+        s_color = '#800080'
+        s_minus_color = '#660099'
+        a_plus_color = '#3300CC'
+        a_color = '#0000FF'
+        a_minus_color = '#0019CC'
+        b_plus_color = '#004C66'
+        b_color = '#008000'
+        b_minus_color = '#4CA600'
+        c_plus_color = '#B2D800'
+        c_color = '#FFFF00'
+        c_minus_color = '#FFE400'
+        d_plus_color = '#FFC000'
+        d_color = '#FFA500'
+        d_minus_color = '#FF7300'
+        f_plus_color = '#FF3100'
+        f_color = '#FF0000'
+        f_minus_color = '#B20000'
+        bottom_color = '#000000'
 
     # Plot the CDF and mark each team
     fig, ax = plt.subplots(figsize=(20, 10))
     ax.plot(vals, cdf(vals), 'k', markevery=markers, marker='|')
 
     # Color each section by the tier color
-    ax.axvspan(bottom, f_minus, alpha=0.6, color='#000000')
+    ax.axvspan(bottom, f_minus, alpha=0.6, color=bottom_color)
     # ax.annotate(s='F-', xy=((f_minus - elo_dev_third + f_minus) / 2 - 3, -2))
 
-    ax.axvspan(f_minus, f, alpha=0.6, color='#696969')
+    ax.axvspan(f_minus, f, alpha=0.6, color=f_minus_color)
     ax.annotate(s='F-', xy=((f_minus + f) / 2 - 3, -2))
 
-    ax.axvspan(f, f_plus, alpha=0.6, color='#808080')
+    ax.axvspan(f, f_plus, alpha=0.6, color=f_color)
     ax.annotate(s='F', xy=((f + f_plus) / 2 - 3, -2))
 
-    ax.axvspan(f_plus, d_minus, alpha=0.6, color='#A9A9A9')
+    ax.axvspan(f_plus, d_minus, alpha=0.6, color=f_plus_color)
     ax.annotate(s='F+', xy=((f_plus + d_minus) / 2 - 3, -2))
 
-    ax.axvspan(d_minus, d, alpha=0.5, color='#C0C0C0')
+    ax.axvspan(d_minus, d, alpha=0.5, color=d_minus_color)
     ax.annotate(s='D-', xy=((d_minus + d) / 2 - 3, -2))
 
-    ax.axvspan(d, d_plus, alpha=0.5, color='#FF7F50')
+    ax.axvspan(d, d_plus, alpha=0.5, color=d_color)
     ax.annotate(s='D', xy=((d + d_plus) / 2 - 3, -2))
 
-    ax.axvspan(d_plus, c_minus, alpha=0.5, color='#F08080')
+    ax.axvspan(d_plus, c_minus, alpha=0.5, color=d_plus_color)
     ax.annotate(s='D+', xy=((d_plus + c_minus) / 2 - 3, -2))
 
-    ax.axvspan(c_minus, c, alpha=0.5, color='#FFA500')
+    ax.axvspan(c_minus, c, alpha=0.5, color=c_minus_color)
     ax.annotate(s='C-', xy=((c_minus + c) / 2 - 3, -2))
 
-    ax.axvspan(c, c_plus, alpha=0.5, color='#FFFF00')
+    ax.axvspan(c, c_plus, alpha=0.5, color=c_color)
     ax.annotate(s='C', xy=((c + c_plus) / 2 - 3, -2))
 
-    ax.axvspan(c_plus, b_minus, alpha=0.5, color='#ADFF2F')
+    ax.axvspan(c_plus, b_minus, alpha=0.5, color=c_plus_color)
     ax.annotate(s='C+', xy=((c_plus + b_minus) / 2 - 3, -2))
 
-    ax.axvspan(b_minus, b, alpha=0.5, color='#008B8B')
+    ax.axvspan(b_minus, b, alpha=0.5, color=b_minus_color)
     ax.annotate(s='B-', xy=((b_minus + b) / 2 - 3, -2))
 
-    ax.axvspan(b, b_plus, alpha=0.5, color='#00FFFF')
+    ax.axvspan(b, b_plus, alpha=0.5, color=b_color)
     ax.annotate(s='B', xy=((b + b_plus) / 2 - 3, -2))
 
-    ax.axvspan(b_plus, a_minus, alpha=0.5, color='#4169E1')
+    ax.axvspan(b_plus, a_minus, alpha=0.5, color=b_plus_color)
     ax.annotate(s='B+', xy=((b_plus + a_minus) / 2 - 3, -2))
 
-    ax.axvspan(a_minus, a, alpha=0.5, color='#6495ED')
+    ax.axvspan(a_minus, a, alpha=0.5, color=a_minus_color)
     ax.annotate(s='A-', xy=((a_minus + a) / 2 - 3, -2))
 
-    ax.axvspan(a, a_plus, alpha=0.5, color='#DA70D6')
+    ax.axvspan(a, a_plus, alpha=0.5, color=a_color)
     ax.annotate(s='A', xy=((a + a_plus) / 2 - 3, -2))
 
-    ax.axvspan(a_plus, s_minus, alpha=0.5, color='#EE82EE')
+    ax.axvspan(a_plus, s_minus, alpha=0.5, color=a_plus_color)
     ax.annotate(s='A+', xy=((a_plus + s_minus) / 2 - 3, -2))
 
-    ax.axvspan(s_minus, s, alpha=0.5, color='#FAEBD7')
+    ax.axvspan(s_minus, s, alpha=0.5, color=s_minus_color)
     ax.annotate(s='S-', xy=((s_minus + s) / 2 - 3, -2))
 
-    ax.axvspan(s, s_plus, alpha=0.5, color='#F5F5DC')
+    ax.axvspan(s, s_plus, alpha=0.5, color=s_color)
     ax.annotate(s='S', xy=((s + s_plus) / 2 - 3, -2))
 
-    ax.axvspan(s_plus, s_plus + elo_dev_third, alpha=0.5, color='#FFFFF0')
+    ax.axvspan(s_plus, s_plus + elo_dev_third, alpha=0.5, color=s_plus_color)
     ax.annotate(s='S+', xy=((s_plus + s_plus + elo_dev_third) / 2 - 3, -2))
 
     # Label each teams marker with the team name
@@ -321,10 +363,10 @@ def plot_elo_function(teams, week_name, absolute=False):
 
     if absolute:
         plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\Absolute\\Elo_Ratings_' + week_name + '.png',
-                    dpi=300)
+                    dpi=300, bbox_inches='tight')
     else:
         plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\Relative\\Elo_Ratings_' + week_name + '.png',
-                    dpi=300)
+                    dpi=300, bbox_inches='tight')
     plt.show()
 
 
