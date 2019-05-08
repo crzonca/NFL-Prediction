@@ -180,13 +180,14 @@ def handle_week(teams,
 def plot_elo_function(teams, week_name, absolute=False):
     # Get the elo rating of each team
     actual_elos = [round(team[4]) for team in teams]
-    avg_elo = statistics.mean(actual_elos)
 
     if absolute:
+        avg_elo = 1500
         elo_dev = 82.889
     else:
+        avg_elo = statistics.mean(actual_elos)
         elo_dev = statistics.pstdev(actual_elos)
-    elo_dev_third = statistics.pstdev(actual_elos) / 3
+    elo_dev_third = elo_dev / 3
 
     # Cumulative distribution function for a normal deviation
     def cdf(rating):
@@ -224,9 +225,9 @@ def plot_elo_function(teams, week_name, absolute=False):
     d_plus = avg_elo - elo_dev_third * 4
     d = avg_elo - elo_dev_third * 5
     d_minus = avg_elo - elo_dev_third * 6
-    f_plus = avg_elo - elo_dev_third * 4
-    f = avg_elo - elo_dev_third * 5
-    f_minus = avg_elo - elo_dev_third * 6
+    f_plus = avg_elo - elo_dev_third * 7
+    f = avg_elo - elo_dev_third * 8
+    f_minus = avg_elo - elo_dev_third * 9
 
     # Get the range for the curve and the location of each team
     vals = range(bottom, top)
@@ -239,24 +240,61 @@ def plot_elo_function(teams, week_name, absolute=False):
 
     # Color each section by the tier color
     ax.axvspan(bottom, f_minus, alpha=0.6, color='#000000')
+    # ax.annotate(s='F-', xy=((f_minus - elo_dev_third + f_minus) / 2 - 3, -2))
+
     ax.axvspan(f_minus, f, alpha=0.6, color='#696969')
+    ax.annotate(s='F-', xy=((f_minus + f) / 2 - 3, -2))
+
     ax.axvspan(f, f_plus, alpha=0.6, color='#808080')
+    ax.annotate(s='F', xy=((f + f_plus) / 2 - 3, -2))
+
     ax.axvspan(f_plus, d_minus, alpha=0.6, color='#A9A9A9')
+    ax.annotate(s='F+', xy=((f_plus + d_minus) / 2 - 3, -2))
+
     ax.axvspan(d_minus, d, alpha=0.5, color='#C0C0C0')
+    ax.annotate(s='D-', xy=((d_minus + d) / 2 - 3, -2))
+
     ax.axvspan(d, d_plus, alpha=0.5, color='#FF7F50')
+    ax.annotate(s='D', xy=((d + d_plus) / 2 - 3, -2))
+
     ax.axvspan(d_plus, c_minus, alpha=0.5, color='#F08080')
+    ax.annotate(s='D+', xy=((d_plus + c_minus) / 2 - 3, -2))
+
     ax.axvspan(c_minus, c, alpha=0.5, color='#FFA500')
+    ax.annotate(s='C-', xy=((c_minus + c) / 2 - 3, -2))
+
     ax.axvspan(c, c_plus, alpha=0.5, color='#FFFF00')
+    ax.annotate(s='C', xy=((c + c_plus) / 2 - 3, -2))
+
     ax.axvspan(c_plus, b_minus, alpha=0.5, color='#ADFF2F')
+    ax.annotate(s='C+', xy=((c_plus + b_minus) / 2 - 3, -2))
+
     ax.axvspan(b_minus, b, alpha=0.5, color='#008B8B')
+    ax.annotate(s='B-', xy=((b_minus + b) / 2 - 3, -2))
+
     ax.axvspan(b, b_plus, alpha=0.5, color='#00FFFF')
+    ax.annotate(s='B', xy=((b + b_plus) / 2 - 3, -2))
+
     ax.axvspan(b_plus, a_minus, alpha=0.5, color='#4169E1')
+    ax.annotate(s='B+', xy=((b_plus + a_minus) / 2 - 3, -2))
+
     ax.axvspan(a_minus, a, alpha=0.5, color='#6495ED')
+    ax.annotate(s='A-', xy=((a_minus + a) / 2 - 3, -2))
+
     ax.axvspan(a, a_plus, alpha=0.5, color='#DA70D6')
+    ax.annotate(s='A', xy=((a + a_plus) / 2 - 3, -2))
+
     ax.axvspan(a_plus, s_minus, alpha=0.5, color='#EE82EE')
-    ax.axvspan(s_minus, s, alpha=0.5, color='#F5F5DC')
-    ax.axvspan(s, s_plus, alpha=0.5, color='#FFFFF0')
-    ax.axvspan(s_plus, top, alpha=0.5, color='#FFFFFF')
+    ax.annotate(s='A+', xy=((a_plus + s_minus) / 2 - 3, -2))
+
+    ax.axvspan(s_minus, s, alpha=0.5, color='#FAEBD7')
+    ax.annotate(s='S-', xy=((s_minus + s) / 2 - 3, -2))
+
+    ax.axvspan(s, s_plus, alpha=0.5, color='#F5F5DC')
+    ax.annotate(s='S', xy=((s + s_plus) / 2 - 3, -2))
+
+    ax.axvspan(s_plus, s_plus + elo_dev_third, alpha=0.5, color='#FFFFF0')
+    ax.annotate(s='S+', xy=((s_plus + s_plus + elo_dev_third) / 2 - 3, -2))
 
     # Label each teams marker with the team name
     for i, percent in enumerate(percents):
