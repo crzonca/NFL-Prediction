@@ -186,6 +186,14 @@ def plot_elo_function(teams, week_name, absolute=False, classic_colors=False):
     else:
         ax.set_ylabel('Relative Percentile')
 
+    # Add the tick marks
+    bottom_remainder = 50 - (bottom % 50)
+    plt.xticks(range(bottom + bottom_remainder, top + bottom_remainder + 1, 50))
+    plt.yticks(range(0, 101, 10))
+
+    # Remove the x margins
+    plt.margins(x=0)
+
     # Plot
     week_name = week_name.replace(' ', '_')
 
@@ -195,13 +203,5 @@ def plot_elo_function(teams, week_name, absolute=False, classic_colors=False):
     else:
         plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\Relative\\Elo_Ratings_' + week_name + '.png',
                     dpi=300)
-
-    # Add the tick marks
-    bottom_remainder = 50 - (bottom % 50)
-    plt.xticks(range(bottom + bottom_remainder, top + bottom_remainder + 1, 50))
-    plt.yticks(range(0, 101, 10))
-
-    # Remove the x margins
-    plt.margins(x=0)
 
     plt.show()
