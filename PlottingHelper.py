@@ -1,10 +1,17 @@
+import os
 import statistics
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 
-def plot_elo_function(teams, week_name, absolute=False, classic_colors=False):
+def plot_elo_function(teams,
+                      plot_name,
+                      sub_dir_name,
+                      absolute=False,
+                      classic_colors=False,
+                      show_plot=True,
+                      save_dir='..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\'):
     # Get the elo rating of each team
     actual_elos = [round(team[4]) for team in teams]
 
@@ -179,7 +186,9 @@ def plot_elo_function(teams, week_name, absolute=False, classic_colors=False):
                     arrowprops=dict(arrowstyle='-'))
 
     # Add titles
-    ax.set_title('Elo Ratings: ' + week_name)
+    if plot_name:
+        plot_name = plot_name + ' '
+    ax.set_title('Elo Ratings: ' + plot_name + sub_dir_name)
     ax.set_xlabel('Elo Rating')
     if absolute:
         ax.set_ylabel('Absolute Percentile')
@@ -195,13 +204,60 @@ def plot_elo_function(teams, week_name, absolute=False, classic_colors=False):
     plt.margins(x=0)
 
     # Plot
-    week_name = week_name.replace(' ', '_')
+    sub_dir_name = sub_dir_name.replace(' ', '_')
 
-    if absolute:
-        plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\Absolute\\Elo_Ratings_' + week_name + '.png',
-                    dpi=300)
-    else:
-        plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\Relative\\Elo_Ratings_' + week_name + '.png',
-                    dpi=300)
+    if save_dir:
+        if absolute:
+            save_dir = save_dir + 'Absolute\\' + sub_dir_name + '\\'
+        else:
+            save_dir = save_dir + 'Relative\\' + sub_dir_name + '\\'
 
-    plt.show()
+        if not os.path.exists(save_dir):
+            os.mkdir(save_dir)
+        if plot_name:
+            plot_name = plot_name.strip().replace(' ', '_')
+            file_name = save_dir + 'Elo_Ratings_' + plot_name + '.png'
+        else:
+            file_name = save_dir + 'Elo_Ratings.png'
+        plt.savefig(file_name, dpi=300)
+
+    if show_plot:
+        plt.show()
+
+
+def plot_conference_elo_function(teams, conference_name, week_name, absolute=False, classic_colors=False):
+    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    conference_teams = list()
+
+    league = Playoffs.get_league_structure()
+    for conf_name, conference in league.items():
+        if conference_name == conf_name:
+            for div_name, division in conference.items():
+                conference_teams.extend(division)
+
+    teams = list(filter(lambda t: t[0] in conference_teams, teams))
+    plot_elo_function(teams,
+                      conference_name,
+                      week_name,
+                      absolute=absolute,
+                      classic_colors=classic_colors,
+                      show_plot=False)
+
+
+def plot_division_elo_function(teams, division_name, week_name, absolute=False, classic_colors=False):
+    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    division_teams = list()
+
+    league = Playoffs.get_league_structure()
+    for conf_name, conference in league.items():
+        for div_name, division in conference.items():
+            if div_name == division_name:
+                division_teams = division
+
+    teams = list(filter(lambda t: t[0] in division_teams, teams))
+    plot_elo_function(teams,
+                      division_name,
+                      week_name,
+                      absolute=absolute,
+                      classic_colors=classic_colors,
+                      show_plot=False)

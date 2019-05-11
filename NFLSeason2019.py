@@ -167,8 +167,17 @@ def handle_week(teams,
         # If the week has not ended
         if maya.now() < week_end_date:
             # Plot the team's percentiles based on their elo
-            Plotter.plot_elo_function(teams, week_name)
-            Plotter.plot_elo_function(teams, week_name, absolute=True)
+            Plotter.plot_elo_function(teams, '', week_name)
+
+            # Absolute Rankings
+            Plotter.plot_elo_function(teams, '', week_name, absolute=True)
+
+            # Conference and division Rankings
+            league = Playoffs.get_league_structure()
+            for conf_name, conf in league.items():
+                for div_name, division in conf.items():
+                    Plotter.plot_division_elo_function(teams, div_name, week_name)
+                Plotter.plot_conference_elo_function(teams, conf_name, week_name)
 
     # Return the updated teams
     return teams
