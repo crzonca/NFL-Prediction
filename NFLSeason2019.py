@@ -13,7 +13,6 @@ def season():
 
     # Preseason
     print('Preseason')
-    teams = handle_week(teams, 'Preseason Week 1', pre_week_1, eliminated_teams, '5 May 2019')
     teams = handle_week(teams, 'Preseason Week 1', pre_week_1, eliminated_teams, '6 August 2019')
     teams = handle_week(teams, 'Preseason Week 2', pre_week_2, eliminated_teams, '13 August 2019')
     teams = handle_week(teams, 'Preseason Week 3', pre_week_3, eliminated_teams, '20 August 2019')
