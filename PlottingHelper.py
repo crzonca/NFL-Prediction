@@ -3,6 +3,8 @@ import statistics
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import seaborn as sns
 
 
 def plot_elo_function(teams,
@@ -12,6 +14,8 @@ def plot_elo_function(teams,
                       classic_colors=False,
                       show_plot=True,
                       save_dir='..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\'):
+    sns.set(style="ticks")
+
     # Get the elo rating of each team
     actual_elos = [round(team[4]) for team in teams]
 
@@ -183,7 +187,8 @@ def plot_elo_function(teams,
                     xy=(actual_elos[i], percent),
                     xytext=offset,
                     textcoords='offset points',
-                    arrowprops=dict(arrowstyle='-'))
+                    arrowprops=dict(arrowstyle='-',
+                                    color='black'))
 
     # Add titles
     if plot_name:
@@ -223,6 +228,8 @@ def plot_elo_function(teams,
 
     if show_plot:
         plt.show()
+    else:
+        plt.close()
 
 
 def plot_conference_elo_function(teams, conference_name, week_name, absolute=False, classic_colors=False):
@@ -261,3 +268,37 @@ def plot_division_elo_function(teams, division_name, week_name, absolute=False, 
                       absolute=absolute,
                       classic_colors=classic_colors,
                       show_plot=False)
+
+
+def plot_team_elo_over_season(title, team_names):
+    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    sns.set(style="ticks")
+    max_len = max([len(Playoffs.team_elos[name]) for name in team_names])
+
+    # Remove other teams
+    team_elos = Playoffs.team_elos.copy()
+    other_teams = [team for team in team_elos.keys() if team not in team_names]
+    for other_team in other_teams:
+        del team_elos[other_team]
+
+    # Fill out data rows
+    for name in team_names:
+        elos = team_elos[name]
+        while len(elos) < max_len + 1:
+            team_elos[name].append(elos[-1])
+    data = pd.DataFrame(team_elos)
+
+    ax = data.plot.line(figsize=(20, 10))
+
+    # Add titles
+    ax.set_title('Team Elos: ' + title)
+    ax.set_xlabel('Week')
+    ax.set_ylabel('Elo')
+
+    # Add the tick marks
+    plt.xticks(range(max_len + 1))
+
+    # Remove the x margins
+    plt.margins(x=0)
+
+    plt.show()

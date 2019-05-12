@@ -89,11 +89,16 @@ def season():
     teams = handle_week(teams, 'Superbowl', superbowl, eliminated_teams, '28 January 2020')
 
     # Final Outcome
-    Playoffs.monte_carlo(teams, trials=1)
+    Playoffs.monte_carlo(teams)
+    league = Playoffs.get_league_structure()
+    for conf_name, conf in league.items():
+        for div_name, division in conf.items():
+            Plotter.plot_team_elo_over_season(div_name, division)
 
 
 def set_up_teams():
     def create_base_team(team_name, elo):
+        Playoffs.team_elos[team_name] = [elo]
         return team_name, 0, 0, 0, elo, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
     teams = list()
@@ -2125,5 +2130,7 @@ def set_game_outcome(teams,
                                    away_pass_attempts, away_pass_tds, away_interceptions_thrown, away_total_yards)
 
     Playoffs.completed_games.append((home_name, home_score, away_name, away_score))
+    Playoffs.team_elos[home_name].append(get_team(teams, home_name)[4])
+    Playoffs.team_elos[away_name].append(get_team(teams, away_name)[4])
 
     return teams

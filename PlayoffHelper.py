@@ -6,6 +6,7 @@ import Projects.nfl.NFL_Prediction.NFL as NFL
 import Projects.nfl.NFL_Prediction.StandingsHelper as Standings
 
 completed_games = list()
+team_elos = dict()
 
 
 def get_team(teams, team_name):
