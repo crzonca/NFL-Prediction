@@ -1,11 +1,13 @@
 import random
 import statistics
 from functools import cmp_to_key
+import pandas as pd
 
 import Projects.nfl.NFL_Prediction.NFL as NFL
 import Projects.nfl.NFL_Prediction.StandingsHelper as Standings
 
 completed_games = list()
+completed_games_df = pd.DataFrame()
 team_elos = dict()
 
 
