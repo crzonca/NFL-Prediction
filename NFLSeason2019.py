@@ -5,69 +5,72 @@ import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
 import Projects.nfl.NFL_Prediction.PlottingHelper as Plotter
 import Projects.nfl.NFL_Prediction.StandingsHelper as Standings
 
+nfl_teams = list()
+
 
 def season():
     # Setup
-    teams = set_up_teams()
+    global nfl_teams
+    nfl_teams = set_up_teams()
     eliminated_teams = list()
 
     # Preseason
     print('Preseason')
-    teams = handle_week(teams, 'Preseason Week 1', pre_week_1, eliminated_teams, '6 August 2019')
-    teams = handle_week(teams, 'Preseason Week 2', pre_week_2, eliminated_teams, '13 August 2019')
-    teams = handle_week(teams, 'Preseason Week 3', pre_week_3, eliminated_teams, '20 August 2019')
-    handle_week(teams, 'Preseason Week 4', pre_week_4, eliminated_teams, '27 August 2019')
+    nfl_teams = handle_week(nfl_teams, 'Preseason Week 1', pre_week_1, eliminated_teams, '6 August 2019')
+    nfl_teams = handle_week(nfl_teams, 'Preseason Week 2', pre_week_2, eliminated_teams, '13 August 2019')
+    nfl_teams = handle_week(nfl_teams, 'Preseason Week 3', pre_week_3, eliminated_teams, '20 August 2019')
+    handle_week(nfl_teams, 'Preseason Week 4', pre_week_4, eliminated_teams, '27 August 2019')
 
     # Reset teams after preseason
-    teams = set_up_teams()
+    nfl_teams = set_up_teams()
 
     # Preseason Info
-    Standings.print_league_details(teams, eliminated_teams)
-    Standings.print_schedule_difficulty(teams)
+    Standings.print_league_details(nfl_teams, eliminated_teams)
+    Standings.print_schedule_difficulty(nfl_teams)
     print('*' * 120, '\n')
 
     # Regular Season
     print('Regular Season')
-    teams = handle_week(teams, 'Week 1', week_1, eliminated_teams, '3 September 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 1', week_1, eliminated_teams, '3 September 2019')
 
-    teams = handle_week(teams, 'Week 2', week_2, eliminated_teams, '10 September 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 2', week_2, eliminated_teams, '10 September 2019')
 
-    teams = handle_week(teams, 'Week 3', week_3, eliminated_teams, '17 September 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 3', week_3, eliminated_teams, '17 September 2019')
 
-    teams = handle_week(teams, 'Week 4', week_4, eliminated_teams, '24 September 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 4', week_4, eliminated_teams, '24 September 2019')
 
-    teams = handle_week(teams, 'Week 5', week_5, eliminated_teams, '1 October 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 5', week_5, eliminated_teams, '1 October 2019')
 
-    teams = handle_week(teams, 'Week 6', week_6, eliminated_teams, '8 October 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 6', week_6, eliminated_teams, '8 October 2019')
 
-    teams = handle_week(teams, 'Week 7', week_7, eliminated_teams, '15 October 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 7', week_7, eliminated_teams, '15 October 2019')
 
-    teams = handle_week(teams, 'Week 8', week_8, eliminated_teams, '22 October 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 8', week_8, eliminated_teams, '22 October 2019')
 
-    teams = handle_week(teams, 'Week 9', week_9, eliminated_teams, '29 October 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 9', week_9, eliminated_teams, '29 October 2019')
 
-    teams = handle_week(teams, 'Week 10', week_10, eliminated_teams, '5 November 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 10', week_10, eliminated_teams, '5 November 2019')
 
-    teams = handle_week(teams, 'Week 11', week_11, eliminated_teams, '12 November 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 11', week_11, eliminated_teams, '12 November 2019')
 
-    teams = handle_week(teams, 'Week 12', week_12, eliminated_teams, '19 November 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 12', week_12, eliminated_teams, '19 November 2019')
     eliminated_teams.extend([])
 
-    teams = handle_week(teams, 'Week 13', week_13, eliminated_teams, '26 November 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 13', week_13, eliminated_teams, '26 November 2019')
 
-    teams = handle_week(teams, 'Week 14', week_14, eliminated_teams, '3 December 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 14', week_14, eliminated_teams, '3 December 2019')
 
-    teams = handle_week(teams, 'Week 15', week_15, eliminated_teams, '10 December 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 15', week_15, eliminated_teams, '10 December 2019')
 
-    teams = handle_week(teams, 'Week 16', week_16, eliminated_teams, '17 December 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 16', week_16, eliminated_teams, '17 December 2019')
 
-    teams = handle_week(teams, 'Week 17', week_17, eliminated_teams, '24 December 2019')
+    nfl_teams = handle_week(nfl_teams, 'Week 17', week_17, eliminated_teams, '24 December 2019')
 
     # Regular Season Info
-    Standings.print_schedule_difficulty(teams, remaining=True)
+    Standings.print_schedule_difficulty(nfl_teams, remaining=True)
 
     # Playoff Info
-    afc_playoff_teams, nfc_playoff_teams = Playoffs.get_playoff_picture(teams)
+    afc_playoff_teams, nfc_playoff_teams = Playoffs.get_playoff_picture(nfl_teams)
     print('Current Playoff Picture')
     print('-' * 15 + 'AFC' + '-' * 15)
     Playoffs.create_playoff_bracket(afc_playoff_teams)
@@ -79,16 +82,16 @@ def season():
 
     # Playoffs
     print('Playoffs')
-    teams = handle_week(teams, 'Wildcard Weekend', wildcard, eliminated_teams, '31 December 2019')
+    nfl_teams = handle_week(nfl_teams, 'Wildcard Weekend', wildcard, eliminated_teams, '31 December 2019')
 
-    teams = handle_week(teams, 'Divisional Round', divisional, eliminated_teams, '7 January 2020')
+    nfl_teams = handle_week(nfl_teams, 'Divisional Round', divisional, eliminated_teams, '7 January 2020')
 
-    teams = handle_week(teams, 'Conference Finals', conference, eliminated_teams, '14 January 2020')
+    nfl_teams = handle_week(nfl_teams, 'Conference Finals', conference, eliminated_teams, '14 January 2020')
 
-    teams = handle_week(teams, 'Superbowl', superbowl, eliminated_teams, '28 January 2020')
+    nfl_teams = handle_week(nfl_teams, 'Superbowl', superbowl, eliminated_teams, '28 January 2020')
 
     # Final Outcome
-    Playoffs.monte_carlo(teams)
+    Playoffs.monte_carlo(nfl_teams)
     league = Playoffs.get_league_structure()
     for conf_name, conf in league.items():
         for div_name, division in conf.items():
@@ -97,7 +100,6 @@ def season():
 
 def set_up_teams():
     def create_base_team(team_name, elo):
-        Playoffs.team_elos[team_name] = [elo]
         return team_name, 0, 0, 0, elo, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
     teams = list()
@@ -194,7 +196,7 @@ def pre_week_1(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Giants',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -230,7 +232,7 @@ def pre_week_1(teams, week_end_date):
     #                          'Packers', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Texans', 0, 0, 0, 0, 0, 0, 0, 0)
     #
-    # teams = set_game_outcome(teams,
+    # teams = set_game_outcome(teams, 0,
     #                          'Saints', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Vikings', 0, 0, 0, 0, 0, 0, 0, 0)
     #
@@ -254,7 +256,7 @@ def pre_week_1(teams, week_end_date):
     #                          'Dolphins', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Falcons', 0, 0, 0, 0, 0, 0, 0, 0)
     #
-    # teams = set_game_outcome(teams,
+    # teams = set_game_outcome(teams, 0,
     #                          'Ravens', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Jaguars', 0, 0, 0, 0, 0, 0, 0, 0)
     #
@@ -270,7 +272,7 @@ def pre_week_1(teams, week_end_date):
     #                          'Chiefs', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Bengals', 0, 0, 0, 0, 0, 0, 0, 0)
     #
-    # teams = set_game_outcome(teams,
+    # teams = set_game_outcome(teams, 0,
     #                          'Raiders', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Rams', 0, 0, 0, 0, 0, 0, 0, 0)
 
@@ -283,7 +285,7 @@ def pre_week_2(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Giants',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -372,7 +374,7 @@ def pre_week_3(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Cowboys',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -461,7 +463,7 @@ def pre_week_4(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Cowboys',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -550,7 +552,7 @@ def week_1(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Bears',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -639,7 +641,7 @@ def week_2(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Panthers',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -728,7 +730,7 @@ def week_3(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Jaguars',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -817,7 +819,7 @@ def week_4(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Packers',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -902,7 +904,7 @@ def week_5(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Seahawks',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -987,7 +989,7 @@ def week_6(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Patriots',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -1067,7 +1069,7 @@ def week_7(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Broncos',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -1148,7 +1150,7 @@ def week_8(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Vikings',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -1233,7 +1235,7 @@ def week_9(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Cardinals',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -1314,7 +1316,7 @@ def week_10(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Raiders',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -1391,7 +1393,7 @@ def week_11(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Browns',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -1472,7 +1474,7 @@ def week_12(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Texans',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -1553,7 +1555,7 @@ def week_13(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Lions',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -1642,7 +1644,7 @@ def week_14(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Bears',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -1731,7 +1733,7 @@ def week_15(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Ravens',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -1820,7 +1822,7 @@ def week_16(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Broncos',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -1909,7 +1911,7 @@ def week_17(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Ravens',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -1998,7 +2000,7 @@ def wildcard(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Bears',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -2039,7 +2041,7 @@ def divisional(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Bears',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -2080,7 +2082,7 @@ def conference(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Bears',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -2113,7 +2115,7 @@ def superbowl(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0
+    #                          spread=0,
     #                          home_name='Bears',
     #                          home_score=0,
     #                          home_touchdowns=0,
@@ -2148,6 +2150,7 @@ def set_game_outcome(teams, spread,
                      away_name, away_score, away_touchdowns, away_net_pass_yards, away_pass_completions,
                      away_pass_attempts, away_pass_tds, away_interceptions_thrown, away_total_yards):
     import pandas as pd
+
     home_team = get_team(teams, home_name)
     away_team = get_team(teams, away_name)
 
@@ -2169,8 +2172,9 @@ def set_game_outcome(teams, spread,
                             'away_interceptions_thrown': away_interceptions_thrown,
                             'away_net_passing_yards': away_net_pass_yards,
                             'away_total_yards': away_total_yards,
-                            'away_elo': away_team[4]})
-    Playoffs.completed_games_df = Playoffs.completed_games_df.append(game_df)
+                            'away_elo': away_team[4]},
+                           index=[len(Playoffs.completed_games)])
+    Playoffs.completed_games = Playoffs.completed_games.append(game_df)
 
     teams = Predictor.update_teams(teams,
                                    home_name, home_score, home_touchdowns, home_net_pass_yards, home_pass_completions,
