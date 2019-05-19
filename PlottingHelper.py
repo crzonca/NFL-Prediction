@@ -272,21 +272,39 @@ def plot_division_elo_function(teams, division_name, week_name, absolute=False, 
 
 def plot_team_elo_over_season(title, team_names):
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
-    sns.set(style="ticks")
-    max_len = max([len(Playoffs.team_elos[name]) for name in team_names])
+    import Projects.nfl.NFL_Prediction.NFLSeason2019 as Season
 
-    # Remove other teams
-    team_elos = Playoffs.team_elos.copy()
-    other_teams = [team for team in team_elos.keys() if team not in team_names]
-    for other_team in other_teams:
-        del team_elos[other_team]
+    sns.set(style="ticks")
+
+    all_teams_games = list()
+    for team_name in team_names:
+        team_games = Playoffs.completed_games.loc[(Playoffs.completed_games['home_team'] == team_name) |
+                                                  (Playoffs.completed_games['away_team'] == team_name)]
+        all_teams_games.append(team_games)
+    max_len = max([len(team_games) for team_games in all_teams_games])
 
     # Fill out data rows
-    for name in team_names:
-        elos = team_elos[name]
-        while len(elos) < max_len + 1:
-            team_elos[name].append(elos[-1])
-    data = pd.DataFrame(team_elos)
+    teams_elos = pd.DataFrame(columns=team_names)
+    for team_name in team_names:
+        team_games = Playoffs.completed_games.loc[(Playoffs.completed_games['home_team'] == team_name) |
+                                                  (Playoffs.completed_games['away_team'] == team_name)]
+        home = pd.Series(team_games['home_team'] == team_name)
+        elos = pd.Series(team_games.lookup(team_games.index, home.map({True: 'home_elo', False: 'away_elo'})))
+
+        teams = Season.nfl_teams
+        team = Season.get_team(teams, team_name)
+
+        current = pd.Series(team[4])
+        elos = elos.append(current, ignore_index=True)
+        teams_elos[team_name] = elos
+
+    data = pd.DataFrame(columns=team_names)
+    for team_name in team_names:
+        elos = teams_elos[team_name]
+        while len(elos) < max_len + 2:
+            last = pd.Series(elos.iloc[-1])
+            elos = elos.append(last, ignore_index=True)
+        data[team_name] = elos
 
     ax = data.plot.line(figsize=(20, 10))
 
