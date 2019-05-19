@@ -777,8 +777,8 @@ def sort_by_tiebreakers(teams):
 
 
 def compare_win_pct(team1, team2):
-    team1_games_played = team1[1] + team1[2]
-    team2_games_played = team2[1] + team2[2]
+    team1_games_played = team1[1] + team1[2] + team1[3]
+    team2_games_played = team2[1] + team2[2] + team2[3]
     team1_pct = team1[1] / team1_games_played if team1_games_played > 0 else 0
     team2_pct = team2[1] / team2_games_played if team2_games_played > 0 else 0
 
@@ -788,15 +788,12 @@ def compare_win_pct(team1, team2):
 
 
 def compare_head_to_head(team1, team2):
-    # head_to_head_games = list(filter(lambda game: contains_both_teams(team1, team2, game), completed_games))
     head_to_head_games = completed_games.loc[((completed_games['home_team'] == team1[0]) |
                                               (completed_games['away_team'] == team1[0])) &
                                              ((completed_games['home_team'] == team2[0]) |
                                               (completed_games['away_team'] == team2[0]))]
 
-    # team1_victories = list(filter(lambda game: filter_team_victories(team1, game), head_to_head_games))
     team1_victories = get_team_victories(team1[0], head_to_head_games)
-    # team2_victories = list(filter(lambda game: filter_team_victories(team2, game), head_to_head_games))
     team2_victories = get_team_victories(team2[0], head_to_head_games)
 
     if len(team1_victories) - len(team2_victories) == 0:
@@ -813,14 +810,10 @@ def get_team_victories(team_name, games_df):
 
 
 def compare_divisional_record(team1, team2):
-    # team1_divisional_games = list(filter(lambda game: contains_divisional_teams(team1, game), completed_games))
     team1_divisional_games = get_divisional_games(team1[0], completed_games)
-    # team2_divisional_games = list(filter(lambda game: contains_divisional_teams(team2, game), completed_games))
     team2_divisional_games = get_divisional_games(team2[0], completed_games)
 
-    # team1_victories = list(filter(lambda game: filter_team_victories(team1, game), team1_divisional_games))
     team1_victories = get_team_victories(team1[0], team1_divisional_games)
-    # team2_victories = list(filter(lambda game: filter_team_victories(team2, game), team2_divisional_games))
     team2_victories = get_team_victories(team2[0], team2_divisional_games)
 
     if len(team1_victories) - len(team2_victories) == 0:
@@ -846,14 +839,10 @@ def get_divisional_games(team_name, games_df):
 
 
 def compare_common_record(team1, team2):
-    # team1_common_games = list(filter(lambda game: contains_common_opponents(team1, team2, game), completed_games))
     team1_common_games = get_games_against_common_opponents(team1, team2, completed_games)
-    # team2_common_games = list(filter(lambda game: contains_common_opponents(team2, team1, game), completed_games))
     team2_common_games = get_games_against_common_opponents(team2, team1, completed_games)
 
-    # team1_victories = list(filter(lambda game: filter_team_victories(team1, game), team1_common_games))
     team1_victories = get_team_victories(team1[0], team1_common_games)
-    # team2_victories = list(filter(lambda game: filter_team_victories(team2, game), team2_common_games))
     team2_victories = get_team_victories(team2[0], team2_common_games)
 
     if len(team1_victories) - len(team2_victories) == 0:
@@ -875,14 +864,10 @@ def get_games_against_common_opponents(team1, team2, games_df):
 
 
 def compare_conference_record(team1, team2):
-    # team1_conference_games = list(filter(lambda game: contains_conference_teams(team1, game), completed_games))
     team1_conference_games = get_conference_games(team1[0], completed_games)
-    # team2_conference_games = list(filter(lambda game: contains_conference_teams(team2, game), completed_games))
     team2_conference_games = get_conference_games(team2[0], completed_games)
 
-    # team1_victories = list(filter(lambda game: filter_team_victories(team1, game), team1_conference_games))
     team1_victories = get_team_victories(team1[0], team1_conference_games)
-    # team2_victories = list(filter(lambda game: filter_team_victories(team2, game), team2_conference_games))
     team2_victories = get_team_victories(team1[0], team2_conference_games)
 
     if len(team1_victories) - len(team2_victories) == 0:
@@ -912,18 +897,13 @@ def get_conference_games(team_name, games_df):
 
 
 def compare_strength_of_victory(team1, team2):
-    # team1_games = list(filter(lambda g: contains_team(team1, g), completed_games))
     team1_games = completed_games.loc[(completed_games['home_team'] == team1[0]) |
                                       (completed_games['away_team'] == team1[0])]
 
-    # team2_games = list(filter(lambda g: contains_team(team2, g), completed_games))
     team2_games = completed_games.loc[(completed_games['home_team'] == team2[0]) |
                                       (completed_games['away_team'] == team2[0])]
 
-    # team1_victories = list(filter(lambda g: filter_team_victories(team1, g), team1_games))
     team1_victories = get_team_victories(team1[0], team1_games)
-
-    # team2_victories = list(filter(lambda g: filter_team_victories(team2, g), team2_games))
     team2_victories = get_team_victories(team1[0], team2_games)
 
     team1_opponents = (set(team1_victories['home_team'].unique()) |
@@ -961,34 +941,15 @@ def compare_strength_of_victory(team1, team2):
     team2_opponent_win_pct = sum(team2_opponent_victories) / team2_opponent_games_played \
         if team2_opponent_games_played > 0 else 0
 
-    # for game in team1_victories:
-    #     if game[0] == team1[0]:
-    #         opponent = game[2]
-    #     else:
-    #         opponent = game[0]
-    #     opponent_games = list(filter(lambda g: contains_team_name(opponent, g), completed_games))
-    #     opponent_victories = list(filter(lambda g: filter_team_victories([opponent], g), opponent_games))
-    #     team1_opponent_victories.append(len(opponent_victories))
-    #
-    # for game in team2_victories:
-    #     if game[0] == team2[0]:
-    #         opponent = game[2]
-    #     else:
-    #         opponent = game[0]
-    #     opponent_games = list(filter(lambda g: contains_team_name(opponent, g), completed_games))
-    #     opponent_victories = list(filter(lambda g: filter_team_victories([opponent], g), opponent_games))
-    #     team2_opponent_victories.append(len(opponent_victories))
-
     if team1_opponent_win_pct - team2_opponent_win_pct == 0:
         return compare_strength_of_schedule(team1, team2)
     return team1_opponent_win_pct - team2_opponent_win_pct
 
 
 def compare_strength_of_schedule(team1, team2):
-    # team1_games = list(filter(lambda g: contains_team(team1, g), completed_games))
     team1_games = completed_games.loc[(completed_games['home_team'] == team1[0]) |
                                       (completed_games['away_team'] == team1[0])]
-    # team2_games = list(filter(lambda g: contains_team(team2, g), completed_games))
+
     team2_games = completed_games.loc[(completed_games['home_team'] == team2[0]) |
                                       (completed_games['away_team'] == team2[0])]
 
@@ -997,26 +958,6 @@ def compare_strength_of_schedule(team1, team2):
 
     team2_opponents = (set(team2_games['home_team'].unique()) |
                        set(team2_games['away_team'].unique())) - {team2[0]}
-
-    # team1_opponent_victories = list()
-    # team2_opponent_victories = list()
-    # for game in team1_games:
-    #     if game[0] == team1[0]:
-    #         opponent = game[2]
-    #     else:
-    #         opponent = game[0]
-    #     opponent_games = list(filter(lambda g: contains_team_name(opponent, g), completed_games))
-    #     opponent_victories = list(filter(lambda g: filter_team_victories([opponent], g), opponent_games))
-    #     team1_opponent_victories.append(len(opponent_victories))
-    #
-    # for game in team2_games:
-    #     if game[0] == team2[0]:
-    #         opponent = game[2]
-    #     else:
-    #         opponent = game[0]
-    #     opponent_games = list(filter(lambda g: contains_team_name(opponent, g), completed_games))
-    #     opponent_victories = list(filter(lambda g: filter_team_victories([opponent], g), opponent_games))
-    #     team2_opponent_victories.append(len(opponent_victories))
 
     import Projects.nfl.NFL_Prediction.NFLSeason2019 as Season
     team1_opponent_victories = list()
@@ -1057,81 +998,6 @@ def compare_point_diff(team1, team2):
     team2_point_diff = team2[5] - team2[6]
 
     return team1_point_diff - team2_point_diff
-
-
-# def filter_team_victories(team, game):
-#     if game[0] == team[0]:
-#         return game[1] > game[3]
-#     else:
-#         return game[1] < game[3]
-
-
-# def contains_team(team, game):
-#     return game[0] == team[0] or game[2] == team[0]
-
-
-# def contains_team_name(team, game):
-#     return game[0] == team or game[2] == team
-
-
-# def contains_both_teams(team1, team2, game):
-#     return contains_team(team1, game) and contains_team(team2, game)
-
-
-# def contains_divisional_teams(team, game):
-#     name = team[0]
-#     league = get_league_structure()
-#     teams_division = None
-#     for conf_name, conference in league.items():
-#         for div_name, division in conference.items():
-#             if name in division:
-#                 teams_division = division
-#
-#     return (game[0] == name and game[2] in teams_division) or (game[0] in teams_division and game[2] == name)
-
-
-# def contains_conference_teams(team, game):
-#     name = team[0]
-#     league = get_league_structure()
-#     teams_conference = None
-#     for conf_name, conference in league.items():
-#         for div_name, division in conference.items():
-#             if name in division:
-#                 teams_conference = conference
-#
-#     conf_teams = list()
-#     for div_name, division in teams_conference.items():
-#         conf_teams.extend(division)
-#
-#     return (game[0] == name and game[2] in conf_teams) or (game[0] in conf_teams and game[2] == name)
-
-
-# def contains_common_opponents(team1, team2, game):
-#     team1_name = team1[0]
-#     team2_name = team2[0]
-#
-#     home_team = game[0]
-#     away_team = game[2]
-#
-#     team1_opponents = set()
-#     team2_opponents = set()
-#
-#     for completed_game in completed_games:
-#         completed_home_team = completed_game[0]
-#         completed_away_team = completed_game[2]
-#         if completed_home_team == team1_name:
-#             team1_opponents.add(completed_away_team)
-#         if completed_away_team == team1_name:
-#             team1_opponents.add(completed_home_team)
-#
-#         if completed_home_team == team2_name:
-#             team2_opponents.add(completed_away_team)
-#         if completed_away_team == team2_name:
-#             team2_opponents.add(completed_home_team)
-#
-#     common = team1_opponents.intersection(team2_opponents)
-#
-#     return (home_team == team1_name and away_team in common) or (home_team in common and away_team == team1_name)
 
 
 def get_schedule_difficulty(teams, team_name, remaining=False):
