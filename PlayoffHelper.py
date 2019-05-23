@@ -1,12 +1,19 @@
 import random
 import statistics
 from functools import cmp_to_key
+
 import pandas as pd
 
 import Projects.nfl.NFL_Prediction.NFL as NFL
 import Projects.nfl.NFL_Prediction.StandingsHelper as Standings
 
-completed_games = pd.DataFrame()
+completed_games = pd.DataFrame(columns=['home_team', 'away_team', 'home_score', 'away_score', 'home_spread',
+                                        'home_pass_completions', 'home_pass_attempts', 'home_passing_touchdowns',
+                                        'home_interceptions_thrown', 'home_net_passing_yards', 'home_total_yards',
+                                        'home_elo',
+                                        'away_pass_completions', 'away_pass_attempts', 'away_passing_touchdowns',
+                                        'away_interceptions_thrown', 'away_net_passing_yards', 'away_total_yards',
+                                        'away_elo'])
 
 
 def get_team(teams, team_name):
@@ -569,16 +576,22 @@ def get_superbowl_schedule():
     return games
 
 
-def monte_carlo(teams, trials=100000):
+def monte_carlo(teams, trials=1e5, verbose=False):
     all_trials = list()
-    # 1,000,000 Trials
-    for trial in range(trials):
+
+    if verbose:
+        print(int(trials), 'Trials')
+        print('Simulating remaining games...')
+
+    # For each trial
+    for trial in range(int(trials)):
         # Get just the name, record and elo of each team
         pseudo_teams = [(team[0], team[1], team[2], team[3], team[4], 0, 0) for team in teams]
 
         # For each game in the list of games yet to be played
         schedule, spreads, neutral_location = zip(*get_schedule())
-        for game in schedule[len(completed_games):]:
+        remaining_schedule = schedule[len(completed_games):]
+        for game in remaining_schedule:
             # Get the home and away teams
             home = game[0]
             away = game[1]
@@ -594,10 +607,12 @@ def monte_carlo(teams, trials=100000):
 
             # Update the teams records based on the simulated outcome
             home_wins = home[1] + 1 if home_victory else home[1]
-            home_losses = home[2] + 1 if not home_victory else home[2]
-            home_ties = home[3] + 1 if draw else home[3]
-            away_wins = away[1] + 1 if not home_victory else away[1]
             away_losses = away[2] + 1 if home_victory else away[2]
+
+            home_losses = home[2] + 1 if not home_victory else home[2]
+            away_wins = away[1] + 1 if not home_victory else away[1]
+
+            home_ties = home[3] + 1 if draw else home[3]
             away_ties = away[3] + 1 if draw else away[3]
 
             # Update the teams elo based on the simulated outcome
@@ -615,21 +630,37 @@ def monte_carlo(teams, trials=100000):
         all_trials.append(pseudo_teams)
 
     averaged_teams = list()
+    playoff_teams = list()
 
     # Get a list of team names
     team_names = [team[0] for team in teams]
 
+    if verbose:
+        print('Analyzing team outcomes...')
+
     # For each team name in the list
     for team_name in team_names:
+        if verbose:
+            print('Analyzing', team_name)
+
         team_trials = list()
 
         # For each trial
-        for trial in all_trials:
+        for trial_num, trial in enumerate(all_trials):
+            if verbose:
+                print('Getting playoff picture for trial', trial_num)
             # Get the pseudo team
             team = get_team(trial, team_name)
 
             # Add it to a list of all pseudo teams with that name over all trials
             team_trials.append(team)
+
+            # Get the teams in the playoffs for each trial
+            afc_playoff_teams, nfc_playoff_teams = get_playoff_picture(trial)
+            trial_playoff_teams = list()
+            trial_playoff_teams.extend(afc_playoff_teams)
+            trial_playoff_teams.extend(nfc_playoff_teams)
+            playoff_teams.append(trial_playoff_teams)
 
         # Get a list of the pseudo teams wins for each trial
         wins = [team[1] for team in team_trials]
@@ -654,19 +685,10 @@ def monte_carlo(teams, trials=100000):
         # Add it to a final list
         averaged_teams.append(averaged_team)
 
-    # Get the teams in the playoffs for each trial
-    playoff_teams = list()
-    for trial in all_trials:
-        afc_playoff_teams, nfc_playoff_teams = get_playoff_picture(trial)
-        trial_playoff_teams = list()
-        trial_playoff_teams.extend(afc_playoff_teams)
-        trial_playoff_teams.extend(nfc_playoff_teams)
-        playoff_teams.append(trial_playoff_teams)
-
     # Get the percent of trails where each team is in the playoffs
     averaged_teams_with_chances = list()
     for team in averaged_teams:
-        playoff_appearances = list(filter(lambda s: team[0] in [avg[0] for avg in s], playoff_teams))
+        playoff_appearances = list(filter(lambda sim: team[0] in [avg[0] for avg in sim], playoff_teams))
         playoff_chances = 100 * len(playoff_appearances) / trials
         team = (team[0], team[1], team[2], team[3], team[4], playoff_chances)
         averaged_teams_with_chances.append(team)
@@ -676,6 +698,7 @@ def monte_carlo(teams, trials=100000):
 
 
 def get_pct_chance(home_elo, away_elo):
+    # Get a teams expected chance to win based off each teams elo
     q_home = 10 ** (home_elo / 400)
     q_away = 10 ** (away_elo / 400)
 
@@ -685,56 +708,83 @@ def get_pct_chance(home_elo, away_elo):
 
 
 def get_playoff_picture(teams, verbose=False):
+    # Sort the teams by playoff tiebreakers
     teams = sort_by_tiebreakers(teams)
+
+    # Get the league structure
     league = get_league_structure()
 
+    # Lists for each playoff contender type
     first_round_byes = list()
     division_leaders = list()
     wild_cards = list()
 
+    # Lists for playoff contenders split by conference
     afc_division_leaders = list()
     afc_wild_cards = list()
 
     nfc_division_leaders = list()
     nfc_wild_cards = list()
 
+    # For each conference
     for conf_name, conference in league.items():
         conference_teams = list()
 
+        # For each division
         for div_name, division in conference.items():
+            # Get the teams within each division
             division_teams = [get_team(teams, team_name) for team_name in division]
+
+            # Sort the division by the playoff tiebreakers
             division_teams = sort_by_tiebreakers(division_teams)
 
+            # Append the top team to the list of division leaders
             if conf_name == 'AFC':
                 afc_division_leaders.append(division_teams[0])
             elif conf_name == 'NFC':
                 nfc_division_leaders.append(division_teams[0])
             division_leaders.append(division_teams[0])
 
+            # Add the teams within the division to the list of teams within the conference
             conference_teams.extend(division_teams)
 
+        # Sort the conference by the playoff tiebreakers
         conference_teams = sort_by_tiebreakers(conference_teams)
+
+        # Add the top team to the list of teams with a first round bye
         first_round_byes.append(conference_teams[0])
 
+        # Get the name of the top team in the conference
         conf_leader = conference_teams[0][0]
+
+        # Get the division of the top team in the conference
         conf_leaders_division = None
         for div_name, division in conference.items():
             if conf_leader in division:
                 conf_leaders_division = division
+
+        # For each of the next best teams in the conference
         for runner_up in range(1, 5):
             runner_up_name = conference_teams[runner_up][0]
+
+            # Get the division of the next best team
             runner_up_division = None
             for div_name, division in conference.items():
                 if runner_up_name in division:
                     runner_up_division = division
+
+            # If the division of the runner up is different from the division of the conference leader
             if runner_up_division != conf_leaders_division:
+                # Add the runner up to the list of teams with a first round bye
                 first_round_byes.append(conference_teams[runner_up])
                 break
 
+        # Get a list of the remaining teams that are not a division leader
         other_teams = conference_teams.copy()
         other_teams = list(set(other_teams) - set(division_leaders))
         other_teams = sort_by_tiebreakers(other_teams)
 
+        # Add the top 2 teams (that are not division leaders) from each conference top the list of wild cards
         if conf_name == 'AFC':
             afc_wild_cards.append(other_teams[0])
             afc_wild_cards.append(other_teams[1])
@@ -744,6 +794,7 @@ def get_playoff_picture(teams, verbose=False):
         wild_cards.append(other_teams[0])
         wild_cards.append(other_teams[1])
 
+    # Print the playoff teams
     if verbose:
         print(Standings.Colors.UNDERLINE + 'First Round Byes:' + Standings.Colors.ENDC)
         first_round_byes = [team[0] for team in first_round_byes]
@@ -760,52 +811,73 @@ def get_playoff_picture(teams, verbose=False):
         print('\n'.join(wild_cards))
         print()
 
+    # Create a list of AFC playoff teams
     afc_playoff_teams = list()
     afc_playoff_teams.extend(sort_by_tiebreakers(afc_division_leaders))
     afc_playoff_teams.extend(sort_by_tiebreakers(afc_wild_cards))
 
+    # Create a list of NFC playoff teams
     nfc_playoff_teams = list()
     nfc_playoff_teams.extend(sort_by_tiebreakers(nfc_division_leaders))
     nfc_playoff_teams.extend(sort_by_tiebreakers(nfc_wild_cards))
 
+    # Return all of the playoff teams
     return afc_playoff_teams, nfc_playoff_teams
 
 
 def sort_by_tiebreakers(teams):
+    # Get a list of teams sorted by the official NFL playoff tiebreakers
     sorted_teams = sorted(teams, key=cmp_to_key(compare_win_pct), reverse=True)
     return sorted_teams
 
 
 def compare_win_pct(team1, team2):
+    # Get the percentage of games each team has won
     team1_games_played = team1[1] + team1[2] + team1[3]
     team2_games_played = team2[1] + team2[2] + team2[3]
     team1_win_pct = team1[1] / team1_games_played if team1_games_played > 0 else 0
     team2_win_pct = team2[1] / team2_games_played if team2_games_played > 0 else 0
 
+    # If they have each won the same percentage of games
     if team1_win_pct - team2_win_pct == 0:
+        # Get the percentage of games each team has lost
         team1_loss_pct = team1[2] / team1_games_played if team1_games_played > 0 else 0
         team2_loss_pct = team2[2] / team2_games_played if team2_games_played > 0 else 0
+
+        # If they have each lost the same percentage of games
         if team2_loss_pct - team1_loss_pct == 0:
+            # Compare the teams based on their head to head games
             return compare_head_to_head(team1, team2)
+
+        # Sort based on which ever team lost least
         return team2_loss_pct - team1_loss_pct
+
+    # Sort based on which ever team won most
     return team1_win_pct - team2_win_pct
 
 
 def compare_head_to_head(team1, team2):
+    # Get the games between both teams
     head_to_head_games = completed_games.loc[((completed_games['home_team'] == team1[0]) |
                                               (completed_games['away_team'] == team1[0])) &
                                              ((completed_games['home_team'] == team2[0]) |
                                               (completed_games['away_team'] == team2[0]))]
 
+    # Get the number of victories each team had
     team1_victories = get_team_victories(team1[0], head_to_head_games)
     team2_victories = get_team_victories(team2[0], head_to_head_games)
 
+    # If they each won as many as they lost
     if len(team1_victories) - len(team2_victories) == 0:
+        # Compare the teams based on their record against teams in their division
         return compare_divisional_record(team1, team2)
+
+    # Sort based on which ever team won most
     return len(team1_victories) - len(team2_victories)
 
 
 def get_team_victories(team_name, games_df):
+    # Get the games where the team won
     team_victories = games_df.loc[((games_df['home_team'] == team_name) &
                                    (games_df['home_score'] > games_df['away_score'])) |
                                   ((games_df['away_team'] == team_name) &
@@ -814,21 +886,29 @@ def get_team_victories(team_name, games_df):
 
 
 def compare_divisional_record(team1, team2):
+    # Get they games against opponents within each teams division
     team1_divisional_games = get_divisional_games(team1[0], completed_games)
     team2_divisional_games = get_divisional_games(team2[0], completed_games)
 
+    # Get the number of victories each team had
     team1_victories = get_team_victories(team1[0], team1_divisional_games)
     team2_victories = get_team_victories(team2[0], team2_divisional_games)
-    
+
+    # Get the percentage of victories each team had
     team1_divisional_pct = len(team1_victories) / len(team1_divisional_games) if len(team1_divisional_games) > 0 else 0
     team2_divisional_pct = len(team2_victories) / len(team2_divisional_games) if len(team2_divisional_games) > 0 else 0
 
+    # If they have each won the same percentage of games
     if team1_divisional_pct - team2_divisional_pct == 0:
+        # Compare the teams based on their record against common opponents
         return compare_common_record(team1, team2)
+
+    # Sort based on which ever team won most
     return team1_divisional_pct - team2_divisional_pct
 
 
 def get_divisional_games(team_name, games_df):
+    # Get the division of the team
     nfl = get_league_structure()
     teams_division = None
     for conf_name, conf in nfl.items():
@@ -837,6 +917,7 @@ def get_divisional_games(team_name, games_df):
                 teams_division = division
                 break
 
+    # Get the games where the opponent is in the teams division
     divisional_games = games_df.loc[((games_df['home_team'] == team_name) &
                                      (games_df['away_team'].isin(teams_division))) |
                                     ((games_df['away_team'] == team_name) &
@@ -846,27 +927,37 @@ def get_divisional_games(team_name, games_df):
 
 
 def compare_common_record(team1, team2):
+    # Get they games against common opponents
     team1_common_games = get_games_against_common_opponents(team1, team2, completed_games)
     team2_common_games = get_games_against_common_opponents(team2, team1, completed_games)
 
+    # Get the number of victories each team had
     team1_victories = get_team_victories(team1[0], team1_common_games)
     team2_victories = get_team_victories(team2[0], team2_common_games)
 
+    # Get the percentage of victories each team had
     team1_common_pct = len(team1_victories) / len(team1_common_games) if len(team1_common_games) > 0 else 0
     team2_common_pct = len(team2_victories) / len(team2_common_games) if len(team2_common_games) > 0 else 0
 
+    # If they have each won the same percentage of games
     if team1_common_pct - team2_common_pct == 0:
+        # Compare the teams based on their record against teams in their conference
         return compare_conference_record(team1, team2)
+
+    # Sort based on which ever team won most
     return team1_common_pct - team2_common_pct
 
 
 def get_games_against_common_opponents(team1, team2, games_df):
+    # Get all of the games each team played in
     team1_games = games_df.loc[(games_df['home_team'] == team1[0]) | (games_df['away_team'] == team1[0])]
     team2_games = games_df.loc[(games_df['home_team'] == team2[0]) | (games_df['away_team'] == team2[0])]
 
+    # Get all of the opponents team 2 faced (excluding team 1)
     team2_opponents = (set(team2_games['home_team'].unique()) |
                        set(team2_games['away_team'].unique())) - {team2[0]} - {team1[0]}
 
+    # Get all the games where team 1 faced an opponent that team 2 faced
     common_opponents = team1_games.loc[(team1_games['home_team'].isin(team2_opponents)) |
                                        (team1_games['away_team'].isin(team2_opponents))]
 
@@ -874,21 +965,29 @@ def get_games_against_common_opponents(team1, team2, games_df):
 
 
 def compare_conference_record(team1, team2):
+    # Get they games against opponents within each teams conference
     team1_conference_games = get_conference_games(team1[0], completed_games)
     team2_conference_games = get_conference_games(team2[0], completed_games)
 
+    # Get the number of victories each team had
     team1_victories = get_team_victories(team1[0], team1_conference_games)
     team2_victories = get_team_victories(team2[0], team2_conference_games)
 
+    # Get the percentage of victories each team had
     team1_conference_pct = len(team1_victories) / len(team1_conference_games) if len(team1_conference_games) > 0 else 0
     team2_conference_pct = len(team2_victories) / len(team2_conference_games) if len(team2_conference_games) > 0 else 0
 
+    # If they have each won the same percentage of games
     if team1_conference_pct - team2_conference_pct == 0:
+        # Compare the teams based on the total number of wins of the teams they defeated
         return compare_strength_of_victory(team1, team2)
+
+    # Sort based on which ever team won most
     return team1_conference_pct - team2_conference_pct
 
 
 def get_conference_games(team_name, games_df):
+    # Get the conference of the team
     nfl = get_league_structure()
     teams_conference = None
     for conf_name, conf in nfl.items():
@@ -897,10 +996,12 @@ def get_conference_games(team_name, games_df):
                 teams_conference = conf
                 break
 
+    # Get all the teams within the conference
     conference_teams = list()
     for div_name, division in teams_conference.items():
         conference_teams.extend(division)
 
+    # Get the games where the opponent is in the teams conference
     conference_games = games_df.loc[((games_df['home_team'] == team_name) &
                                      (games_df['away_team'].isin(conference_teams))) |
                                     ((games_df['away_team'] == team_name) &
@@ -910,28 +1011,33 @@ def get_conference_games(team_name, games_df):
 
 
 def compare_strength_of_victory(team1, team2):
+    import Projects.nfl.NFL_Prediction.NFLSeason2019 as Season
+
+    # Get all the games each team competed in
     team1_games = completed_games.loc[(completed_games['home_team'] == team1[0]) |
                                       (completed_games['away_team'] == team1[0])]
 
     team2_games = completed_games.loc[(completed_games['home_team'] == team2[0]) |
                                       (completed_games['away_team'] == team2[0])]
 
+    # Get all of the games where each team was victorious
     team1_victories = get_team_victories(team1[0], team1_games)
     team2_victories = get_team_victories(team2[0], team2_games)
 
+    # Get all of the opponents each team defeated
     team1_opponents = (set(team1_victories['home_team'].unique()) |
                        set(team1_victories['away_team'].unique())) - {team1[0]}
 
     team2_opponents = (set(team2_victories['home_team'].unique()) |
                        set(team2_victories['away_team'].unique())) - {team2[0]}
 
-    import Projects.nfl.NFL_Prediction.NFLSeason2019 as Season
+    # Total the wins, losses and ties of each teams opponents
     team1_opponent_victories = list()
     team1_opponent_losses = list()
     team1_opponent_ties = list()
     for opponent in team1_opponents:
         teams = Season.nfl_teams
-        opponent = Season.get_team(teams, opponent)
+        opponent = get_team(teams, opponent)
         team1_opponent_victories.append(opponent[1])
         team1_opponent_losses.append(opponent[2])
         team1_opponent_ties.append(opponent[3])
@@ -941,11 +1047,12 @@ def compare_strength_of_victory(team1, team2):
     team2_opponent_ties = list()
     for opponent in team2_opponents:
         teams = Season.nfl_teams
-        opponent = Season.get_team(teams, opponent)
+        opponent = get_team(teams, opponent)
         team2_opponent_victories.append(opponent[1])
         team2_opponent_losses.append(opponent[2])
         team2_opponent_ties.append(opponent[3])
 
+    # Get the combined win percentage of each teams opponents
     team1_opponent_games_played = sum(team1_opponent_victories) + sum(team1_opponent_losses) + sum(team1_opponent_ties)
     team1_opponent_win_pct = sum(team1_opponent_victories) / team1_opponent_games_played \
         if team1_opponent_games_played > 0 else 0
@@ -954,31 +1061,39 @@ def compare_strength_of_victory(team1, team2):
     team2_opponent_win_pct = sum(team2_opponent_victories) / team2_opponent_games_played \
         if team2_opponent_games_played > 0 else 0
 
+    # If each teams opponents have the same combined win percentage
     if team1_opponent_win_pct - team2_opponent_win_pct == 0:
+        # Compare the teams based on the total number of wins of the teams they faced
         return compare_strength_of_schedule(team1, team2)
+
+    # Sort based on which ever team defeated opponents with the highest combined win percentage
     return team1_opponent_win_pct - team2_opponent_win_pct
 
 
 def compare_strength_of_schedule(team1, team2):
+    import Projects.nfl.NFL_Prediction.NFLSeason2019 as Season
+
+    # Get all the games each team competed in
     team1_games = completed_games.loc[(completed_games['home_team'] == team1[0]) |
                                       (completed_games['away_team'] == team1[0])]
 
     team2_games = completed_games.loc[(completed_games['home_team'] == team2[0]) |
                                       (completed_games['away_team'] == team2[0])]
 
+    # Get all of the opponents each team faced
     team1_opponents = (set(team1_games['home_team'].unique()) |
                        set(team1_games['away_team'].unique())) - {team1[0]}
 
     team2_opponents = (set(team2_games['home_team'].unique()) |
                        set(team2_games['away_team'].unique())) - {team2[0]}
 
-    import Projects.nfl.NFL_Prediction.NFLSeason2019 as Season
+    # Total the wins, losses and ties of each teams opponents
     team1_opponent_victories = list()
     team1_opponent_losses = list()
     team1_opponent_ties = list()
     for opponent in team1_opponents:
         teams = Season.nfl_teams
-        opponent = Season.get_team(teams, opponent)
+        opponent = get_team(teams, opponent)
         team1_opponent_victories.append(opponent[1])
         team1_opponent_losses.append(opponent[2])
         team1_opponent_ties.append(opponent[3])
@@ -988,11 +1103,12 @@ def compare_strength_of_schedule(team1, team2):
     team2_opponent_ties = list()
     for opponent in team2_opponents:
         teams = Season.nfl_teams
-        opponent = Season.get_team(teams, opponent)
+        opponent = get_team(teams, opponent)
         team2_opponent_victories.append(opponent[1])
         team2_opponent_losses.append(opponent[2])
         team2_opponent_ties.append(opponent[3])
 
+    # Get the combined win percentage of each teams opponents
     team1_opponent_games_played = sum(team1_opponent_victories) + sum(team1_opponent_losses) + sum(team1_opponent_ties)
     team1_opponent_win_pct = sum(team1_opponent_victories) / team1_opponent_games_played \
         if team1_opponent_games_played > 0 else 0
@@ -1001,59 +1117,82 @@ def compare_strength_of_schedule(team1, team2):
     team2_opponent_win_pct = sum(team2_opponent_victories) / team2_opponent_games_played \
         if team2_opponent_games_played > 0 else 0
 
+    # If each teams opponents have the same combined win percentage
     if team1_opponent_win_pct - team2_opponent_win_pct == 0:
+        # Compare the teams based on their point differential
         return compare_point_diff(team1, team2)
+
+    # Sort based on which ever team faced opponents with the highest combined win percentage
     return team1_opponent_win_pct - team2_opponent_win_pct
 
 
 def compare_point_diff(team1, team2):
+    # Get the point differential of each team
     team1_point_diff = team1[5] - team1[6]
     team2_point_diff = team2[5] - team2[6]
 
+    # Sort based on which ever team has the highest point differential
     return team1_point_diff - team2_point_diff
 
 
 def get_schedule_difficulty(teams, team_name, remaining=False):
+    # Get the schedule
     schedule, spreads, neutral_location = zip(*get_schedule())
+
+    # If only remaining games
     if remaining:
+        # Remove the completed games
         schedule = schedule[len(completed_games):]
 
+    # Filter the total schedule down to just the games the team is in
     teams_schedule = list(filter(lambda g: g[0] == team_name or g[1] == team_name, schedule))
     if len(teams_schedule) == 0:
         return 0
 
+    # For each game in the teams schedule
     opponent_elos = list()
     for game in teams_schedule:
+        # Get the teams opponent
         opponent = None
         if game[0] == team_name:
             opponent = get_team(teams, game[1])
         elif game[1] == team_name:
             opponent = get_team(teams, game[0])
+
+        # Add the opponents elo to the list
         opponent_elos.append(opponent[4])
 
+    # Get the standard deviation of the opponents
     if len(opponent_elos) > 1:
         deviation = statistics.pstdev(opponent_elos)
     else:
         deviation = 0
 
+    # Return the average opponent elo and the standard deviation
     return statistics.mean(opponent_elos), deviation
 
 
 def create_playoff_bracket(teams):
+    # Create a list of playoff teams and their seed
     seeded_teams = list()
     for seed, team in enumerate(teams):
         seeded_teams.append((seed, team))
 
+    # Get the length of the longest name in the list of playoff teams
     max_name_length = max([len(team[0]) for team in teams]) + 3
 
+    # Pad the team names for formatting
     padded_team_names = [team[0].rjust(max_name_length) for team in teams]
-    for index, name in enumerate(padded_team_names):
-        if index == 4 or index == 5:
+
+    # Put an asterisk next to the wildcard teams
+    for seed, name in enumerate(padded_team_names):
+        if seed == 4 or seed == 5:
             name = name.strip()
             name = '*' + name
             name = name.rjust(max_name_length)
-            padded_team_names[index] = name
+            padded_team_names[seed] = name
 
+    # Print a bracket
     print(' ' * 5 + padded_team_names[0] + '--|')
     print(' ' * (max_name_length + 7) + '|')
     print(' ' * (max_name_length + 7) + '|----|')

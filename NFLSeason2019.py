@@ -19,7 +19,7 @@ def season():
     nfl_teams = handle_week(nfl_teams, 'Preseason Week 1', pre_week_1, eliminated_teams, '6 August 2019')
     nfl_teams = handle_week(nfl_teams, 'Preseason Week 2', pre_week_2, eliminated_teams, '13 August 2019')
     nfl_teams = handle_week(nfl_teams, 'Preseason Week 3', pre_week_3, eliminated_teams, '20 August 2019')
-    handle_week(nfl_teams, 'Preseason Week 4', pre_week_4, eliminated_teams, '27 August 2019')
+    nfl_teams = handle_week(nfl_teams, 'Preseason Week 4', pre_week_4, eliminated_teams, '27 August 2019')
 
     # Reset teams after preseason
     nfl_teams = set_up_teams()
