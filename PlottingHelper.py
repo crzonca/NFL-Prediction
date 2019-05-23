@@ -298,6 +298,7 @@ def plot_team_elo_over_season(title, team_names):
         elos = elos.append(current, ignore_index=True)
         teams_elos[team_name] = elos
 
+    # Extend the line another week
     data = pd.DataFrame(columns=team_names)
     for team_name in team_names:
         elos = teams_elos[team_name]

@@ -576,7 +576,7 @@ def get_superbowl_schedule():
     return games
 
 
-def monte_carlo(teams, trials=1e5, verbose=False):
+def monte_carlo(teams, trials=1e4, verbose=False):
     all_trials = list()
 
     if verbose:
@@ -629,38 +629,21 @@ def monte_carlo(teams, trials=1e5, verbose=False):
         # Add all the pseudo teams in the trial to a list
         all_trials.append(pseudo_teams)
 
+    if verbose:
+        print('Analyzing team outcomes...')
+
     averaged_teams = list()
     playoff_teams = list()
 
     # Get a list of team names
     team_names = [team[0] for team in teams]
 
-    if verbose:
-        print('Analyzing team outcomes...')
-
-    # For each team name in the list
+    # For each team name
     for team_name in team_names:
         if verbose:
             print('Analyzing', team_name)
 
-        team_trials = list()
-
-        # For each trial
-        for trial_num, trial in enumerate(all_trials):
-            if verbose:
-                print('Getting playoff picture for trial', trial_num)
-            # Get the pseudo team
-            team = get_team(trial, team_name)
-
-            # Add it to a list of all pseudo teams with that name over all trials
-            team_trials.append(team)
-
-            # Get the teams in the playoffs for each trial
-            afc_playoff_teams, nfc_playoff_teams = get_playoff_picture(trial)
-            trial_playoff_teams = list()
-            trial_playoff_teams.extend(afc_playoff_teams)
-            trial_playoff_teams.extend(nfc_playoff_teams)
-            playoff_teams.append(trial_playoff_teams)
+        team_trials = [get_team(trial, team_name) for trial in all_trials]
 
         # Get a list of the pseudo teams wins for each trial
         wins = [team[1] for team in team_trials]
@@ -684,6 +667,18 @@ def monte_carlo(teams, trials=1e5, verbose=False):
 
         # Add it to a final list
         averaged_teams.append(averaged_team)
+
+    # For each trial
+    for trial_num, trial in enumerate(all_trials):
+        if verbose:
+            print('Getting playoff picture for trial', trial_num)
+
+        # Get the teams in the playoffs for each trial
+        afc_playoff_teams, nfc_playoff_teams = get_playoff_picture(trial)
+        trial_playoff_teams = list()
+        trial_playoff_teams.extend(afc_playoff_teams)
+        trial_playoff_teams.extend(nfc_playoff_teams)
+        playoff_teams.append(trial_playoff_teams)
 
     # Get the percent of trails where each team is in the playoffs
     averaged_teams_with_chances = list()

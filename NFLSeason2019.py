@@ -70,8 +70,8 @@ def season():
     Standings.print_schedule_difficulty(nfl_teams, remaining=True)
 
     # Playoff Info
-    afc_playoff_teams, nfc_playoff_teams = Playoffs.get_playoff_picture(nfl_teams)
-    print('Current Playoff Picture')
+    print('Current Playoff Picture:')
+    afc_playoff_teams, nfc_playoff_teams = Playoffs.get_playoff_picture(nfl_teams, verbose=True)
     print('-' * 15 + 'AFC' + '-' * 15)
     Playoffs.create_playoff_bracket(afc_playoff_teams)
     print()
