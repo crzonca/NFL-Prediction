@@ -576,9 +576,12 @@ def get_superbowl_schedule():
     return games
 
 
-def monte_carlo(teams, trials=1e4, verbose=False):
+def monte_carlo(teams, trials=1e3, verbose=False):
+    import maya
+
     all_trials = list()
 
+    start = maya.now()
     if verbose:
         print(int(trials), 'Trials')
         print('Simulating remaining games...')
@@ -687,6 +690,10 @@ def monte_carlo(teams, trials=1e4, verbose=False):
         playoff_chances = 100 * len(playoff_appearances) / trials
         team = (team[0], team[1], team[2], team[3], team[4], playoff_chances)
         averaged_teams_with_chances.append(team)
+
+    end = maya.now()
+    if verbose:
+        print('Elapsed Time', end - start)
 
     # Print the standings
     Standings.print_monte_carlo_simulation(averaged_teams_with_chances)
