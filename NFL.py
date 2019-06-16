@@ -6,6 +6,9 @@ import maya
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from imblearn.over_sampling import RandomOverSampler
+from scipy import stats
+from scipy.stats import norm
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import VotingClassifier
@@ -47,10 +50,12 @@ def run_all():
     frames = add_stat_differences(frames)
     all_games = combine_frames(frames)
 
+    # over_sampled = oversample_data()
+
     won_series = plot_corr()
     best_features = get_best_features()
 
-    won_series = won_series.filter(best_features).sort_values(kind="quicksort", ascending=False)
+    won_series = won_series.filter(best_features).sort_values(kind='quicksort', ascending=False)
     best_features = list(won_series.index)
 
     evaluate_model_parameters(best_features)
@@ -858,9 +863,9 @@ def combine_frames(frames):
     num_wins = len(combined.loc[combined['home_victory'] == 1])
     num_losses = len(combined.loc[combined['home_victory'] == 0])
     num_ties = len(combined.loc[combined['home_draw'] == 1])
-    print("Number of wins:  {0} ({1:2.2f}%)".format(num_wins, (num_wins / num_obs) * 100))
-    print("Number of losses: {0} ({1:2.2f}%)".format(num_losses, (num_losses / num_obs) * 100))
-    print("Number of ties: {0} ({1:2.2f}%)".format(num_ties, (num_ties / num_obs) * 100))
+    print('Number of wins:  {0} ({1:2.2f}%)'.format(num_wins, (num_wins / num_obs) * 100))
+    print('Number of losses: {0} ({1:2.2f}%)'.format(num_losses, (num_losses / num_obs) * 100))
+    print('Number of ties: {0} ({1:2.2f}%)'.format(num_ties, (num_ties / num_obs) * 100))
     print()
 
     # Get the percentage of the target variable that is true during regular season games
@@ -869,9 +874,9 @@ def combine_frames(frames):
     num_wins = len(regular_season_games.loc[regular_season_games['home_victory'] == 1])
     num_losses = len(regular_season_games.loc[regular_season_games['home_victory'] == 0])
     num_ties = len(regular_season_games.loc[regular_season_games['home_draw'] == 1])
-    print("Number of regular season wins:  {0} ({1:2.2f}%)".format(num_wins, (num_wins / num_obs) * 100))
-    print("Number of regular season losses: {0} ({1:2.2f}%)".format(num_losses, (num_losses / num_obs) * 100))
-    print("Number of regular season ties: {0} ({1:2.2f}%)".format(num_ties, (num_ties / num_obs) * 100))
+    print('Number of regular season wins:  {0} ({1:2.2f}%)'.format(num_wins, (num_wins / num_obs) * 100))
+    print('Number of regular season losses: {0} ({1:2.2f}%)'.format(num_losses, (num_losses / num_obs) * 100))
+    print('Number of regular season ties: {0} ({1:2.2f}%)'.format(num_ties, (num_ties / num_obs) * 100))
     print()
 
     # Get the percentage of the target variable that is true during post season games (excluding the superbowls)
@@ -880,9 +885,9 @@ def combine_frames(frames):
     num_wins = len(playoff_games.loc[playoff_games['home_victory'] == 1])
     num_losses = len(playoff_games.loc[playoff_games['home_victory'] == 0])
     num_ties = len(playoff_games.loc[playoff_games['home_draw'] == 1])
-    print("Number of playoff wins:  {0} ({1:2.2f}%)".format(num_wins, (num_wins / num_obs) * 100))
-    print("Number of playoff losses: {0} ({1:2.2f}%)".format(num_losses, (num_losses / num_obs) * 100))
-    print("Number of playoff ties: {0} ({1:2.2f}%)".format(num_ties, (num_ties / num_obs) * 100))
+    print('Number of playoff wins:  {0} ({1:2.2f}%)'.format(num_wins, (num_wins / num_obs) * 100))
+    print('Number of playoff losses: {0} ({1:2.2f}%)'.format(num_losses, (num_losses / num_obs) * 100))
+    print('Number of playoff ties: {0} ({1:2.2f}%)'.format(num_ties, (num_ties / num_obs) * 100))
     print()
 
     # Get the percentage of the target variable that is true during the superbowl
@@ -891,9 +896,9 @@ def combine_frames(frames):
     num_wins = len(superbowl_games.loc[superbowl_games['home_victory'] == 1])
     num_losses = len(superbowl_games.loc[superbowl_games['home_victory'] == 0])
     num_ties = len(superbowl_games.loc[superbowl_games['home_draw'] == 1])
-    print("Number of superbowl wins:  {0} ({1:2.2f}%)".format(num_wins, (num_wins / num_obs) * 100))
-    print("Number of superbowl losses: {0} ({1:2.2f}%)".format(num_losses, (num_losses / num_obs) * 100))
-    print("Number of superbowl ties: {0} ({1:2.2f}%)".format(num_ties, (num_ties / num_obs) * 100))
+    print('Number of superbowl wins:  {0} ({1:2.2f}%)'.format(num_wins, (num_wins / num_obs) * 100))
+    print('Number of superbowl losses: {0} ({1:2.2f}%)'.format(num_losses, (num_losses / num_obs) * 100))
+    print('Number of superbowl ties: {0} ({1:2.2f}%)'.format(num_ties, (num_ties / num_obs) * 100))
     print()
 
     """It's clear that the teams chance of victory is increased when the are playing at home (57.3% chance at home 
@@ -908,10 +913,122 @@ def combine_frames(frames):
     return combined
 
 
-def plot_corr():
-    """Gets the correlation between all relevant features and the home_victory label."""
+def oversample_data():
+    """Over samples the data to get an even number of wins and losses."""
     # Get the data frame for all seasons
-    df = pd.read_csv(game_data_dir + '20022018.csv')
+    original_df = pd.read_csv(game_data_dir + '20022018.csv')
+
+    # Over sample the data to get an even number of wins and losses
+    random_over_sampler = RandomOverSampler()
+    oversampled, y_ros = random_over_sampler.fit_sample(original_df, original_df['home_victory'])
+
+    df = pd.DataFrame(data=oversampled, columns=original_df.columns)
+
+    # Get the percentage of the target variable that is true
+    num_obs = len(df)
+    num_wins = len(df.loc[df['home_victory'] == 1])
+    num_losses = len(df.loc[df['home_victory'] == 0])
+    num_ties = len(df.loc[df['home_draw'] == 1])
+    print('Number of wins:  {0} ({1:2.2f}%)'.format(num_wins, (num_wins / num_obs) * 100))
+    print('Number of losses: {0} ({1:2.2f}%)'.format(num_losses, (num_losses / num_obs) * 100))
+    print('Number of ties: {0} ({1:2.2f}%)'.format(num_ties, (num_ties / num_obs) * 100))
+    print()
+
+    # Get the percentage of the target variable that is true during regular season games
+    regular_season_games = df.loc[(df['week'] < 18)]
+    num_obs = len(regular_season_games)
+    num_wins = len(regular_season_games.loc[regular_season_games['home_victory'] == 1])
+    num_losses = len(regular_season_games.loc[regular_season_games['home_victory'] == 0])
+    num_ties = len(regular_season_games.loc[regular_season_games['home_draw'] == 1])
+    print('Number of regular season wins:  {0} ({1:2.2f}%)'.format(num_wins, (num_wins / num_obs) * 100))
+    print('Number of regular season losses: {0} ({1:2.2f}%)'.format(num_losses, (num_losses / num_obs) * 100))
+    print('Number of regular season ties: {0} ({1:2.2f}%)'.format(num_ties, (num_ties / num_obs) * 100))
+    print()
+
+    # Get the percentage of the target variable that is true during post season games (excluding the superbowls)
+    playoff_games = df.loc[(df['week'] == 18) | (df['week'] == 19) | (df['week'] == 20)]
+    num_obs = len(playoff_games)
+    num_wins = len(playoff_games.loc[playoff_games['home_victory'] == 1])
+    num_losses = len(playoff_games.loc[playoff_games['home_victory'] == 0])
+    num_ties = len(playoff_games.loc[playoff_games['home_draw'] == 1])
+    print('Number of playoff wins:  {0} ({1:2.2f}%)'.format(num_wins, (num_wins / num_obs) * 100))
+    print('Number of playoff losses: {0} ({1:2.2f}%)'.format(num_losses, (num_losses / num_obs) * 100))
+    print('Number of playoff ties: {0} ({1:2.2f}%)'.format(num_ties, (num_ties / num_obs) * 100))
+    print()
+
+    # Get the percentage of the target variable that is true during the superbowl
+    superbowl_games = df.loc[(df['week'] == 21)]
+    num_obs = len(superbowl_games)
+    num_wins = len(superbowl_games.loc[superbowl_games['home_victory'] == 1])
+    num_losses = len(superbowl_games.loc[superbowl_games['home_victory'] == 0])
+    num_ties = len(superbowl_games.loc[superbowl_games['home_draw'] == 1])
+    print('Number of superbowl wins:  {0} ({1:2.2f}%)'.format(num_wins, (num_wins / num_obs) * 100))
+    print('Number of superbowl losses: {0} ({1:2.2f}%)'.format(num_losses, (num_losses / num_obs) * 100))
+    print('Number of superbowl ties: {0} ({1:2.2f}%)'.format(num_ties, (num_ties / num_obs) * 100))
+    print()
+
+    # print(df.dtypes)
+    df['home_spread'] = df['home_spread'].astype(np.int64)
+    df['home_victory'] = df['home_victory'].astype(np.int64)
+    df['win_pct_diff'] = df['win_pct_diff'].astype(np.float64)
+    df['elo_diff'] = df['elo_diff'].astype(np.float64)
+    df['average_points_for_diff'] = df['average_points_for_diff'].astype(np.float64)
+    df['average_points_against_diff'] = df['average_points_against_diff'].astype(np.float64)
+    df['average_first_downs_diff'] = df['average_first_downs_diff'].astype(np.float64)
+    df['average_rush_attempts_diff'] = df['average_rush_attempts_diff'].astype(np.float64)
+    df['average_rushing_yards_diff'] = df['average_rushing_yards_diff'].astype(np.float64)
+    df['average_rushing_touchdowns_diff'] = df['average_rushing_touchdowns_diff'].astype(np.float64)
+    df['average_pass_completions_diff'] = df['average_pass_completions_diff'].astype(np.float64)
+    df['average_pass_attempts_diff'] = df['average_pass_attempts_diff'].astype(np.float64)
+    df['average_passing_yards_diff'] = df['average_passing_yards_diff'].astype(np.float64)
+    df['average_passing_touchdowns_diff'] = df['average_passing_touchdowns_diff'].astype(np.float64)
+    df['average_interceptions_thrown_diff'] = df['average_interceptions_thrown_diff'].astype(np.float64)
+    df['average_times_sacked_diff'] = df['average_times_sacked_diff'].astype(np.float64)
+    df['average_sacked_yards_diff'] = df['average_sacked_yards_diff'].astype(np.float64)
+    df['average_net_passing_yards_diff'] = df['average_net_passing_yards_diff'].astype(np.float64)
+    df['average_total_yards_diff'] = df['average_total_yards_diff'].astype(np.float64)
+    df['average_fumbles_diff'] = df['average_fumbles_diff'].astype(np.float64)
+    df['average_fumbles_lost_diff'] = df['average_fumbles_lost_diff'].astype(np.float64)
+    df['average_turnovers_diff'] = df['average_turnovers_diff'].astype(np.float64)
+    df['average_penalties_diff'] = df['average_penalties_diff'].astype(np.float64)
+    df['average_penalty_yards_diff'] = df['average_penalty_yards_diff'].astype(np.float64)
+    df['average_third_down_pct_diff'] = df['average_third_down_pct_diff'].astype(np.float64)
+    df['average_fourth_down_pct_diff'] = df['average_fourth_down_pct_diff'].astype(np.float64)
+    df['average_time_of_possession_diff'] = df['average_time_of_possession_diff'].astype(np.float64)
+    df['average_yards_allowed_diff'] = df['average_yards_allowed_diff'].astype(np.float64)
+    df['average_interceptions_diff'] = df['average_interceptions_diff'].astype(np.float64)
+    df['average_fumbles_forced_diff'] = df['average_fumbles_forced_diff'].astype(np.float64)
+    df['average_fumbles_recovered_diff'] = df['average_fumbles_recovered_diff'].astype(np.float64)
+    df['average_turnovers_forced_diff'] = df['average_turnovers_forced_diff'].astype(np.float64)
+    df['average_sacks_diff'] = df['average_sacks_diff'].astype(np.float64)
+    df['average_sack_yards_forced_diff'] = df['average_sack_yards_forced_diff'].astype(np.float64)
+    df['average_yards_per_rush_attempt_diff'] = df['average_yards_per_rush_attempt_diff'].astype(np.float64)
+    df['average_rushing_touchdowns_per_attempt_diff'] = df['average_rushing_touchdowns_per_attempt_diff'].astype(
+        np.float64)
+    df['average_yards_per_pass_attempt_diff'] = df['average_yards_per_pass_attempt_diff'].astype(np.float64)
+    df['average_passing_touchdowns_per_attempt_diff'] = df['average_passing_touchdowns_per_attempt_diff'].astype(
+        np.float64)
+    df['average_yards_per_pass_completion_diff'] = df['average_yards_per_pass_completion_diff'].astype(np.float64)
+    df['average_rushing_play_pct_diff'] = df['average_rushing_play_pct_diff'].astype(np.float64)
+    df['average_passing_play_pct_diff'] = df['average_passing_play_pct_diff'].astype(np.float64)
+    df['average_rushing_yards_pct_diff'] = df['average_rushing_yards_pct_diff'].astype(np.float64)
+    df['average_passing_yards_pct_diff'] = df['average_passing_yards_pct_diff'].astype(np.float64)
+    df['average_completion_pct_diff'] = df['average_completion_pct_diff'].astype(np.float64)
+    df['average_sacked_pct_diff'] = df['average_sacked_pct_diff'].astype(np.float64)
+    df['average_passer_rating_diff'] = df['average_passer_rating_diff'].astype(np.float64)
+    df['average_touchdowns_diff'] = df['average_touchdowns_diff'].astype(np.float64)
+    df['average_yards_per_point_diff'] = df['average_yards_per_point_diff'].astype(np.float64)
+    df['average_scoring_margin_diff'] = df['average_scoring_margin_diff'].astype(np.float64)
+    df['average_turnover_margin_diff'] = df['average_turnover_margin_diff'].astype(np.float64)
+
+    return df
+
+
+def plot_corr(df=None):
+    """Gets the correlation between all relevant features and the home_victory label."""
+    if df is None:
+        # Get the data frame for all seasons
+        df = pd.read_csv(game_data_dir + '20022018.csv')
 
     # Print a description of all the games
     games_description = df.describe()
@@ -973,10 +1090,11 @@ def plot_corr():
     return won_series
 
 
-def get_best_features():
+def get_best_features(df=None):
     """Gets the set of at least 10 features that explains the variance for the y label."""
-    # Get the data frame for all seasons
-    df = pd.read_csv(game_data_dir + '20022018.csv')
+    if df is None:
+        # Get the data frame for all seasons
+        df = pd.read_csv(game_data_dir + '20022018.csv')
 
     # Drop all columns that arent the label, the spread or a team difference
     columns_to_keep = list()
@@ -1032,6 +1150,9 @@ def get_best_features():
         print(feature)
     print()
 
+    # Correlation matrix revealed high correlation between points for and touchdowns
+    contributing_features.remove('average_points_for_diff')
+
     # Plot the correlation between the top 8 features
     columns_to_drop = list(set(feature_col_names) - set(contributing_features))
     relevant = df.drop(columns=columns_to_drop)
@@ -1041,17 +1162,38 @@ def get_best_features():
     sns.heatmap(corrmat, vmax=.8, square=True, annot=True, fmt='.2f', cmap='winter')
     plt.show()
 
-    # Correlation matrix revealed high correlation between points for and touchdowns
-    contributing_features.remove('average_points_for_diff')
+    # Check the distribution of each feature
+    for feature in contributing_features:
+        series = df[feature]
+        (mu, sigma) = norm.fit(series)
+        sns.distplot(series, fit=norm)
+        plt.legend(['Normal dist. ($\mu=$ {:.2f} and $\sigma=$ {:.2f} )'.format(mu, sigma)],
+                   loc='best')
+        plt.ylabel('Frequency')
+        plt.title(feature + ' Distribution')
+
+        print(feature)
+        print('Skewness: {:.2f}'.format(series.skew()))
+        print('Kurtosis: {:.2f}'.format(series.kurt()))
+
+        print('mu: {:.2f}'.format(mu))
+        print('sigma: {:.2f}'.format(sigma))
+        print()
+
+        # Get the QQ-plot
+        fig = plt.figure()
+        res = stats.probplot(series, plot=plt)
+        plt.show()
 
     return contributing_features
 
 
-def evaluate_model_parameters(contributing_features):
+def evaluate_model_parameters(contributing_features, df=None):
     """Does a grid search on 6 different models to find the best parameters,
     evaluates each set of parameters on brier loss score and accuracy."""
-    # Get the data frame for all seasons
-    df = pd.read_csv(game_data_dir + '20022018.csv')
+    if df is None:
+        # Get the data frame for all seasons
+        df = pd.read_csv(game_data_dir + '20022018.csv')
 
     # Filter the columns to keep
     columns_to_keep = list()
@@ -1307,10 +1449,10 @@ def tune_k_nearest_neighbors(X, y, skf, scores):
 
     # Create a list of dicts to try parameter combinations over
     print('K Nearest Neighbors')
-    k_neighbors_parameters = [{'n_neighbors': range(3, 9),
+    k_neighbors_parameters = [{'n_neighbors': range(3, 71, 2),
                                'weights': ['uniform', 'distance'],
                                'algorithm': ['auto', 'ball_tree', 'kd_tree'],
-                               'leaf_size': range(1, 20),
+                               'leaf_size': range(20, 31),
                                'p': [1, 2]}]
 
     best_brier_model = None
@@ -1428,6 +1570,16 @@ def print_grid_search_details(clf, filename):
     print()
 
 
+def get_best_knn():
+    """Gets the SVC model that yielded the best result."""
+
+    return KNeighborsClassifier(algorithm='kd_tree',
+                                leaf_size=30,
+                                n_neighbors=67,
+                                p=2,
+                                weights='distance')
+
+
 def get_best_logistic_regression():
     """Gets the logistic regression model that yielded the best result."""
 
@@ -1458,12 +1610,13 @@ def get_best_random_forest():
                                   random_state=42)
 
 
-def get_voting_classifier(contributing_features):
+def get_voting_classifier(contributing_features, df=None):
     """Creates a voting classifier based on the top 3 estimators,
     estimators are weighted by the normalized inverse of their respective briers."""
 
-    # Get the data frame for all seasons
-    df = pd.read_csv(game_data_dir + '20022018.csv')
+    if df is None:
+        # Get the data frame for all seasons
+        df = pd.read_csv(game_data_dir + '20022018.csv')
 
     # Drop all columns except for the most important features, and the predicted label
     columns_to_keep = list()
@@ -1519,6 +1672,9 @@ def get_voting_classifier(contributing_features):
 
 
 def evaluate_2018_season():
+    # Set the directory to write files to
+    filename = other_dir + '7 Features\\Scores\\2017Confusion.txt'
+
     voting_classifier = joblib.load(other_dir + '7 Features\\2017VotingClassifier.pkl')
     scaler = joblib.load(other_dir + '7 Features\\2017Scaler.pkl')
 
@@ -1570,20 +1726,31 @@ def evaluate_2018_season():
 
     rf_brier = brier_score_loss(outcome, rf)
     print('Random Forest Brier Score Loss:', round(rf_brier, 4))
+    print('Random Forest Brier Score Loss:', round(rf_brier, 4), file=open(filename, 'a'))
 
     svc_brier = brier_score_loss(outcome, svc)
     print('SVC Brier Score Loss:', round(svc_brier, 4))
+    print('SVC Brier Score Loss:', round(svc_brier, 4), file=open(filename, 'a'))
 
     lr_brier = brier_score_loss(outcome, lr)
-    print('Linear Regression Brier Score Loss:', round(lr_brier, 4))
+    print('Logistic Regression Brier Score Loss:', round(lr_brier, 4))
+    print('Logistic Regression Brier Score Loss:', round(lr_brier, 4), file=open(filename, 'a'))
 
     vote_brier = brier_score_loss(outcome, vote)
     print('Voting Classifier Brier Score Loss:', round(vote_brier, 4))
+    print('Voting Classifier Brier Score Loss:', round(vote_brier, 4), file=open(filename, 'a'))
+    print('', file=open(filename, 'a'))
 
     print('Random Forest:', round((.25 - rf_brier) * 26700, 2))
     print('SVC:', round((.25 - svc_brier) * 26700, 2))
-    print('Linear Regression:', round((.25 - lr_brier) * 26700, 2))
+    print('Logistic Regression:', round((.25 - lr_brier) * 26700, 2))
     print('Voting Classifier:', round((.25 - vote_brier) * 26700, 2))
+
+    print('Random Forest:', round((.25 - rf_brier) * 26700, 2), file=open(filename, 'a'))
+    print('SVC:', round((.25 - svc_brier) * 26700, 2), file=open(filename, 'a'))
+    print('Logistic Regression:', round((.25 - lr_brier) * 26700, 2), file=open(filename, 'a'))
+    print('Voting Classifier:', round((.25 - vote_brier) * 26700, 2), file=open(filename, 'a'))
+    print('', file=open(filename, 'a'))
 
     # results.to_csv(other_dir + '7 Features\\Scores\\2017Predictions.csv', index=False)
 
@@ -1595,21 +1762,32 @@ def evaluate_2018_season():
     print()
     print('Random Forest')
     print('-' * 120)
-    get_metrics(outcome, rounded_rf)
+    print('Random Forest', file=open(filename, 'a'))
+    print('-' * 120, file=open(filename, 'a'))
+    get_metrics(outcome, rounded_rf, filename)
+
     print('SVC')
     print('-' * 120)
-    get_metrics(outcome, rounded_svc)
+    print('SVC', file=open(filename, 'a'))
+    print('-' * 120, file=open(filename, 'a'))
+    get_metrics(outcome, rounded_svc, filename)
+
     print('Linear Regression')
     print('-' * 120)
-    get_metrics(outcome, rounded_lr)
+    print('Linear Regression', file=open(filename, 'a'))
+    print('-' * 120, file=open(filename, 'a'))
+    get_metrics(outcome, rounded_lr, filename)
+
     print('Voting Classifier')
     print('-' * 120)
-    get_metrics(outcome, rounded_vote)
+    print('Voting Classifier', file=open(filename, 'a'))
+    print('-' * 120, file=open(filename, 'a'))
+    get_metrics(outcome, rounded_vote, filename)
 
     # visualize_2018_season()
 
 
-def get_metrics(y_true, y_pred):
+def get_metrics(y_true, y_pred, filename):
     y_true = pd.to_numeric(y_true)
     outcome_counts = y_true.value_counts()
     outcome_positive = outcome_counts.loc[1]
@@ -1617,18 +1795,26 @@ def get_metrics(y_true, y_pred):
     total_games = outcome_positive + outcome_negative
     print('Actual home victories:', outcome_positive)
     print('Actual home defeats:', outcome_negative)
+    print('Actual home victories:', outcome_positive, file=open(filename, 'a'))
+    print('Actual home defeats:', outcome_negative, file=open(filename, 'a'))
 
     prevalence = outcome_positive / (outcome_positive + outcome_negative)
     print('Home victory prevalence:', round(prevalence * 100, 2),
           str(outcome_positive) + '/' + str(outcome_positive + outcome_negative))
     print()
+    print('Home victory prevalence:', round(prevalence * 100, 2),
+          str(outcome_positive) + '/' + str(outcome_positive + outcome_negative), file=open(filename, 'a'))
+    print('', file=open(filename, 'a'))
 
     predicted_counts = y_pred.value_counts()
     predicted_positive = predicted_counts.loc[1]
     predicted_negative = predicted_counts.loc[0]
     print('Predicted home victories:', predicted_positive)
     print('Predicted home defeats:', predicted_negative)
+    print('Predicted home victories:', predicted_positive, file=open(filename, 'a'))
+    print('Predicted home defeats:', predicted_negative, file=open(filename, 'a'))
     print()
+    print('', file=open(filename, 'a'))
 
     confusion = confusion_matrix(y_true, y_pred)
     true_positive = confusion[1][1]
@@ -1642,6 +1828,12 @@ def get_metrics(y_true, y_pred):
     print('Home defeats predicted as victories:', false_positive)
     print()
 
+    print('Correctly predicted home victories:', true_positive, file=open(filename, 'a'))
+    print('Home victories predicted as defeats:', false_negative, file=open(filename, 'a'))
+    print('Correctly predicted home defeats:', true_negative, file=open(filename, 'a'))
+    print('Home defeats predicted as victories:', false_positive, file=open(filename, 'a'))
+    print('', file=open(filename, 'a'))
+
     accuracy = accuracy_score(y_true, y_pred)
     precision = precision_score(y_true, y_pred)
     recall = recall_score(y_true, y_pred)
@@ -1653,13 +1845,26 @@ def get_metrics(y_true, y_pred):
     print('Prediction precision:', round(precision * 100, 2),
           str(true_positive) + '/' + str(predicted_positive))
 
+    print('Prediction accuracy:', round(accuracy * 100, 2),
+          str(true_positive + true_negative) + '/' + str(total_games), file=open(filename, 'a'))
+    print('', file=open(filename, 'a'))
+
+    print('Prediction precision:', round(precision * 100, 2),
+          str(true_positive) + '/' + str(predicted_positive), file=open(filename, 'a'))
+
     false_discovery = false_positive / predicted_positive
     print('False discovery rate:', round(false_discovery * 100, 2),
           str(false_positive) + '/' + str(predicted_positive))
 
+    print('False discovery rate:', round(false_discovery * 100, 2),
+          str(false_positive) + '/' + str(predicted_positive), file=open(filename, 'a'))
+
     negative_prediction = true_negative / predicted_negative
     print('Negative prediction rate:', round(negative_prediction * 100, 2),
           str(true_negative) + '/' + str(predicted_negative))
+
+    print('Negative prediction rate:', round(negative_prediction * 100, 2),
+          str(true_negative) + '/' + str(predicted_negative), file=open(filename, 'a'))
 
     false_omission = false_negative / predicted_negative
     print('False omission rate:', round(false_omission * 100, 2),
@@ -1669,35 +1874,64 @@ def get_metrics(y_true, y_pred):
     print('Prediction recall:', round(recall * 100, 2),
           str(true_positive) + '/' + str(outcome_positive))
 
+    print('False omission rate:', round(false_omission * 100, 2),
+          str(false_negative) + '/' + str(predicted_negative), file=open(filename, 'a'))
+    print('', file=open(filename, 'a'))
+
+    print('Prediction recall:', round(recall * 100, 2),
+          str(true_positive) + '/' + str(outcome_positive), file=open(filename, 'a'))
+
     miss_rate = false_negative / outcome_positive
     print('Miss rate:', round(miss_rate * 100, 2),
           str(false_negative) + '/' + str(outcome_positive))
 
+    print('Miss rate:', round(miss_rate * 100, 2),
+          str(false_negative) + '/' + str(outcome_positive), file=open(filename, 'a'))
+
     specificity = true_negative / outcome_negative
     print('Specificity:', round(specificity * 100, 2),
           str(true_negative) + '/' + str(outcome_negative))
+
+    print('Specificity:', round(specificity * 100, 2),
+          str(true_negative) + '/' + str(outcome_negative), file=open(filename, 'a'))
 
     fall_out = false_positive / outcome_negative
     print('Fall out:', round(fall_out * 100, 2),
           str(false_positive) + '/' + str(outcome_negative))
     print()
 
+    print('Fall out:', round(fall_out * 100, 2),
+          str(false_positive) + '/' + str(outcome_negative), file=open(filename, 'a'))
+    print('', file=open(filename, 'a'))
+
     positive_likelihood = recall / fall_out
     print('Positive likelihood ratio:', round(positive_likelihood, 4),
           str(round(recall * 100, 2)) + '/' + str(round(fall_out * 100, 2)))
+
+    print('Positive likelihood ratio:', round(positive_likelihood, 4),
+          str(round(recall * 100, 2)) + '/' + str(round(fall_out * 100, 2)), file=open(filename, 'a'))
 
     negative_likelihood = miss_rate / specificity
     print('Negative likelihood ratio:', round(negative_likelihood, 4),
           str(round(miss_rate * 100, 2)) + '/' + str(round(specificity * 100, 2)))
     print()
 
+    print('Negative likelihood ratio:', round(negative_likelihood, 4),
+          str(round(miss_rate * 100, 2)) + '/' + str(round(specificity * 100, 2)), file=open(filename, 'a'))
+    print('', file=open(filename, 'a'))
+
     diagnostic_odds = positive_likelihood / negative_likelihood
     print('Diagnostic odds ratio:', round(diagnostic_odds, 4),
           str(round(positive_likelihood, 4)) + '/' + str(round(negative_likelihood, 4)))
 
+    print('Diagnostic odds ratio:', round(diagnostic_odds, 4),
+          str(round(positive_likelihood, 4)) + '/' + str(round(negative_likelihood, 4)), file=open(filename, 'a'))
+
     f1 = f1_score(y_true, y_pred)
     print('F1 score:', round(f1, 4))
     print()
+    print('F1 score:', round(f1, 4), file=open(filename, 'a'))
+    print('', file=open(filename, 'a'))
 
 
 def visualize_2018_season():

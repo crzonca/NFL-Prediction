@@ -1,0 +1,64 @@
+Best parameters set found on development set:
+0.65063 (+/-0.022) for {'C': 1, 'kernel': 'linear', 'probability': True}
+
+Grid scores on development set:
+0.65063 (+/-0.022) for {'C': 1, 'kernel': 'linear', 'probability': True}
+0.65063 (+/-0.024) for {'C': 10, 'kernel': 'linear', 'probability': True}
+0.65063 (+/-0.024) for {'C': 100, 'kernel': 'linear', 'probability': True}
+0.64982 (+/-0.024) for {'C': 0.1, 'kernel': 'linear', 'probability': True}
+0.64961 (+/-0.024) for {'C': 100, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True}
+0.64900 (+/-0.025) for {'C': 100, 'gamma': 0.001, 'kernel': 'rbf', 'probability': True}
+0.64859 (+/-0.023) for {'C': 10, 'gamma': 0.001, 'kernel': 'rbf', 'probability': True}
+0.64736 (+/-0.023) for {'C': 100, 'gamma': 0.0001, 'kernel': 'rbf', 'probability': True}
+0.64695 (+/-0.027) for {'C': 10, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True}
+0.64675 (+/-0.027) for {'C': 100, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True}
+0.64327 (+/-0.034) for {'C': 1, 'gamma': 'scale', 'kernel': 'rbf', 'probability': True}
+0.64245 (+/-0.034) for {'C': 1, 'gamma': 'auto', 'kernel': 'rbf', 'probability': True}
+0.64204 (+/-0.019) for {'C': 1, 'gamma': 0.001, 'kernel': 'rbf', 'probability': True}
+0.64183 (+/-0.019) for {'C': 100, 'gamma': 1e-05, 'kernel': 'rbf', 'probability': True}
+0.64142 (+/-0.019) for {'C': 10, 'gamma': 0.0001, 'kernel': 'rbf', 'probability': True}
+0.64040 (+/-0.025) for {'C': 10, 'gamma': 'auto', 'kernel': 'rbf', 'probability': True}
+0.63979 (+/-0.025) for {'C': 10, 'gamma': 'scale', 'kernel': 'rbf', 'probability': True}
+0.63815 (+/-0.026) for {'C': 0.1, 'gamma': 'auto', 'kernel': 'rbf', 'probability': True}
+0.63815 (+/-0.027) for {'C': 0.1, 'gamma': 'scale', 'kernel': 'rbf', 'probability': True}
+0.63754 (+/-0.016) for {'C': 1, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True}
+0.63754 (+/-0.016) for {'C': 10, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True}
+0.63754 (+/-0.016) for {'C': 100, 'gamma': 1e-05, 'kernel': 'sigmoid', 'probability': True}
+0.63733 (+/-0.028) for {'C': 100, 'gamma': 'scale', 'kernel': 'rbf', 'probability': True}
+0.63651 (+/-0.030) for {'C': 100, 'gamma': 'auto', 'kernel': 'rbf', 'probability': True}
+0.63201 (+/-0.010) for {'C': 1, 'gamma': 0.0001, 'kernel': 'rbf', 'probability': True}
+0.63181 (+/-0.009) for {'C': 0.1, 'gamma': 0.001, 'kernel': 'rbf', 'probability': True}
+0.63140 (+/-0.008) for {'C': 10, 'gamma': 1e-05, 'kernel': 'rbf', 'probability': True}
+0.63140 (+/-0.008) for {'C': 100, 'gamma': 1e-06, 'kernel': 'rbf', 'probability': True}
+0.62976 (+/-0.010) for {'C': 0.1, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True}
+0.62955 (+/-0.010) for {'C': 1, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True}
+0.62955 (+/-0.010) for {'C': 10, 'gamma': 1e-05, 'kernel': 'sigmoid', 'probability': True}
+0.62955 (+/-0.010) for {'C': 100, 'gamma': 1e-06, 'kernel': 'sigmoid', 'probability': True}
+0.62239 (+/-0.037) for {'C': 0.1, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True}
+0.62239 (+/-0.037) for {'C': 0.1, 'gamma': 1e-05, 'kernel': 'sigmoid', 'probability': True}
+0.62239 (+/-0.037) for {'C': 0.1, 'gamma': 1e-06, 'kernel': 'rbf', 'probability': True}
+0.62239 (+/-0.037) for {'C': 0.1, 'gamma': 1e-06, 'kernel': 'sigmoid', 'probability': True}
+0.62239 (+/-0.037) for {'C': 0.1, 'gamma': 1e-07, 'kernel': 'sigmoid', 'probability': True}
+0.62239 (+/-0.037) for {'C': 1, 'gamma': 1e-05, 'kernel': 'sigmoid', 'probability': True}
+0.62239 (+/-0.037) for {'C': 1, 'gamma': 1e-06, 'kernel': 'rbf', 'probability': True}
+0.62239 (+/-0.037) for {'C': 1, 'gamma': 1e-06, 'kernel': 'sigmoid', 'probability': True}
+0.62239 (+/-0.037) for {'C': 1, 'gamma': 1e-07, 'kernel': 'sigmoid', 'probability': True}
+0.62239 (+/-0.037) for {'C': 10, 'gamma': 1e-06, 'kernel': 'rbf', 'probability': True}
+0.62239 (+/-0.037) for {'C': 10, 'gamma': 1e-06, 'kernel': 'sigmoid', 'probability': True}
+0.62239 (+/-0.037) for {'C': 10, 'gamma': 1e-07, 'kernel': 'sigmoid', 'probability': True}
+0.62239 (+/-0.037) for {'C': 100, 'gamma': 1e-07, 'kernel': 'sigmoid', 'probability': True}
+0.62219 (+/-0.036) for {'C': 0.1, 'gamma': 1e-05, 'kernel': 'rbf', 'probability': True}
+0.62219 (+/-0.037) for {'C': 0.1, 'gamma': 1e-07, 'kernel': 'rbf', 'probability': True}
+0.62219 (+/-0.036) for {'C': 1, 'gamma': 1e-05, 'kernel': 'rbf', 'probability': True}
+0.62219 (+/-0.037) for {'C': 1, 'gamma': 1e-07, 'kernel': 'rbf', 'probability': True}
+0.62219 (+/-0.037) for {'C': 10, 'gamma': 1e-07, 'kernel': 'rbf', 'probability': True}
+0.62219 (+/-0.037) for {'C': 100, 'gamma': 1e-07, 'kernel': 'rbf', 'probability': True}
+0.62198 (+/-0.035) for {'C': 0.1, 'gamma': 0.0001, 'kernel': 'rbf', 'probability': True}
+0.56795 (+/-0.047) for {'C': 0.1, 'gamma': 'scale', 'kernel': 'sigmoid', 'probability': True}
+0.56345 (+/-0.052) for {'C': 1, 'gamma': 'scale', 'kernel': 'sigmoid', 'probability': True}
+0.56242 (+/-0.052) for {'C': 100, 'gamma': 'scale', 'kernel': 'sigmoid', 'probability': True}
+0.56222 (+/-0.052) for {'C': 10, 'gamma': 'scale', 'kernel': 'sigmoid', 'probability': True}
+0.54789 (+/-0.059) for {'C': 0.1, 'gamma': 'auto', 'kernel': 'sigmoid', 'probability': True}
+0.54093 (+/-0.056) for {'C': 1, 'gamma': 'auto', 'kernel': 'sigmoid', 'probability': True}
+0.54073 (+/-0.054) for {'C': 10, 'gamma': 'auto', 'kernel': 'sigmoid', 'probability': True}
+0.54073 (+/-0.054) for {'C': 100, 'gamma': 'auto', 'kernel': 'sigmoid', 'probability': True}
