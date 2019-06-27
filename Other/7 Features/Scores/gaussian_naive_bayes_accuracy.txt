@@ -22,3 +22,7 @@ Grid scores on development set:
 0.63891 (+/-0.018) for {'var_smoothing': 1e-17}
 0.63891 (+/-0.018) for {'var_smoothing': 1e-18}
 0.63891 (+/-0.018) for {'var_smoothing': 1e-19}
+0.61974 (+/-0.008) for {'var_smoothing': 10}
+0.57303 (+/-0.001) for {'var_smoothing': 1000}
+0.57303 (+/-0.001) for {'var_smoothing': 100}
+

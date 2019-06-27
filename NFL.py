@@ -914,7 +914,9 @@ def combine_frames(frames):
 
 
 def oversample_data():
-    """Over samples the data to get an even number of wins and losses."""
+    """Over samples the data to get an even number of wins and losses.  This causes the number of predicted losses to
+    increase, having an improvement on the negative prediction rate.  However, this also caused the overall brier to
+    be significantly lower in testing against the 2018 season."""
     # Get the data frame for all seasons
     original_df = pd.read_csv(game_data_dir + '20022018.csv')
 
@@ -1053,7 +1055,7 @@ def plot_corr(df=None):
     pairs = corr.unstack()
 
     # Sort the pairs based on highest correlation
-    sorted_pairs = pairs.sort_values(kind="quicksort", ascending=False)
+    sorted_pairs = pairs.sort_values(kind='quicksort', ascending=False)
 
     # Get all pairs with the home_victory label
     won_series = sorted_pairs['home_victory']
@@ -1237,17 +1239,17 @@ def evaluate_model_parameters(contributing_features, df=None):
     # C Support Vector Classifier       -0.21214    66.424
     tune_svc_classifier(X, y, skf, scores)
 
-    # Random Forest                     -0.21277    66.314
+    # Random Forest                     -0.21281    66.314
     tune_random_forest(X, y, feature_col_names, skf, scores)
 
-    # K Nearest Neighbors               -0.23918    62.106
+    # K Nearest Neighbors               -0.21657    65.345
     tune_k_nearest_neighbors(X, y, skf, scores)
 
-    # Gaussian Naive Bayes              -0.23105     64.397
-    tune_gauss_naive_bayes(X, y, skf, scores)
-
-    # Bernoulli Naive Bayes             -0.27513    63.362
+    # Bernoulli Naive Bayes             -0.22297    64.353
     tune_bernoulli_naive_bayes(X, y, skf, scores)
+
+    # Gaussian Naive Bayes              -0.22866    61.974
+    tune_gauss_naive_bayes(X, y, skf, scores)
 
 
 def tune_logistic_regression(X, y, skf, scores):
@@ -1317,7 +1319,7 @@ def tune_gauss_naive_bayes(X, y, skf, scores):
 
     # Create a list of dicts to try parameter combinations over
     print('Gaussian Naive Bayes')
-    naive_bayes_parameters = [{'var_smoothing': [1 * 10 ** x for x in range(0, -20, -1)]}]
+    naive_bayes_parameters = [{'var_smoothing': [1 * 10 ** x for x in range(3, -20, -1)]}]
 
     best_brier_model = None
     best_accuracy_model = None
@@ -1357,7 +1359,8 @@ def tune_bernoulli_naive_bayes(X, y, skf, scores):
 
     # Create a list of dicts to try parameter combinations over
     print('Bernoulli Naive Bayes')
-    naive_bayes_parameters = [{'alpha': [x / 10.0 for x in range(5, 20)]}]
+    naive_bayes_parameters = [{'alpha': [x for x in range(5, 20000, 10)],
+                               'fit_prior': [True, False]}]
 
     best_brier_model = None
     best_accuracy_model = None
@@ -1452,7 +1455,7 @@ def tune_k_nearest_neighbors(X, y, skf, scores):
     k_neighbors_parameters = [{'n_neighbors': range(3, 71, 2),
                                'weights': ['uniform', 'distance'],
                                'algorithm': ['auto', 'ball_tree', 'kd_tree'],
-                               'leaf_size': range(20, 31),
+                               'leaf_size': range(1, 31),
                                'p': [1, 2]}]
 
     best_brier_model = None
@@ -1567,7 +1570,7 @@ def print_grid_search_details(clf, filename):
         print('%0.5f (+/-%0.03f) for %r' % (mean, std * 2, params), file=open(filename, 'a'))
 
     print()
-    print()
+    print('', file=open(filename, 'a'))
 
 
 def get_best_knn():
@@ -1575,9 +1578,9 @@ def get_best_knn():
 
     return KNeighborsClassifier(algorithm='kd_tree',
                                 leaf_size=30,
-                                n_neighbors=67,
-                                p=2,
-                                weights='distance')
+                                n_neighbors=63,
+                                p=1,
+                                weights='uniform')
 
 
 def get_best_logistic_regression():
@@ -1604,8 +1607,8 @@ def get_best_svc():
 def get_best_random_forest():
     """Gets the random forest model that yielded the best result."""
 
-    return RandomForestClassifier(n_estimators=1000,
-                                  max_features=6,
+    return RandomForestClassifier(n_estimators=500,
+                                  max_features=5,
                                   max_depth=3,
                                   random_state=42)
 
@@ -1673,7 +1676,7 @@ def get_voting_classifier(contributing_features, df=None):
 
 def evaluate_2018_season():
     # Set the directory to write files to
-    filename = other_dir + '7 Features\\Scores\\2017Confusion.txt'
+    filename = other_dir + '7 Features\\Scores\\2018Confusion.txt'
 
     voting_classifier = joblib.load(other_dir + '7 Features\\2017VotingClassifier.pkl')
     scaler = joblib.load(other_dir + '7 Features\\2017Scaler.pkl')
@@ -1752,7 +1755,7 @@ def evaluate_2018_season():
     print('Voting Classifier:', round((.25 - vote_brier) * 26700, 2), file=open(filename, 'a'))
     print('', file=open(filename, 'a'))
 
-    # results.to_csv(other_dir + '7 Features\\Scores\\2017Predictions.csv', index=False)
+    # results.to_csv(other_dir + '7 Features\\Scores\\2018Predictions.csv', index=False)
 
     rounded_rf = rf.apply(lambda row: round(row))
     rounded_svc = svc.apply(lambda row: round(row))
@@ -1935,7 +1938,7 @@ def get_metrics(y_true, y_pred, filename):
 
 
 def visualize_2018_season():
-    predictions = pd.read_csv(other_dir + '7 Features\\Scores\\2017Predictions.csv')
+    predictions = pd.read_csv(other_dir + '7 Features\\Scores\\2018Predictions.csv')
 
     for num, game in enumerate(predictions.values):
         vote_prob = int(round(game[3] * 100))
