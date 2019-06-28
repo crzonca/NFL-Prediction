@@ -50,17 +50,17 @@ def run_all():
     frames = add_stat_differences(frames)
     all_games = combine_frames(frames)
 
-    # over_sampled = oversample_data()
-
     won_series = plot_corr()
-    best_features = get_best_features()
+    best_features, games = get_best_features()
+
+    # games = oversample_data(games)
 
     won_series = won_series.filter(best_features).sort_values(kind='quicksort', ascending=False)
     best_features = list(won_series.index)
 
-    evaluate_model_parameters(best_features)
-    voting_classifier = get_voting_classifier(best_features)
-    evaluate_2018_season()
+    evaluate_model_parameters(best_features, df=games)
+    voting_classifier = get_voting_classifier(best_features, df=games)
+    evaluate_2018_season(df=games)
 
 
 def get_all_data_frames():
@@ -913,12 +913,13 @@ def combine_frames(frames):
     return combined
 
 
-def oversample_data():
+def oversample_data(original_df=None):
     """Over samples the data to get an even number of wins and losses.  This causes the number of predicted losses to
     increase, having an improvement on the negative prediction rate.  However, this also caused the overall brier to
     be significantly lower in testing against the 2018 season."""
-    # Get the data frame for all seasons
-    original_df = pd.read_csv(game_data_dir + '20022018.csv')
+    if original_df is None:
+        # Get the data frame for all seasons
+        original_df = pd.read_csv(game_data_dir + '20022018.csv')
 
     # Over sample the data to get an even number of wins and losses
     random_over_sampler = RandomOverSampler()
@@ -1164,22 +1165,27 @@ def get_best_features(df=None):
     sns.heatmap(corrmat, vmax=.8, square=True, annot=True, fmt='.2f', cmap='winter')
     plt.show()
 
+    # Get description of relevant features
+    contributing_feature_description = relevant.describe()
+    print(contributing_feature_description.to_string())
+    print()
+
     # Check the distribution of each feature
     for feature in contributing_features:
         series = df[feature]
-        (mu, sigma) = norm.fit(series)
+        (mean, dev) = norm.fit(series)
         sns.distplot(series, fit=norm)
-        plt.legend(['Normal dist. ($\mu=$ {:.2f} and $\sigma=$ {:.2f} )'.format(mu, sigma)],
+        plt.legend(['Normal dist. ($\mu=$ {:.2f} and $\sigma=$ {:.2f} )'.format(mean, dev)],
                    loc='best')
         plt.ylabel('Frequency')
         plt.title(feature + ' Distribution')
 
         print(feature)
-        print('Skewness: {:.2f}'.format(series.skew()))
-        print('Kurtosis: {:.2f}'.format(series.kurt()))
+        print('Skewness: {:.3f}'.format(series.skew()))
+        print('Kurtosis: {:.3f}'.format(series.kurt()))
 
-        print('mu: {:.2f}'.format(mu))
-        print('sigma: {:.2f}'.format(sigma))
+        print('Mean: {:.3f}'.format(mean))
+        print('Std. Dev.: {:.3f}'.format(dev))
         print()
 
         # Get the QQ-plot
@@ -1187,7 +1193,27 @@ def get_best_features(df=None):
         res = stats.probplot(series, plot=plt)
         plt.show()
 
-    return contributing_features
+    # Remove extreme outliers
+    for feature in contributing_features:
+        series = df[feature]
+        (mean, dev) = norm.fit(series)
+        df = df.loc[df[feature] < mean + 4 * dev]
+        df = df.loc[df[feature] > mean - 4 * dev]
+
+    # Check the distribution of each feature
+    for feature in contributing_features:
+        series = df[feature]
+        (mean, dev) = norm.fit(series)
+
+        print(feature)
+        print('Skewness: {:.3f}'.format(series.skew()))
+        print('Kurtosis: {:.3f}'.format(series.kurt()))
+
+        print('Mean: {:.3f}'.format(mean))
+        print('Std. Dev.: {:.3f}'.format(dev))
+        print()
+
+    return contributing_features, df
 
 
 def evaluate_model_parameters(contributing_features, df=None):
