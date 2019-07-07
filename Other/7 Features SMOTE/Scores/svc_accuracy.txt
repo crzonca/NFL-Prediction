@@ -1,0 +1,64 @@
+Best parameters set found on development set:
+0.66356 (+/-0.017) for {'classification__C': 10, 'classification__gamma': 0.001, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+
+Grid scores on development set:
+0.66356 (+/-0.017) for {'classification__C': 10, 'classification__gamma': 0.001, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.66245 (+/-0.011) for {'classification__C': 100, 'classification__gamma': 0.001, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.66201 (+/-0.014) for {'classification__C': 100, 'classification__gamma': 0.0001, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.66201 (+/-0.020) for {'classification__C': 100, 'classification__gamma': 0.0001, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.66201 (+/-0.016) for {'classification__C': 100, 'classification__kernel': 'linear', 'classification__probability': True}
+0.66178 (+/-0.017) for {'classification__C': 100, 'classification__gamma': 0.001, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.66178 (+/-0.014) for {'classification__C': 0.1, 'classification__kernel': 'linear', 'classification__probability': True}
+0.66134 (+/-0.012) for {'classification__C': 10, 'classification__gamma': 0.001, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.66112 (+/-0.014) for {'classification__C': 10, 'classification__kernel': 'linear', 'classification__probability': True}
+0.66045 (+/-0.016) for {'classification__C': 1, 'classification__kernel': 'linear', 'classification__probability': True}
+0.65402 (+/-0.021) for {'classification__C': 100, 'classification__gamma': 1e-05, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.65357 (+/-0.029) for {'classification__C': 0.1, 'classification__gamma': 'scale', 'classification__kernel': 'rbf', 'classification__probability': True}
+0.65291 (+/-0.022) for {'classification__C': 0.1, 'classification__gamma': 'auto', 'classification__kernel': 'rbf', 'classification__probability': True}
+0.65224 (+/-0.023) for {'classification__C': 10, 'classification__gamma': 0.0001, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.65180 (+/-0.020) for {'classification__C': 1, 'classification__gamma': 0.001, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.65158 (+/-0.026) for {'classification__C': 1, 'classification__gamma': 'scale', 'classification__kernel': 'rbf', 'classification__probability': True}
+0.65091 (+/-0.022) for {'classification__C': 1, 'classification__gamma': 'auto', 'classification__kernel': 'rbf', 'classification__probability': True}
+0.64536 (+/-0.020) for {'classification__C': 1, 'classification__gamma': 0.001, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.64470 (+/-0.020) for {'classification__C': 100, 'classification__gamma': 1e-05, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.64336 (+/-0.019) for {'classification__C': 10, 'classification__gamma': 0.0001, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.63560 (+/-0.024) for {'classification__C': 10, 'classification__gamma': 'scale', 'classification__kernel': 'rbf', 'classification__probability': True}
+0.63449 (+/-0.024) for {'classification__C': 10, 'classification__gamma': 'auto', 'classification__kernel': 'rbf', 'classification__probability': True}
+0.63404 (+/-0.022) for {'classification__C': 100, 'classification__gamma': 1e-06, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.63338 (+/-0.018) for {'classification__C': 0.1, 'classification__gamma': 0.001, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.63338 (+/-0.019) for {'classification__C': 10, 'classification__gamma': 1e-05, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.63316 (+/-0.019) for {'classification__C': 1, 'classification__gamma': 0.0001, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.63005 (+/-0.019) for {'classification__C': 10, 'classification__gamma': 1e-05, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.62916 (+/-0.018) for {'classification__C': 1, 'classification__gamma': 0.0001, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.62827 (+/-0.016) for {'classification__C': 100, 'classification__gamma': 1e-06, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.62783 (+/-0.017) for {'classification__C': 0.1, 'classification__gamma': 0.001, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.62317 (+/-0.017) for {'classification__C': 100, 'classification__gamma': 'scale', 'classification__kernel': 'rbf', 'classification__probability': True}
+0.62250 (+/-0.026) for {'classification__C': 100, 'classification__gamma': 'auto', 'classification__kernel': 'rbf', 'classification__probability': True}
+0.62117 (+/-0.027) for {'classification__C': 0.1, 'classification__gamma': 1e-06, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.62095 (+/-0.025) for {'classification__C': 10, 'classification__gamma': 1e-07, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.62073 (+/-0.027) for {'classification__C': 0.1, 'classification__gamma': 1e-05, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.62073 (+/-0.027) for {'classification__C': 100, 'classification__gamma': 1e-07, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.62051 (+/-0.027) for {'classification__C': 0.1, 'classification__gamma': 1e-06, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.62051 (+/-0.026) for {'classification__C': 10, 'classification__gamma': 1e-06, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.62028 (+/-0.026) for {'classification__C': 1, 'classification__gamma': 1e-07, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.62028 (+/-0.024) for {'classification__C': 10, 'classification__gamma': 1e-06, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.62006 (+/-0.027) for {'classification__C': 0.1, 'classification__gamma': 0.0001, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.62006 (+/-0.026) for {'classification__C': 0.1, 'classification__gamma': 0.0001, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.62006 (+/-0.026) for {'classification__C': 1, 'classification__gamma': 1e-06, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.62006 (+/-0.027) for {'classification__C': 1, 'classification__gamma': 1e-06, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.61984 (+/-0.027) for {'classification__C': 100, 'classification__gamma': 1e-07, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.61962 (+/-0.024) for {'classification__C': 0.1, 'classification__gamma': 1e-07, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.61962 (+/-0.026) for {'classification__C': 0.1, 'classification__gamma': 1e-07, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.61962 (+/-0.026) for {'classification__C': 1, 'classification__gamma': 1e-05, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.61962 (+/-0.025) for {'classification__C': 1, 'classification__gamma': 1e-05, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.61940 (+/-0.025) for {'classification__C': 0.1, 'classification__gamma': 1e-05, 'classification__kernel': 'rbf', 'classification__probability': True}
+0.61873 (+/-0.026) for {'classification__C': 10, 'classification__gamma': 1e-07, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.61851 (+/-0.025) for {'classification__C': 1, 'classification__gamma': 1e-07, 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.56813 (+/-0.054) for {'classification__C': 10, 'classification__gamma': 'scale', 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.55548 (+/-0.057) for {'classification__C': 10, 'classification__gamma': 'auto', 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.55415 (+/-0.064) for {'classification__C': 0.1, 'classification__gamma': 'auto', 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.55038 (+/-0.062) for {'classification__C': 1, 'classification__gamma': 'auto', 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.54749 (+/-0.061) for {'classification__C': 1, 'classification__gamma': 'scale', 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.53972 (+/-0.041) for {'classification__C': 0.1, 'classification__gamma': 'scale', 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.53684 (+/-0.041) for {'classification__C': 100, 'classification__gamma': 'scale', 'classification__kernel': 'sigmoid', 'classification__probability': True}
+0.53395 (+/-0.041) for {'classification__C': 100, 'classification__gamma': 'auto', 'classification__kernel': 'sigmoid', 'classification__probability': True}

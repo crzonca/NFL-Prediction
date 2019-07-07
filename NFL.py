@@ -1,18 +1,18 @@
 import os
 import statistics
 
+import joblib
 import matplotlib.pyplot as plt
 import maya
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from imblearn.over_sampling import RandomOverSampler
 from scipy import stats
 from scipy.stats import norm
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import VotingClassifier
-from sklearn.externals import joblib
+# from sklearn.externals import joblib
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 from sklearn.linear_model import LogisticRegression
@@ -53,14 +53,12 @@ def run_all():
     won_series = plot_corr()
     best_features, games = get_best_features()
 
-    # games = oversample_data(games)
-
     won_series = won_series.filter(best_features).sort_values(kind='quicksort', ascending=False)
     best_features = list(won_series.index)
 
     evaluate_model_parameters(best_features, df=games)
     voting_classifier = get_voting_classifier(best_features, df=games)
-    evaluate_2018_season(df=games)
+    evaluate_2018_season()
 
 
 def get_all_data_frames():
@@ -913,120 +911,6 @@ def combine_frames(frames):
     return combined
 
 
-def oversample_data(original_df=None):
-    """Over samples the data to get an even number of wins and losses.  This causes the number of predicted losses to
-    increase, having an improvement on the negative prediction rate.  However, this also caused the overall brier to
-    be significantly lower in testing against the 2018 season."""
-    if original_df is None:
-        # Get the data frame for all seasons
-        original_df = pd.read_csv(game_data_dir + '20022018.csv')
-
-    # Over sample the data to get an even number of wins and losses
-    random_over_sampler = RandomOverSampler()
-    oversampled, y_ros = random_over_sampler.fit_sample(original_df, original_df['home_victory'])
-
-    df = pd.DataFrame(data=oversampled, columns=original_df.columns)
-
-    # Get the percentage of the target variable that is true
-    num_obs = len(df)
-    num_wins = len(df.loc[df['home_victory'] == 1])
-    num_losses = len(df.loc[df['home_victory'] == 0])
-    num_ties = len(df.loc[df['home_draw'] == 1])
-    print('Number of wins:  {0} ({1:2.2f}%)'.format(num_wins, (num_wins / num_obs) * 100))
-    print('Number of losses: {0} ({1:2.2f}%)'.format(num_losses, (num_losses / num_obs) * 100))
-    print('Number of ties: {0} ({1:2.2f}%)'.format(num_ties, (num_ties / num_obs) * 100))
-    print()
-
-    # Get the percentage of the target variable that is true during regular season games
-    regular_season_games = df.loc[(df['week'] < 18)]
-    num_obs = len(regular_season_games)
-    num_wins = len(regular_season_games.loc[regular_season_games['home_victory'] == 1])
-    num_losses = len(regular_season_games.loc[regular_season_games['home_victory'] == 0])
-    num_ties = len(regular_season_games.loc[regular_season_games['home_draw'] == 1])
-    print('Number of regular season wins:  {0} ({1:2.2f}%)'.format(num_wins, (num_wins / num_obs) * 100))
-    print('Number of regular season losses: {0} ({1:2.2f}%)'.format(num_losses, (num_losses / num_obs) * 100))
-    print('Number of regular season ties: {0} ({1:2.2f}%)'.format(num_ties, (num_ties / num_obs) * 100))
-    print()
-
-    # Get the percentage of the target variable that is true during post season games (excluding the superbowls)
-    playoff_games = df.loc[(df['week'] == 18) | (df['week'] == 19) | (df['week'] == 20)]
-    num_obs = len(playoff_games)
-    num_wins = len(playoff_games.loc[playoff_games['home_victory'] == 1])
-    num_losses = len(playoff_games.loc[playoff_games['home_victory'] == 0])
-    num_ties = len(playoff_games.loc[playoff_games['home_draw'] == 1])
-    print('Number of playoff wins:  {0} ({1:2.2f}%)'.format(num_wins, (num_wins / num_obs) * 100))
-    print('Number of playoff losses: {0} ({1:2.2f}%)'.format(num_losses, (num_losses / num_obs) * 100))
-    print('Number of playoff ties: {0} ({1:2.2f}%)'.format(num_ties, (num_ties / num_obs) * 100))
-    print()
-
-    # Get the percentage of the target variable that is true during the superbowl
-    superbowl_games = df.loc[(df['week'] == 21)]
-    num_obs = len(superbowl_games)
-    num_wins = len(superbowl_games.loc[superbowl_games['home_victory'] == 1])
-    num_losses = len(superbowl_games.loc[superbowl_games['home_victory'] == 0])
-    num_ties = len(superbowl_games.loc[superbowl_games['home_draw'] == 1])
-    print('Number of superbowl wins:  {0} ({1:2.2f}%)'.format(num_wins, (num_wins / num_obs) * 100))
-    print('Number of superbowl losses: {0} ({1:2.2f}%)'.format(num_losses, (num_losses / num_obs) * 100))
-    print('Number of superbowl ties: {0} ({1:2.2f}%)'.format(num_ties, (num_ties / num_obs) * 100))
-    print()
-
-    # print(df.dtypes)
-    df['home_spread'] = df['home_spread'].astype(np.int64)
-    df['home_victory'] = df['home_victory'].astype(np.int64)
-    df['win_pct_diff'] = df['win_pct_diff'].astype(np.float64)
-    df['elo_diff'] = df['elo_diff'].astype(np.float64)
-    df['average_points_for_diff'] = df['average_points_for_diff'].astype(np.float64)
-    df['average_points_against_diff'] = df['average_points_against_diff'].astype(np.float64)
-    df['average_first_downs_diff'] = df['average_first_downs_diff'].astype(np.float64)
-    df['average_rush_attempts_diff'] = df['average_rush_attempts_diff'].astype(np.float64)
-    df['average_rushing_yards_diff'] = df['average_rushing_yards_diff'].astype(np.float64)
-    df['average_rushing_touchdowns_diff'] = df['average_rushing_touchdowns_diff'].astype(np.float64)
-    df['average_pass_completions_diff'] = df['average_pass_completions_diff'].astype(np.float64)
-    df['average_pass_attempts_diff'] = df['average_pass_attempts_diff'].astype(np.float64)
-    df['average_passing_yards_diff'] = df['average_passing_yards_diff'].astype(np.float64)
-    df['average_passing_touchdowns_diff'] = df['average_passing_touchdowns_diff'].astype(np.float64)
-    df['average_interceptions_thrown_diff'] = df['average_interceptions_thrown_diff'].astype(np.float64)
-    df['average_times_sacked_diff'] = df['average_times_sacked_diff'].astype(np.float64)
-    df['average_sacked_yards_diff'] = df['average_sacked_yards_diff'].astype(np.float64)
-    df['average_net_passing_yards_diff'] = df['average_net_passing_yards_diff'].astype(np.float64)
-    df['average_total_yards_diff'] = df['average_total_yards_diff'].astype(np.float64)
-    df['average_fumbles_diff'] = df['average_fumbles_diff'].astype(np.float64)
-    df['average_fumbles_lost_diff'] = df['average_fumbles_lost_diff'].astype(np.float64)
-    df['average_turnovers_diff'] = df['average_turnovers_diff'].astype(np.float64)
-    df['average_penalties_diff'] = df['average_penalties_diff'].astype(np.float64)
-    df['average_penalty_yards_diff'] = df['average_penalty_yards_diff'].astype(np.float64)
-    df['average_third_down_pct_diff'] = df['average_third_down_pct_diff'].astype(np.float64)
-    df['average_fourth_down_pct_diff'] = df['average_fourth_down_pct_diff'].astype(np.float64)
-    df['average_time_of_possession_diff'] = df['average_time_of_possession_diff'].astype(np.float64)
-    df['average_yards_allowed_diff'] = df['average_yards_allowed_diff'].astype(np.float64)
-    df['average_interceptions_diff'] = df['average_interceptions_diff'].astype(np.float64)
-    df['average_fumbles_forced_diff'] = df['average_fumbles_forced_diff'].astype(np.float64)
-    df['average_fumbles_recovered_diff'] = df['average_fumbles_recovered_diff'].astype(np.float64)
-    df['average_turnovers_forced_diff'] = df['average_turnovers_forced_diff'].astype(np.float64)
-    df['average_sacks_diff'] = df['average_sacks_diff'].astype(np.float64)
-    df['average_sack_yards_forced_diff'] = df['average_sack_yards_forced_diff'].astype(np.float64)
-    df['average_yards_per_rush_attempt_diff'] = df['average_yards_per_rush_attempt_diff'].astype(np.float64)
-    df['average_rushing_touchdowns_per_attempt_diff'] = df['average_rushing_touchdowns_per_attempt_diff'].astype(
-        np.float64)
-    df['average_yards_per_pass_attempt_diff'] = df['average_yards_per_pass_attempt_diff'].astype(np.float64)
-    df['average_passing_touchdowns_per_attempt_diff'] = df['average_passing_touchdowns_per_attempt_diff'].astype(
-        np.float64)
-    df['average_yards_per_pass_completion_diff'] = df['average_yards_per_pass_completion_diff'].astype(np.float64)
-    df['average_rushing_play_pct_diff'] = df['average_rushing_play_pct_diff'].astype(np.float64)
-    df['average_passing_play_pct_diff'] = df['average_passing_play_pct_diff'].astype(np.float64)
-    df['average_rushing_yards_pct_diff'] = df['average_rushing_yards_pct_diff'].astype(np.float64)
-    df['average_passing_yards_pct_diff'] = df['average_passing_yards_pct_diff'].astype(np.float64)
-    df['average_completion_pct_diff'] = df['average_completion_pct_diff'].astype(np.float64)
-    df['average_sacked_pct_diff'] = df['average_sacked_pct_diff'].astype(np.float64)
-    df['average_passer_rating_diff'] = df['average_passer_rating_diff'].astype(np.float64)
-    df['average_touchdowns_diff'] = df['average_touchdowns_diff'].astype(np.float64)
-    df['average_yards_per_point_diff'] = df['average_yards_per_point_diff'].astype(np.float64)
-    df['average_scoring_margin_diff'] = df['average_scoring_margin_diff'].astype(np.float64)
-    df['average_turnover_margin_diff'] = df['average_turnover_margin_diff'].astype(np.float64)
-
-    return df
-
-
 def plot_corr(df=None):
     """Gets the correlation between all relevant features and the home_victory label."""
     if df is None:
@@ -1159,14 +1043,24 @@ def get_best_features(df=None):
     # Plot the correlation between the top 8 features
     columns_to_drop = list(set(feature_col_names) - set(contributing_features))
     relevant = df.drop(columns=columns_to_drop)
-    corrmat = relevant.corr().abs()
+    corrmat = relevant.corr()
     f, ax = plt.subplots(figsize=(9, 9))
     sns.set(font_scale=0.9)
     sns.heatmap(corrmat, vmax=.8, square=True, annot=True, fmt='.2f', cmap='winter')
     plt.show()
 
+    # Get the correlations of each contributing feature
+    correlations = corrmat.unstack()['home_victory']
+    negatively_correlated = correlations[correlations < 0]
+    positively_correlated = correlations[correlations > 0]
+
+    # Get a list of which features are positively or negatively correlated
+    negatively_correlated = list(negatively_correlated.index)
+    positively_correlated = list(positively_correlated.index)
+    positively_correlated.remove('home_victory')
+
     # Get description of relevant features
-    contributing_feature_description = relevant.describe()
+    contributing_feature_description = df.filter(contributing_features).describe()
     print(contributing_feature_description.to_string())
     print()
 
@@ -1175,6 +1069,7 @@ def get_best_features(df=None):
         series = df[feature]
         (mean, dev) = norm.fit(series)
         sns.distplot(series, fit=norm)
+
         plt.legend(['Normal dist. ($\mu=$ {:.2f} and $\sigma=$ {:.2f} )'.format(mean, dev)],
                    loc='best')
         plt.ylabel('Frequency')
@@ -1194,6 +1089,7 @@ def get_best_features(df=None):
         plt.show()
 
     # Remove extreme outliers
+    print('Removing outliers')
     for feature in contributing_features:
         series = df[feature]
         (mean, dev) = norm.fit(series)
@@ -1571,7 +1467,7 @@ def print_grid_search_details(clf, filename):
     """Prints the results of the grid search to a file and the console."""
 
     # Set the directory to write files to
-    filename = other_dir + '7 Features\\Scores\\' + filename
+    filename = other_dir + '7 Features No Outliers\\Scores\\' + filename
 
     # Print the best parameter found in the search along with its score
     print('Best parameters set found on development set:')
@@ -1612,13 +1508,13 @@ def get_best_knn():
 def get_best_logistic_regression():
     """Gets the logistic regression model that yielded the best result."""
 
-    return LogisticRegression(C=0.04,
+    return LogisticRegression(C=0.06,
                               class_weight=None,
                               multi_class='ovr',
                               penalty='l1',
                               random_state=42,
                               solver='saga',
-                              tol=0.0001)
+                              tol=0.001)
 
 
 def get_best_svc():
@@ -1633,8 +1529,8 @@ def get_best_svc():
 def get_best_random_forest():
     """Gets the random forest model that yielded the best result."""
 
-    return RandomForestClassifier(n_estimators=500,
-                                  max_features=5,
+    return RandomForestClassifier(n_estimators=1000,
+                                  max_features=4,
                                   max_depth=3,
                                   random_state=42)
 
@@ -1676,7 +1572,7 @@ def get_voting_classifier(contributing_features, df=None):
     X = scaler.transform(X)
 
     # Pickle the scaler
-    joblib.dump(scaler, other_dir + '7 Features\\2018Scaler.pkl')
+    joblib.dump(scaler, other_dir + '7 Features No Outliers\\2018Scaler.pkl')
 
     # Get the classification models
     logistic_regression = get_best_logistic_regression()
@@ -1684,10 +1580,10 @@ def get_voting_classifier(contributing_features, df=None):
     random_forest = get_best_random_forest()
 
     # Create voting classifier from the 3 estimators, weighted by unit vector of the inverse of the briers, soft voting
-    voting_classifier = VotingClassifier(estimators=[('Logistic Regression', logistic_regression),
-                                                     ('SVC', svc),
-                                                     ('Random Forest', random_forest)],
-                                         weights=[0.578447, 0.577656, 0.575945],
+    voting_classifier = VotingClassifier(estimators=[('Logistic Regression', logistic_regression),  # .21217, 66.519
+                                                     ('SVC', svc),                                  # .21244, 66.386
+                                                     ('Random Forest', random_forest)],             # .21353, 66.563
+                                         weights=[0.57822, 0.57727, 0.57656],
                                          voting='soft',
                                          flatten_transform=False)
 
@@ -1695,17 +1591,17 @@ def get_voting_classifier(contributing_features, df=None):
     voting_classifier.fit(X, y.ravel())
 
     # Pickle the voting classifier
-    joblib.dump(voting_classifier, other_dir + '7 Features\\2018VotingClassifier.pkl')
+    joblib.dump(voting_classifier, other_dir + '7 Features No Outliers\\2018VotingClassifier.pkl')
 
     return voting_classifier
 
 
 def evaluate_2018_season():
     # Set the directory to write files to
-    filename = other_dir + '7 Features\\Scores\\2018Confusion.txt'
+    filename = other_dir + '7 Features No Outliers\\Scores\\2018Confusion.txt'
 
-    voting_classifier = joblib.load(other_dir + '7 Features\\2017VotingClassifier.pkl')
-    scaler = joblib.load(other_dir + '7 Features\\2017Scaler.pkl')
+    voting_classifier = joblib.load(other_dir + '7 Features No Outliers\\2017VotingClassifier.pkl')
+    scaler = joblib.load(other_dir + '7 Features No Outliers\\2017Scaler.pkl')
 
     last_season = pd.read_csv(game_data_dir + '20022018.csv').values[-267:]
     last_season = pd.DataFrame(last_season)
@@ -1781,7 +1677,7 @@ def evaluate_2018_season():
     print('Voting Classifier:', round((.25 - vote_brier) * 26700, 2), file=open(filename, 'a'))
     print('', file=open(filename, 'a'))
 
-    # results.to_csv(other_dir + '7 Features\\Scores\\2018Predictions.csv', index=False)
+    results.to_csv(other_dir + '7 Features No Outliers\\Scores\\2018Predictions.csv', index=False)
 
     rounded_rf = rf.apply(lambda row: round(row))
     rounded_svc = svc.apply(lambda row: round(row))
@@ -1964,7 +1860,7 @@ def get_metrics(y_true, y_pred, filename):
 
 
 def visualize_2018_season():
-    predictions = pd.read_csv(other_dir + '7 Features\\Scores\\2018Predictions.csv')
+    predictions = pd.read_csv(other_dir + '7 Features No Outliers\\Scores\\2018Predictions.csv')
 
     for num, game in enumerate(predictions.values):
         vote_prob = int(round(game[3] * 100))
@@ -1985,3 +1881,55 @@ def visualize_2018_season():
             print('\033[31m' + str(num + 2).zfill(3) + ' ' + ''.join(slider) + ' ' + str(brier) + '\033[0m')
         else:
             print('\033[32m' + str(num + 2).zfill(3) + ' ' + ''.join(slider) + ' ' + str(brier) + '\033[0m')
+
+
+def analyze_results():
+    with open(other_dir + '7 Features No Outliers\\Scores\\logistic_regression_brier_score_loss.txt') as brier:
+        with open(other_dir + '7 Features No Outliers\\Scores\\logistic_regression_accuracy.txt') as accuracy:
+            brier_lines = brier.readlines()[4:]
+            accuracy_lines = accuracy.readlines()[4:]
+
+            tenth = int(len(brier_lines) * .1)
+            if tenth > 10:
+                brier_lines = brier_lines[:tenth]
+                accuracy_lines = accuracy_lines[:tenth]
+
+            briers = dict()
+            for brier_line in brier_lines:
+                brier_score = float(brier_line.split()[0])
+                brier_params = brier_line.split(' for ')[-1]
+                briers[brier_params] = brier_score
+
+            accuracies = dict()
+            for accuracy_line in accuracy_lines:
+                accuracy_score = float(accuracy_line.split()[0])
+                accuracy_params = accuracy_line.split(' for ')[-1]
+                accuracies[accuracy_params] = accuracy_score
+
+            brier_scores = briers.values()
+            min_brier = min(brier_scores)
+            max_brier = max(brier_scores)
+            mean_brier = statistics.mean(brier_scores)
+            brier_dev = statistics.stdev(brier_scores)
+
+            for brier_key, brier_val in briers.items():
+                # briers[brier_key] = (brier_val - mean_brier) / brier_dev
+                briers[brier_key] = (brier_val - min_brier) / (max_brier - min_brier)
+
+            accuracies_scores = accuracies.values()
+            min_accuracy = min(accuracies_scores)
+            max_accuracy = max(accuracies_scores)
+            mean_accuracy = statistics.mean(accuracies_scores)
+            accuracy_dev = statistics.stdev(accuracies_scores)
+
+            for accuracy_key, accuracy_val in accuracies.items():
+                # accuracies[accuracy_key] = (accuracy_val - mean_accuracy) / accuracy_dev
+                accuracies[accuracy_key] = (accuracy_val - min_accuracy) / (max_accuracy - min_accuracy)
+
+            params = dict()
+            for brier_key, brier_val in briers.items():
+                if accuracies.get(brier_key) is not None:
+                    params[brier_key] = brier_val + accuracies.get(brier_key)
+
+            sorted_params = sorted(params.items(), key=lambda kv: kv[1], reverse=True)
+            return sorted_params

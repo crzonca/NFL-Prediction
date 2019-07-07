@@ -16,10 +16,12 @@ Home victory prevalence: 59.18 158/267
 
 Predicted home victories: 182
 Predicted home defeats: 85
+
 Correctly predicted home victories: 124
 Home victories predicted as defeats: 34
 Correctly predicted home defeats: 51
 Home defeats predicted as victories: 58
+
 Prediction accuracy: 65.54 175/267
 
 Prediction precision: 68.13 124/182
@@ -46,10 +48,12 @@ Home victory prevalence: 59.18 158/267
 
 Predicted home victories: 175
 Predicted home defeats: 92
+
 Correctly predicted home victories: 121
 Home victories predicted as defeats: 37
 Correctly predicted home defeats: 55
 Home defeats predicted as victories: 54
+
 Prediction accuracy: 65.92 176/267
 
 Prediction precision: 69.14 121/175
@@ -76,10 +80,12 @@ Home victory prevalence: 59.18 158/267
 
 Predicted home victories: 176
 Predicted home defeats: 91
+
 Correctly predicted home victories: 121
 Home victories predicted as defeats: 37
 Correctly predicted home defeats: 54
 Home defeats predicted as victories: 55
+
 Prediction accuracy: 65.54 175/267
 
 Prediction precision: 68.75 121/176
@@ -106,10 +112,12 @@ Home victory prevalence: 59.18 158/267
 
 Predicted home victories: 176
 Predicted home defeats: 91
+
 Correctly predicted home victories: 121
 Home victories predicted as defeats: 37
 Correctly predicted home defeats: 54
 Home defeats predicted as victories: 55
+
 Prediction accuracy: 65.54 175/267
 
 Prediction precision: 68.75 121/176
