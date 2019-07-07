@@ -1697,9 +1697,9 @@ def evaluate_2018_season():
     print('-' * 120, file=open(filename, 'a'))
     get_metrics(outcome, rounded_svc, filename)
 
-    print('Linear Regression')
+    print('Logistic Regression')
     print('-' * 120)
-    print('Linear Regression', file=open(filename, 'a'))
+    print('Logistic Regression', file=open(filename, 'a'))
     print('-' * 120, file=open(filename, 'a'))
     get_metrics(outcome, rounded_lr, filename)
 

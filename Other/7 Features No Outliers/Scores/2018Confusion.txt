@@ -72,7 +72,7 @@ Negative likelihood ratio: 0.4641 23.42/50.46
 Diagnostic odds ratio: 3.3308 1.5458/0.4641
 F1 score: 0.7267
 
-Linear Regression
+Logistic Regression
 ------------------------------------------------------------------------------------------------------------------------
 Actual home victories: 158
 Actual home defeats: 109
