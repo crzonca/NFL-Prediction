@@ -25,7 +25,6 @@ def plot_elo_function(teams,
     else:
         avg_elo = statistics.mean(actual_elos)
         elo_dev = statistics.pstdev(actual_elos)
-    elo_dev_third = elo_dev / 3
 
     # Cumulative distribution function for a normal deviation
     def cdf(rating):
@@ -53,24 +52,24 @@ def plot_elo_function(teams,
     vals = np.arange(bottom, top)
 
     # Get the values that match the boundaries of the tiers
-    s_plus = avg_elo + elo_dev_third * 8
-    s = avg_elo + elo_dev_third * 7
-    s_minus = avg_elo + elo_dev_third * 6
-    a_plus = avg_elo + elo_dev_third * 5
-    a = avg_elo + elo_dev_third * 4
-    a_minus = avg_elo + elo_dev_third * 3
-    b_plus = avg_elo + elo_dev_third * 2
-    b = avg_elo + elo_dev_third * 1
+    s_plus = avg_elo + elo_dev * 8 / 3
+    s = avg_elo + elo_dev * 7 / 3
+    s_minus = avg_elo + elo_dev * 2
+    a_plus = avg_elo + elo_dev * 5 / 3
+    a = avg_elo + elo_dev * 4 / 3
+    a_minus = avg_elo + elo_dev
+    b_plus = avg_elo + elo_dev * 2 / 3
+    b = avg_elo + elo_dev * 1 / 3
     b_minus = avg_elo
-    c_plus = avg_elo - elo_dev_third * 1
-    c = avg_elo - elo_dev_third * 2
-    c_minus = avg_elo - elo_dev_third * 3
-    d_plus = avg_elo - elo_dev_third * 4
-    d = avg_elo - elo_dev_third * 5
-    d_minus = avg_elo - elo_dev_third * 6
-    f_plus = avg_elo - elo_dev_third * 7
-    f = avg_elo - elo_dev_third * 8
-    f_minus = avg_elo - elo_dev_third * 9
+    c_plus = avg_elo - elo_dev * 1 / 3
+    c = avg_elo - elo_dev * 2 / 3
+    c_minus = avg_elo - elo_dev
+    d_plus = avg_elo - elo_dev * 4 / 3
+    d = avg_elo - elo_dev * 5 / 3
+    d_minus = avg_elo - elo_dev * 2
+    f_plus = avg_elo - elo_dev * 7 / 3
+    f = avg_elo - elo_dev * 8 / 3
+    f_minus = avg_elo - elo_dev * 3
 
     # Set the colors of the tiers
     if classic_colors:
@@ -174,15 +173,17 @@ def plot_elo_function(teams,
     ax.axvspan(s, s_plus, alpha=0.5, color=s_color)
     ax.annotate(s='S', xy=((s + s_plus) / 2 - 3, -2))
 
-    ax.axvspan(s_plus, s_plus + elo_dev_third, alpha=0.5, color=s_plus_color)
-    ax.annotate(s='S+', xy=((s_plus + s_plus + elo_dev_third) / 2 - 3, -2))
+    ax.axvspan(s_plus, s_plus + elo_dev / 3, alpha=0.5, color=s_plus_color)
+    ax.annotate(s='S+', xy=((s_plus + s_plus + elo_dev / 3) / 2 - 3, -2))
 
     # Label each teams marker with the team name
     for i, percent in enumerate(percents):
         if i % 2 == 0:
-            offset = (30, -5)
+            offset = (20, -5)
         else:
-            offset = (-60, 0)
+            chars = min(len(team_names[i]), 8)
+            chars = max(chars, 6)
+            offset = (chars * -10, 0)
         ax.annotate(s=team_names[i],
                     xy=(actual_elos[i], percent),
                     xytext=offset,
