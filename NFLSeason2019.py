@@ -15,19 +15,23 @@ def season():
     eliminated_teams = list()
 
     # Preseason
-    print('Preseason')
-    nfl_teams = handle_week(nfl_teams, 'Preseason Week 1', pre_week_1, eliminated_teams, '6 August 2019')
-    nfl_teams = handle_week(nfl_teams, 'Preseason Week 2', pre_week_2, eliminated_teams, '13 August 2019')
-    nfl_teams = handle_week(nfl_teams, 'Preseason Week 3', pre_week_3, eliminated_teams, '20 August 2019')
-    nfl_teams = handle_week(nfl_teams, 'Preseason Week 4', pre_week_4, eliminated_teams, '27 August 2019')
+    if maya.now() < maya.when('3 September 2019', timezone='US/Central'):
+        nfl_teams = handle_week(nfl_teams, 'Preseason Week 1', pre_week_1, eliminated_teams, '6 August 2019')
+        nfl_teams = handle_week(nfl_teams, 'Preseason Week 2', pre_week_2, eliminated_teams, '13 August 2019')
+        nfl_teams = handle_week(nfl_teams, 'Preseason Week 3', pre_week_3, eliminated_teams, '20 August 2019')
+        nfl_teams = handle_week(nfl_teams, 'Preseason Week 4', pre_week_4, eliminated_teams, '27 August 2019')
 
     # Reset teams after preseason
     nfl_teams = set_up_teams()
 
     # Preseason Info
+    print('Preseason Info')
     Standings.print_league_details(nfl_teams, eliminated_teams)
     Standings.print_schedule_difficulty(nfl_teams)
     print('*' * 120, '\n')
+
+    # Plot the regular seasons initial ratings
+    Plotter.plot_elo_function(nfl_teams, '', 'Initial Ratings')
 
     # Regular Season
     print('Regular Season')
@@ -51,7 +55,7 @@ def season():
     nfl_teams = handle_week(nfl_teams, 'Week 17', week_17, eliminated_teams, '24 December 2019')
     eliminated_teams.extend([])
 
-    # Regular Season Info
+    # Regular Season remaining schedule difficulty
     Standings.print_schedule_difficulty(nfl_teams, remaining=True)
 
     # Playoff Info
