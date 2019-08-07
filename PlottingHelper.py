@@ -14,11 +14,17 @@ def plot_elo_function(teams,
                       classic_colors=False,
                       show_plot=True,
                       save_dir='..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\'):
+    """Plots the rating of a set of teams. X axis indicates each team's object Elo rating. Y axis indicates each team's
+    percentile relative to the other teams in the league.  Plot conatins each rating's tier overlaid by a logit function
+    where teams fall."""
+
+    # Set the style
     sns.set(style="ticks")
 
     # Get the elo rating of each team
     actual_elos = [round(team[4]) for team in teams]
 
+    # Determine the rating scale
     if absolute:
         avg_elo = 1500
         elo_dev = 82.889
@@ -115,12 +121,10 @@ def plot_elo_function(teams,
 
     # Plot the CDF and mark each team
     fig, ax = plt.subplots(figsize=(20, 10))
-    # fig.tight_layout()
     ax.plot(vals, cdf(vals), 'k', markevery=markers, marker='|')
 
     # Color each section by the tier color
     ax.axvspan(bottom, f_minus, alpha=0.6, color=bottom_color)
-    # ax.annotate(s='F-', xy=((f_minus - elo_dev_third + f_minus) / 2 - 3, -2))
 
     ax.axvspan(f_minus, f, alpha=0.6, color=f_minus_color)
     ax.annotate(s='F-', xy=((f_minus + f) / 2 - 3, -2))
@@ -209,24 +213,33 @@ def plot_elo_function(teams,
     # Remove the x margins
     plt.margins(x=0)
 
-    # Plot
+    # Change the name of the subdirectory
     sub_dir_name = sub_dir_name.replace(' ', '_')
 
+    # If the plot is being saved
     if save_dir:
+
+        # Determine the directory
         if absolute:
             save_dir = save_dir + 'Absolute\\' + sub_dir_name + '\\'
         else:
             save_dir = save_dir + 'Relative\\' + sub_dir_name + '\\'
 
+        # Create the directory if it doesn't exist
         if not os.path.exists(save_dir):
             os.mkdir(save_dir)
+
+        # Get the file name
         if plot_name:
             plot_name = plot_name.strip().replace(' ', '_')
             file_name = save_dir + 'Elo_Ratings_' + plot_name + '.png'
         else:
             file_name = save_dir + 'Elo_Ratings.png'
+
+        # Save the figure
         plt.savefig(file_name, dpi=300)
 
+    # Display the plot if desired
     if show_plot:
         plt.show()
     else:
@@ -235,14 +248,17 @@ def plot_elo_function(teams,
 
 def plot_conference_elo_function(teams, conference_name, week_name, absolute=False, classic_colors=False):
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
-    conference_teams = list()
+    """Plots the logit function for each team's rating for teams in a given conference."""
 
+    # Get the teams in the conference
+    conference_teams = list()
     league = Playoffs.get_league_structure()
     for conf_name, conference in league.items():
         if conference_name == conf_name:
             for div_name, division in conference.items():
                 conference_teams.extend(division)
 
+    # Plot the elo function for each team in the conference
     teams = list(filter(lambda t: t[0] in conference_teams, teams))
     plot_elo_function(teams,
                       conference_name,
@@ -254,14 +270,17 @@ def plot_conference_elo_function(teams, conference_name, week_name, absolute=Fal
 
 def plot_division_elo_function(teams, division_name, week_name, absolute=False, classic_colors=False):
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
-    division_teams = list()
+    """Plots the logit function for each team's rating for teams in a given division."""
 
+    # Get the teams in the division
+    division_teams = list()
     league = Playoffs.get_league_structure()
     for conf_name, conference in league.items():
         for div_name, division in conference.items():
             if div_name == division_name:
                 division_teams = division
 
+    # Plot the elo function for each team in the division
     teams = list(filter(lambda t: t[0] in division_teams, teams))
     plot_elo_function(teams,
                       division_name,
@@ -271,43 +290,69 @@ def plot_division_elo_function(teams, division_name, week_name, absolute=False, 
                       show_plot=False)
 
 
-def plot_team_elo_over_season(title, team_names):
+def plot_team_elo_over_season(title, team_names, show_plot=True):
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
     import Projects.nfl.NFL_Prediction.NFLSeason2019 as Season
+    """Plots the change in elo over the season for a set of teams."""
 
+    # Set the style
     sns.set(style="ticks")
 
+    # For each team in the list of teams
     all_teams_games = list()
     for team_name in team_names:
+        # Get all the games each team has completed
         team_games = Playoffs.completed_games.loc[(Playoffs.completed_games['home_team'] == team_name) |
                                                   (Playoffs.completed_games['away_team'] == team_name)]
+
+        # Add each completed game to a list
         all_teams_games.append(team_games)
+
+    # Get the maximum number of games any team has played in
     max_len = max([len(team_games) for team_games in all_teams_games])
 
     # Fill out data rows
     teams_elos = pd.DataFrame(columns=team_names)
+
+    # For each team in the list of teams
     for team_name in team_names:
+        # Get all the games each team has completed
         team_games = Playoffs.completed_games.loc[(Playoffs.completed_games['home_team'] == team_name) |
                                                   (Playoffs.completed_games['away_team'] == team_name)]
+
+        # Get the elo for the team for each game
         home = pd.Series(team_games['home_team'] == team_name)
         elos = pd.Series(team_games.lookup(team_games.index, home.map({True: 'home_elo', False: 'away_elo'})))
 
+        # Get the team from its name
         teams = Season.nfl_teams
         team = Season.get_team(teams, team_name)
 
+        # Get and add the teams current elo
         current = pd.Series(team[4])
         elos = elos.append(current, ignore_index=True)
+
+        # Store the team and its elo history in a dictionary
         teams_elos[team_name] = elos
 
     # Extend the line another week
     data = pd.DataFrame(columns=team_names)
+
+    # For each team in the list of teams
     for team_name in team_names:
+
+        # Get the elo history for the team
         elos = teams_elos[team_name]
+
+        # Add 2 more weeks of the most recent elo for formatting
         while len(elos) < max_len + 2:
             last = pd.Series(elos.iloc[-1])
             elos = elos.append(last, ignore_index=True)
+
+        # Update the data frame with the teams elo history
         data[team_name] = elos
 
+    # Plot the data frame
     ax = data.plot.line(figsize=(20, 10))
 
     # Add titles
@@ -321,4 +366,8 @@ def plot_team_elo_over_season(title, team_names):
     # Remove the x margins
     plt.margins(x=0)
 
-    plt.show()
+    # Display the plot if desired
+    if show_plot:
+        plt.show()
+    else:
+        plt.close()
