@@ -245,23 +245,42 @@ def print_monte_carlo_simulation(teams):
 
 def print_schedule_difficulty(teams, remaining=False):
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    import statistics
+
+    # Get each teams schedule difficulty
     team_tuples = list()
     for team in teams:
         schedule_difficulty, deviation = Playoffs.get_schedule_difficulty(teams, team[0], remaining)
         team_tuples.append((team, schedule_difficulty, deviation))
 
+    # Sort the teams
     sorted_by_difficulty = sorted(team_tuples, key=lambda tup: tup[1], reverse=True)
 
-    # Create the table header
-    table = PrettyTable(['Rank', 'Name', 'Games Played', 'Elo', 'Schedule Diff.', 'Deviation'])
-    table.float_format = '0.3'
+    # Calculate the mean and deviation for all the schedule difficulties
+    all_difficulties = [tup[1] for tup in team_tuples]
+    mean_difficulty = statistics.mean(all_difficulties)
+    difficulty_deviation = statistics.pstdev(all_difficulties)
 
-    # Add the info to the rows
-    for rank, team_tuple in enumerate(sorted_by_difficulty):
-        row = list()
+    # Standardize each team's difficulty
+    schedule_difficulties = list()
+    for team_tuple in sorted_by_difficulty:
         team = team_tuple[0]
         schedule_difficulty = team_tuple[1]
         deviation = team_tuple[2]
+
+        schedule_difficulty = (schedule_difficulty - mean_difficulty) / difficulty_deviation
+
+        schedule_difficulties.append((team, schedule_difficulty, deviation))
+
+    # Create the table header
+    table = PrettyTable(['Rank', 'Name', 'Games Played', 'Elo', 'Schedule Diff.'])
+    table.float_format = '0.3'
+
+    # Add the info to the rows
+    for rank, team_tuple in enumerate(schedule_difficulties):
+        row = list()
+        team = team_tuple[0]
+        schedule_difficulty = team_tuple[1]
         row.append(rank + 1)
         team_info = list()
         team_info.append(team[0])
@@ -269,7 +288,6 @@ def print_schedule_difficulty(teams, remaining=False):
         team_info.append(games_played)
         team_info.append(team[4])
         team_info.append(schedule_difficulty)
-        team_info.append(deviation)
         row = row + team_info
 
         table.add_row(row)
