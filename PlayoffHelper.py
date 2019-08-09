@@ -75,22 +75,22 @@ def get_pre_week1_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
     games.append(create_match_up('Falcons', 'Broncos', 2.5))
-    games.append(create_match_up('Giants', 'Jets', 1.5))
-    games.append(create_match_up('Eagles', 'Titans', -3))
+    games.append(create_match_up('Giants', 'Jets', 2.5))
+    games.append(create_match_up('Eagles', 'Titans', -1.5))
     games.append(create_match_up('Bears', 'Panthers', -3))
-    games.append(create_match_up('Lions', 'Patriots', 1))
-    games.append(create_match_up('Packers', 'Texans', -2))
-    games.append(create_match_up('Saints', 'Vikings', -3))
-    games.append(create_match_up('Cardinals', 'Chargers', -2))
-    games.append(create_match_up('49ers', 'Cowboys', -4))
-    games.append(create_match_up('Seahawks', 'Broncos', -1))
-    games.append(create_match_up('Bills', 'Colts', -2.5))
-    games.append(create_match_up('Dolphins', 'Falcons', -3.5))
-    games.append(create_match_up('Ravens', 'Jaguars', -4.5))
-    games.append(create_match_up('Browns', 'Redskins', 2))
+    games.append(create_match_up('Lions', 'Patriots', -2.5))
+    games.append(create_match_up('Packers', 'Texans', -1.5))
+    games.append(create_match_up('Saints', 'Vikings', -2.5))
+    games.append(create_match_up('Cardinals', 'Chargers', -3))
+    games.append(create_match_up('49ers', 'Cowboys', -4.5))
+    games.append(create_match_up('Seahawks', 'Broncos', 2))
+    games.append(create_match_up('Bills', 'Colts', 1.5))
+    games.append(create_match_up('Dolphins', 'Falcons', -4))
+    games.append(create_match_up('Ravens', 'Jaguars', -3.5))
+    games.append(create_match_up('Browns', 'Redskins', -1.5))
     games.append(create_match_up('Steelers', 'Buccaneers', -2.5))
     games.append(create_match_up('Chiefs', 'Bengals', -3.5))
-    games.append(create_match_up('Raiders', 'Rams', -5.5))
+    games.append(create_match_up('Raiders', 'Rams', -5))
 
     return games
 
@@ -578,6 +578,9 @@ def get_superbowl_schedule():
 
 
 def monte_carlo(teams, trials=1e3, verbose=False):
+    """Simulates each game outcome based on every team's elo after every game.  Process is repeated 1000 times to
+    determine each teams probable final record and playoff standing."""
+
     import maya
 
     all_trials = list()
@@ -701,6 +704,8 @@ def monte_carlo(teams, trials=1e3, verbose=False):
 
 
 def get_pct_chance(home_elo, away_elo):
+    """Gets a teams percent chance to beat another team, based solely on each team's elo."""
+
     # Get a teams expected chance to win based off each teams elo
     q_home = 10 ** (home_elo / 400)
     q_away = 10 ** (away_elo / 400)
@@ -711,6 +716,9 @@ def get_pct_chance(home_elo, away_elo):
 
 
 def get_playoff_picture(teams, verbose=False):
+    """Sorts a list of teams into the official standings and determines the current playoff teams.  Playoff teams are
+    divided into 3 categories: 1st round byes, division leaders, and wild cards"""
+
     # Sort the teams by playoff tiebreakers
     teams = sort_by_tiebreakers(teams)
 
@@ -829,12 +837,19 @@ def get_playoff_picture(teams, verbose=False):
 
 
 def sort_by_tiebreakers(teams):
+    """Sorts a list of teams based on the NFL playoff tiebreaker rules."""
+
     # Get a list of teams sorted by the official NFL playoff tiebreakers
     sorted_teams = sorted(teams, key=cmp_to_key(compare_win_pct), reverse=True)
     return sorted_teams
 
 
 def compare_win_pct(team1, team2):
+    """Compares two teams based on each teams win percentage.
+    Positive: team1 greater win percentage
+    Negative: team2 greater win percentage
+    Zero: Equal win percentage"""
+
     # Get the percentage of games each team has won
     team1_games_played = team1[1] + team1[2] + team1[3]
     team2_games_played = team2[1] + team2[2] + team2[3]
@@ -860,6 +875,11 @@ def compare_win_pct(team1, team2):
 
 
 def compare_head_to_head(team1, team2):
+    """Compares two teams based on each teams record against the other team.
+    Positive: team1 better head to head record
+    Negative: team2 better head to head record
+    Zero: Equal head to head record"""
+
     # Get the games between both teams
     head_to_head_games = completed_games.loc[((completed_games['home_team'] == team1[0]) |
                                               (completed_games['away_team'] == team1[0])) &
@@ -880,6 +900,8 @@ def compare_head_to_head(team1, team2):
 
 
 def get_team_victories(team_name, games_df):
+    """Gets all of the games where a team was victorious."""
+
     # Get the games where the team won
     team_victories = games_df.loc[((games_df['home_team'] == team_name) &
                                    (games_df['home_score'] > games_df['away_score'])) |
@@ -889,6 +911,11 @@ def get_team_victories(team_name, games_df):
 
 
 def compare_divisional_record(team1, team2):
+    """Compares two teams based on each teams record against teams within the division.
+    Positive: team1 better divisional record
+    Negative: team2 better divisional record
+    Zero: Equal divisional record"""
+
     # Get they games against opponents within each teams division
     team1_divisional_games = get_divisional_games(team1[0], completed_games)
     team2_divisional_games = get_divisional_games(team2[0], completed_games)
@@ -911,6 +938,8 @@ def compare_divisional_record(team1, team2):
 
 
 def get_divisional_games(team_name, games_df):
+    """Gets all of the games that a team has competed in where the opponent was in the same division."""
+
     # Get the division of the team
     nfl = get_league_structure()
     teams_division = None
@@ -930,6 +959,11 @@ def get_divisional_games(team_name, games_df):
 
 
 def compare_common_record(team1, team2):
+    """Compares two teams based on each teams record against teams that each team has faced.
+    Positive: team1 better common record
+    Negative: team2 better common record
+    Zero: Equal common record"""
+
     # Get they games against common opponents
     team1_common_games = get_games_against_common_opponents(team1, team2, completed_games)
     team2_common_games = get_games_against_common_opponents(team2, team1, completed_games)
@@ -952,6 +986,8 @@ def compare_common_record(team1, team2):
 
 
 def get_games_against_common_opponents(team1, team2, games_df):
+    """Gets all of the games that team1 has competed in where the opponent has also faced team2."""
+
     # Get all of the games each team played in
     team1_games = games_df.loc[(games_df['home_team'] == team1[0]) | (games_df['away_team'] == team1[0])]
     team2_games = games_df.loc[(games_df['home_team'] == team2[0]) | (games_df['away_team'] == team2[0])]
@@ -968,6 +1004,11 @@ def get_games_against_common_opponents(team1, team2, games_df):
 
 
 def compare_conference_record(team1, team2):
+    """Compares two teams based on each teams record against teams within the conference.
+    Positive: team1 better conference record
+    Negative: team2 better conference record
+    Zero: Equal conference record"""
+
     # Get they games against opponents within each teams conference
     team1_conference_games = get_conference_games(team1[0], completed_games)
     team2_conference_games = get_conference_games(team2[0], completed_games)
@@ -990,6 +1031,8 @@ def compare_conference_record(team1, team2):
 
 
 def get_conference_games(team_name, games_df):
+    """Gets all of the games that a team has competed in where the opponent was in the same conference."""
+
     # Get the conference of the team
     nfl = get_league_structure()
     teams_conference = None
@@ -1014,6 +1057,12 @@ def get_conference_games(team_name, games_df):
 
 
 def compare_strength_of_victory(team1, team2):
+    """Compares two teams based on each teams strength of victory. Strength of victory is determined by the combined
+    win percentage of all of the opponents a team has defeated.
+    Positive: team1 greater strength of victory
+    Negative: team2 greater strength of victory
+    Zero: Equal strength of victory"""
+
     import Projects.nfl.NFL_Prediction.NFLSeason2019 as Season
 
     # Get all the games each team competed in
@@ -1074,6 +1123,12 @@ def compare_strength_of_victory(team1, team2):
 
 
 def compare_strength_of_schedule(team1, team2):
+    """Compares two teams based on each teams strength of schedule. Strength of schedule is determined by the combined
+    win percentage of all of a teams opponents.
+    Positive: team1 more difficult schedule
+    Negative: team2 more difficult schedule
+    Zero: Equal schedule difficulty"""
+
     import Projects.nfl.NFL_Prediction.NFLSeason2019 as Season
 
     # Get all the games each team competed in
@@ -1130,6 +1185,11 @@ def compare_strength_of_schedule(team1, team2):
 
 
 def compare_point_diff(team1, team2):
+    """Compares two teams based on each teams point differential.
+    Positive: team1 greater point differential
+    Negative: team2 greater point differential
+    Zero: Equal point differential"""
+
     # Get the point differential of each team
     team1_point_diff = team1[5] - team1[6]
     team2_point_diff = team2[5] - team2[6]
@@ -1139,6 +1199,9 @@ def compare_point_diff(team1, team2):
 
 
 def get_schedule_difficulty(teams, team_name, remaining=False):
+    """Gets the schedule (or remaining schedule) for a team and averages the elo of each opposing team in the teams
+    schedule."""
+
     # Get the schedule
     schedule, spreads, neutral_location = zip(*get_schedule())
 
@@ -1176,6 +1239,10 @@ def get_schedule_difficulty(teams, team_name, remaining=False):
 
 
 def create_playoff_bracket(teams):
+    """Creates formatted playoff brackets for the start of the playoffs.  Creates one bracket per conference and places
+    teams based on their seed and initial match up. Wildcard teams are marked with an asterisk.  Does not update teams
+    midway through the playoffs."""
+
     # Create a list of playoff teams and their seed
     seeded_teams = list()
     for seed, team in enumerate(teams):
