@@ -14,9 +14,20 @@ def plot_elo_function(teams,
                       classic_colors=False,
                       show_plot=True,
                       save_dir='..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\'):
-    """Plots the rating of a set of teams. X axis indicates each team's object Elo rating. Y axis indicates each team's
+    """
+    Plots the rating of a set of teams. X axis indicates each team's object Elo rating. Y axis indicates each team's
     percentile relative to the other teams in the league.  Plot conatins each rating's tier overlaid by a logit function
-    where teams fall."""
+    where teams fall.
+
+    :param teams: The list of teams to include in the plot
+    :param plot_name: The name of the plot
+    :param sub_dir_name: The subdirectory to save the plot to
+    :param absolute: If the logit function should be based off all NFL teams in history
+    :param classic_colors: If the 'classic' color scheme should be used
+    :param show_plot: If the plot should be shown or just saved
+    :param save_dir: The directory to save the plot to
+    :return: Void
+    """
 
     # Set the style
     sns.set(style="ticks")
@@ -247,8 +258,18 @@ def plot_elo_function(teams,
 
 
 def plot_conference_elo_function(teams, conference_name, week_name, absolute=False, classic_colors=False):
+    """
+    Plots the logit function for each team's rating for teams in a given conference.
+
+    :param teams: The list of teams to plot
+    :param conference_name: The name of the conference
+    :param week_name: The week that the plot is for
+    :param absolute: If the logit function should be based off all NFL teams in history
+    :param classic_colors: If the 'classic' color scheme should be used
+    :return: Void
+    """
+
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
-    """Plots the logit function for each team's rating for teams in a given conference."""
 
     # Get the teams in the conference
     conference_teams = list()
@@ -269,8 +290,18 @@ def plot_conference_elo_function(teams, conference_name, week_name, absolute=Fal
 
 
 def plot_division_elo_function(teams, division_name, week_name, absolute=False, classic_colors=False):
+    """
+    Plots the logit function for each team's rating for teams in a given division.
+
+    :param teams: The list of teams to plot
+    :param division_name: The name of the division
+    :param week_name: The week that the plot is for
+    :param absolute: If the logit function should be based off all NFL teams in history
+    :param classic_colors: If the 'classic' color scheme should be used
+    :return: Void
+    """
+
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
-    """Plots the logit function for each team's rating for teams in a given division."""
 
     # Get the teams in the division
     division_teams = list()
@@ -291,9 +322,17 @@ def plot_division_elo_function(teams, division_name, week_name, absolute=False, 
 
 
 def plot_team_elo_over_season(title, team_names, show_plot=True):
+    """
+    Plots the change in elo over the season for a set of teams.
+
+    :param title: The title that the team elos are for
+    :param team_names: The names of the teams that are included in the plot
+    :param show_plot: If the plot should be shown or just saved
+    :return: Void
+    """
+
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
     import Projects.nfl.NFL_Prediction.NFLSeason2019 as Season
-    """Plots the change in elo over the season for a set of teams."""
 
     # Set the style
     sns.set(style="ticks")

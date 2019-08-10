@@ -17,12 +17,26 @@ completed_games = pd.DataFrame(columns=['home_team', 'away_team', 'home_score', 
 
 
 def get_team(teams, team_name):
+    """
+    Gets a specific team in the league based on the team name.
+
+    :param teams: The list of all the teams in the league
+    :param team_name: The name of the team to get
+    :return: The team with the given name
+    """
+
     for team in teams:
         if team[0] == team_name:
             return team
 
 
 def get_league_structure():
+    """
+    Gets a dictionary containing the division and conference structure of the league.
+
+    :return: The league structure
+    """
+
     afc = {'AFC North': ['Bengals', 'Browns', 'Ravens', 'Steelers'],
            'AFC East': ['Bills', 'Dolphins', 'Jets', 'Patriots'],
            'AFC South': ['Colts', 'Jaguars', 'Texans', 'Titans'],
@@ -38,6 +52,12 @@ def get_league_structure():
 
 
 def get_schedule():
+    """
+    Gets the 2019 NFL schedule.
+
+    :return: The 2019 NFL schedule
+    """
+
     games = list()
     games.extend(get_week1_schedule())
     games.extend(get_week2_schedule())
@@ -68,6 +88,16 @@ def get_schedule():
 
 
 def create_match_up(home_name, away_name, home_spread, neutral_location=False):
+    """
+    Creates a representation of an instance of an NFL game.
+
+    :param home_name: The name of the home team
+    :param away_name: The name of the away team
+    :param home_spread: The spread of the game from the home teams perspective
+    :param neutral_location: If the game is at a neutral location
+    :return: The match up
+    """
+
     return (home_name, away_name), home_spread, neutral_location
 
 
@@ -578,8 +608,15 @@ def get_superbowl_schedule():
 
 
 def monte_carlo(teams, trials=1e3, verbose=False):
-    """Simulates each game outcome based on every team's elo after every game.  Process is repeated 1000 times to
-    determine each teams probable final record and playoff standing."""
+    """
+    Simulates each game outcome based on every team's elo after every game.  Process is repeated a high number of times
+    to determine each teams probable final record and playoff standing.
+
+    :param teams: The list of all the teams in the league
+    :param trials: The number of times to repeat the simulation
+    :param verbose: If verbose output should be included
+    :return: Void
+    """
 
     import maya
 
@@ -704,7 +741,13 @@ def monte_carlo(teams, trials=1e3, verbose=False):
 
 
 def get_pct_chance(home_elo, away_elo):
-    """Gets a teams percent chance to beat another team, based solely on each team's elo."""
+    """
+    Gets a teams percent chance to beat another team, based solely on each team's elo.
+
+    :param home_elo: The first team's elo
+    :param away_elo: The second team's elo
+    :return: The percent chance of victory for the first team
+    """
 
     # Get a teams expected chance to win based off each teams elo
     q_home = 10 ** (home_elo / 400)
@@ -716,8 +759,14 @@ def get_pct_chance(home_elo, away_elo):
 
 
 def get_playoff_picture(teams, verbose=False):
-    """Sorts a list of teams into the official standings and determines the current playoff teams.  Playoff teams are
-    divided into 3 categories: 1st round byes, division leaders, and wild cards"""
+    """
+    Sorts a list of teams into the official standings and determines the current playoff teams.  Playoff teams are
+    divided into 3 categories: 1st round byes, division leaders, and wild cards
+
+    :param teams: The list of all the teams in the league
+    :param verbose: If verbose output should be included
+    :return: A list of teams that are in the AFC and NFC playoffs
+    """
 
     # Sort the teams by playoff tiebreakers
     teams = sort_by_tiebreakers(teams)
@@ -837,7 +886,12 @@ def get_playoff_picture(teams, verbose=False):
 
 
 def sort_by_tiebreakers(teams):
-    """Sorts a list of teams based on the NFL playoff tiebreaker rules."""
+    """
+    Sorts a list of teams based on the NFL playoff tiebreaker rules.
+
+    :param teams: The list of all the teams in the league
+    :return: The list of all the teams in the league sorted by the tiebreaker rules
+    """
 
     # Get a list of teams sorted by the official NFL playoff tiebreakers
     sorted_teams = sorted(teams, key=cmp_to_key(compare_win_pct), reverse=True)
@@ -845,10 +899,16 @@ def sort_by_tiebreakers(teams):
 
 
 def compare_win_pct(team1, team2):
-    """Compares two teams based on each teams win percentage.
+    """
+    Compares two teams based on each teams win percentage.
     Positive: team1 greater win percentage
     Negative: team2 greater win percentage
-    Zero: Equal win percentage"""
+    Zero: Equal win percentage
+
+    :param team1: The first team to compare
+    :param team2: The second team to compare
+    :return: A comparison of each team's win percentage
+    """
 
     # Get the percentage of games each team has won
     team1_games_played = team1[1] + team1[2] + team1[3]
@@ -875,10 +935,16 @@ def compare_win_pct(team1, team2):
 
 
 def compare_head_to_head(team1, team2):
-    """Compares two teams based on each teams record against the other team.
+    """
+    Compares two teams based on each teams record against the other team.
     Positive: team1 better head to head record
     Negative: team2 better head to head record
-    Zero: Equal head to head record"""
+    Zero: Equal head to head record
+
+    :param team1: The first team to compare
+    :param team2: The second team to compare
+    :return: A comparison of each team's head to head record
+    """
 
     # Get the games between both teams
     head_to_head_games = completed_games.loc[((completed_games['home_team'] == team1[0]) |
@@ -900,7 +966,13 @@ def compare_head_to_head(team1, team2):
 
 
 def get_team_victories(team_name, games_df):
-    """Gets all of the games where a team was victorious."""
+    """
+    Gets all of the games where a team was victorious.
+
+    :param team_name: The team to get the victorious games
+    :param games_df: A dataframe containing the information of all the completed games
+    :return: A dataframe containing all the games that the team has won
+    """
 
     # Get the games where the team won
     team_victories = games_df.loc[((games_df['home_team'] == team_name) &
@@ -911,10 +983,16 @@ def get_team_victories(team_name, games_df):
 
 
 def compare_divisional_record(team1, team2):
-    """Compares two teams based on each teams record against teams within the division.
+    """
+    Compares two teams based on each teams record against teams within the division.
     Positive: team1 better divisional record
     Negative: team2 better divisional record
-    Zero: Equal divisional record"""
+    Zero: Equal divisional record
+
+    :param team1: The first team to compare
+    :param team2: The second team to compare
+    :return: A comparison of each team's divisional record
+    """
 
     # Get they games against opponents within each teams division
     team1_divisional_games = get_divisional_games(team1[0], completed_games)
@@ -938,7 +1016,13 @@ def compare_divisional_record(team1, team2):
 
 
 def get_divisional_games(team_name, games_df):
-    """Gets all of the games that a team has competed in where the opponent was in the same division."""
+    """
+    Gets all of the games that a team has competed in where the opponent was in the same division.
+
+    :param team_name: The team to get the in division games for
+    :param games_df: A dataframe containing the information of all the completed games
+    :return: A dataframe containing all the games that the team has competed in against an in division opponent
+    """
 
     # Get the division of the team
     nfl = get_league_structure()
@@ -959,10 +1043,16 @@ def get_divisional_games(team_name, games_df):
 
 
 def compare_common_record(team1, team2):
-    """Compares two teams based on each teams record against teams that each team has faced.
+    """
+    Compares two teams based on each teams record against teams that each team has faced.
     Positive: team1 better common record
     Negative: team2 better common record
-    Zero: Equal common record"""
+    Zero: Equal common record
+
+    :param team1: The first team to compare
+    :param team2: The second team to compare
+    :return: A comparison of each team's common record
+    """
 
     # Get they games against common opponents
     team1_common_games = get_games_against_common_opponents(team1, team2, completed_games)
@@ -986,7 +1076,14 @@ def compare_common_record(team1, team2):
 
 
 def get_games_against_common_opponents(team1, team2, games_df):
-    """Gets all of the games that team1 has competed in where the opponent has also faced team2."""
+    """
+    Gets all of the games that team1 has competed in where the opponent has also faced team2.
+
+    :param team1: The first team to compare
+    :param team2: The second team to compare
+    :param games_df: A dataframe containing the information of all the completed games
+    :return: A dataframe containing all games containing both teams and common opponents
+    """
 
     # Get all of the games each team played in
     team1_games = games_df.loc[(games_df['home_team'] == team1[0]) | (games_df['away_team'] == team1[0])]
@@ -1004,10 +1101,16 @@ def get_games_against_common_opponents(team1, team2, games_df):
 
 
 def compare_conference_record(team1, team2):
-    """Compares two teams based on each teams record against teams within the conference.
+    """
+    Compares two teams based on each teams record against teams within the conference.
     Positive: team1 better conference record
     Negative: team2 better conference record
-    Zero: Equal conference record"""
+    Zero: Equal conference record
+
+    :param team1: The first team to compare
+    :param team2: The second team to compare
+    :return: A comparison of each team's conference record
+    """
 
     # Get they games against opponents within each teams conference
     team1_conference_games = get_conference_games(team1[0], completed_games)
@@ -1031,7 +1134,13 @@ def compare_conference_record(team1, team2):
 
 
 def get_conference_games(team_name, games_df):
-    """Gets all of the games that a team has competed in where the opponent was in the same conference."""
+    """
+    Gets all of the games that a team has competed in where the opponent was in the same conference.
+
+    :param team_name: The team to get the in conference games for
+    :param games_df: A dataframe containing the information of all the completed games
+    :return: A dataframe containing all the games that the team has competed in against an in conference opponent
+    """
 
     # Get the conference of the team
     nfl = get_league_structure()
@@ -1057,11 +1166,17 @@ def get_conference_games(team_name, games_df):
 
 
 def compare_strength_of_victory(team1, team2):
-    """Compares two teams based on each teams strength of victory. Strength of victory is determined by the combined
+    """
+    Compares two teams based on each teams strength of victory. Strength of victory is determined by the combined
     win percentage of all of the opponents a team has defeated.
     Positive: team1 greater strength of victory
     Negative: team2 greater strength of victory
-    Zero: Equal strength of victory"""
+    Zero: Equal strength of victory
+
+    :param team1: The first team to compare
+    :param team2: The second team to compare
+    :return: A comparison of each team's strength of victory
+    """
 
     import Projects.nfl.NFL_Prediction.NFLSeason2019 as Season
 
@@ -1123,11 +1238,17 @@ def compare_strength_of_victory(team1, team2):
 
 
 def compare_strength_of_schedule(team1, team2):
-    """Compares two teams based on each teams strength of schedule. Strength of schedule is determined by the combined
+    """
+    Compares two teams based on each teams strength of schedule. Strength of schedule is determined by the combined
     win percentage of all of a teams opponents.
     Positive: team1 more difficult schedule
     Negative: team2 more difficult schedule
-    Zero: Equal schedule difficulty"""
+    Zero: Equal schedule difficulty
+
+    :param team1: The first team to compare
+    :param team2: The second team to compare
+    :return: A comparison of each team's strength of schedule
+    """
 
     import Projects.nfl.NFL_Prediction.NFLSeason2019 as Season
 
@@ -1185,10 +1306,16 @@ def compare_strength_of_schedule(team1, team2):
 
 
 def compare_point_diff(team1, team2):
-    """Compares two teams based on each teams point differential.
+    """
+    Compares two teams based on each teams point differential.
     Positive: team1 greater point differential
     Negative: team2 greater point differential
-    Zero: Equal point differential"""
+    Zero: Equal point differential
+
+    :param team1: The first team to compare
+    :param team2: The second team to compare
+    :return: A comparison of each team's point differential
+    """
 
     # Get the point differential of each team
     team1_point_diff = team1[5] - team1[6]
@@ -1199,8 +1326,14 @@ def compare_point_diff(team1, team2):
 
 
 def get_schedule_difficulty(teams, team_name, remaining=False):
-    """Gets the schedule (or remaining schedule) for a team and averages the elo of each opposing team in the teams
-    schedule."""
+    """
+    Gets the difficulty of a team's schedule, expressed in the average elo of all of the teams opponents.
+
+    :param teams: The list of all the teams in the league
+    :param team_name: The name of the team to get the schedule difficulty for
+    :param remaining: If the schedule difficulty should only be based off of the teams remaining games
+    :return: The average elo of each opposing team in the team's schedule.
+    """
 
     # Get the schedule
     schedule, spreads, neutral_location = zip(*get_schedule())
@@ -1239,9 +1372,14 @@ def get_schedule_difficulty(teams, team_name, remaining=False):
 
 
 def create_playoff_bracket(teams):
-    """Creates formatted playoff brackets for the start of the playoffs.  Creates one bracket per conference and places
+    """
+    Creates formatted playoff brackets for the start of the playoffs.  Creates one bracket per conference and places
     teams based on their seed and initial match up. Wildcard teams are marked with an asterisk.  Does not update teams
-    midway through the playoffs."""
+    midway through the playoffs.
+
+    :param teams: A list of all teams that are currently in the playoffs.
+    :return: Void
+    """
 
     # Create a list of playoff teams and their seed
     seeded_teams = list()

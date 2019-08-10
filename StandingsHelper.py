@@ -6,12 +6,29 @@ import Projects.nfl.NFL_Prediction.NFLPredictor as Predictor
 
 
 def get_team(teams, team_name):
+    """
+    Gets a specific team in the league based on the team name.
+
+    :param teams: The list of all the teams in the league
+    :param team_name: The name of the team to get
+    :return: The team with the given name
+    """
+
     for team in teams:
         if team[0] == team_name:
             return team
 
 
 def print_elo_rankings(teams, eliminated_teams, include_title=True):
+    """
+    Displays the team rankings information for a set of teams.
+
+    :param teams: The list of teams to display information for
+    :param eliminated_teams: The list of teams to exclude from the standings
+    :param include_title: If a header for the rankings information should be included
+    :return: Void
+    """
+
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
 
     # Sort the teams by elo, then by playoff tiebreakers
@@ -50,6 +67,15 @@ def print_elo_rankings(teams, eliminated_teams, include_title=True):
 
 
 def print_standings(teams, eliminated_teams, include_title=True):
+    """
+    Displays partial team standings information for a set of teams.
+
+    :param teams: The list of teams to display information for
+    :param eliminated_teams: The list of teams to exclude from the standings
+    :param include_title: If a header for the standings information should be included
+    :return: Void
+    """
+
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
 
     # Remove the eliminated teams
@@ -83,6 +109,15 @@ def print_standings(teams, eliminated_teams, include_title=True):
 
 
 def print_full_standings(teams, eliminated_teams, include_title=True):
+    """
+    Displays the full team standings information for a set of teams.
+
+    :param teams: The list of teams to display information for
+    :param eliminated_teams: The list of teams to exclude from the standings
+    :param include_title: If a header for the standings information should be included
+    :return: Void
+    """
+
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
 
     # Remove the eliminated teams
@@ -132,6 +167,13 @@ def print_full_standings(teams, eliminated_teams, include_title=True):
 
 
 def print_division_rankings(teams):
+    """
+    Displays the team rankings information for each division.
+
+    :param teams: The list of all the teams in the league
+    :return: Void
+    """
+
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
     nfl = Playoffs.get_league_structure()
     for conference_name, conference in nfl.items():
@@ -145,6 +187,13 @@ def print_division_rankings(teams):
 
 
 def print_division_standings(teams):
+    """
+    Displays the team standings information for each division.
+
+    :param teams: The list of all the teams in the league
+    :return: Void
+    """
+
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
     nfl = Playoffs.get_league_structure()
     for conference_name, conference in nfl.items():
@@ -158,6 +207,13 @@ def print_division_standings(teams):
 
 
 def print_full_division_standings(teams):
+    """
+    Displays the full team standings information for each division.
+
+    :param teams: The list of all the teams in the league
+    :return: Void
+    """
+
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
     nfl = Playoffs.get_league_structure()
     for conference_name, conference in nfl.items():
@@ -171,6 +227,13 @@ def print_full_division_standings(teams):
 
 
 def print_model_rankings(teams, eliminated_teams):
+    """
+    Displays team rankings based off each team's chance against an average team determined by the model.
+
+    :param teams: The list of teams to display information for
+    :param eliminated_teams: The list of teams to exclude from the rankings
+    :return: Void
+    """
     # Get every teams chance to beat the perfectly average team in the league
     team_probs = list()
     for team in teams:
@@ -214,6 +277,12 @@ def print_model_rankings(teams, eliminated_teams):
 
 
 def print_monte_carlo_simulation(teams):
+    """
+    Displays each teams end of season predictions based off the monte carlo simulations.
+
+    :param teams: The list of all the teams in the league, teams here include a playoff chance determined by monte_carlo
+    :return: Void
+    """
     # Sort the teams by wins, then least losses, then point differential, then total yards
     sorted_by_losses = sorted(teams, key=lambda tup: tup[2])
     sorted_by_wins = sorted(sorted_by_losses, reverse=True, key=lambda tup: tup[1])
@@ -244,6 +313,13 @@ def print_monte_carlo_simulation(teams):
 
 
 def print_schedule_difficulty(teams, remaining=False):
+    """
+    Displays the schedule difficulty information for all teams in the league.
+
+    :param teams: The list of all the teams in the league
+    :param remaining: If the schedule difficulty should only be based off of each teams remaining games
+    :return: Void
+    """
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
     import statistics
 
@@ -302,6 +378,17 @@ def print_schedule_difficulty(teams, remaining=False):
 
 
 def print_league_details(teams, eliminated_teams, full_standings=True, divisional_view=False, model_rankings=False):
+    """
+    Display's the current standings and rankings of a set of teams.
+
+    :param teams: The list of teams to display information for
+    :param eliminated_teams: The list of teams to exclude from the rankings
+    :param full_standings: If the standings should display full details, if not just record and elo are displayed
+    :param divisional_view: If the standings should be separated based on the divisions in the league
+    :param model_rankings: If rankings based off the model should be included
+    :return: Void
+    """
+
     # Print the standings
     if full_standings:
         if divisional_view:
@@ -326,12 +413,27 @@ def print_league_details(teams, eliminated_teams, full_standings=True, divisiona
 
 
 def get_tier(teams, team):
+    """
+    "Calculates a team's 'tier' based on the team's elo. Tiers are calculated based on difference from the mean elo,
+    expressed in fractions of the standard deviation.
+
+    :param teams: The list of all the teams in the league
+    :param team: The team to evaluate
+    :return: The team's tier
+    """
+
+    # Get the team's elo
     team_elo = team[4]
+
+    # Get all the elos in the league
     elos = [team_info[4] for team_info in teams]
+
+    # Determine the glass delta for the team's elo
     avg_elo = statistics.mean(elos)
     elo_dev = statistics.pstdev(elos)
     glass_delta = (team_elo - avg_elo) / elo_dev
 
+    # Determine the tier based on the effect size
     if glass_delta > 8 / 3:
         tier = 'S+'
     elif glass_delta > 7 / 3:
@@ -372,6 +474,13 @@ def get_tier(teams, team):
 
 
 def get_tier_color(tier, string):
+    """
+    Colors a string based on a given 'tier'.
+
+    :param tier: The given, predefined, tier of a team
+    :param string: The text to color
+    :return: The original text, colored in the 'tier color'
+    """
     if tier == 'S+':
         string = Colors.UNDERLINE + str(string) + Colors.ENDC
     elif tier == 'S':
@@ -412,6 +521,14 @@ def get_tier_color(tier, string):
 
 
 def get_average_team(teams):
+    """
+    Creates a team with average stats amongst all teams in the league.  Stats are average from teams at the current
+    point in the season.
+
+    :param teams: The list of all the teams in the league
+    :return: A team with each stat as average in the league at that point in the season
+    """
+
     all_wins = list()
     all_losses = list()
     all_ties = list()
@@ -426,6 +543,7 @@ def get_average_team(teams):
     all_total_interceptions_thrown = list()
     all_average_total_yards = list()
 
+    # Get every team's stats
     for team in teams:
         all_wins.append(team[1])
         all_losses.append(team[2])
@@ -441,6 +559,7 @@ def get_average_team(teams):
         all_total_interceptions_thrown.append(team[12])
         all_average_total_yards.append(team[13])
 
+    # Average every team's stats
     avg_wins = statistics.mean(all_wins)
     avg_losses = statistics.mean(all_losses)
     avg_ties = statistics.mean(all_ties)
@@ -461,6 +580,15 @@ def get_average_team(teams):
 
 
 def get_chance_against_average(teams, team):
+    """
+    Predicts a team's percent chance to defeat a team that has completely average stats within the league.  Spread
+    is determined as the difference in each team's point differential. Match up is treated as a neutral field game.
+
+    :param teams: The list of all the teams in the league
+    :param team: The team to evaluate
+    :return: The chance of victory of the evaluated team against an average team
+    """
+
     # Get a perfectly average team for the league
     avg_team = get_average_team(teams)
 
