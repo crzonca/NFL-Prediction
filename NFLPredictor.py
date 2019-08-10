@@ -11,6 +11,15 @@ base_dir = '..\\Projects\\nfl\\NFL_Prediction\\'
 
 
 def predict_game(home_info, away_info, home_spread=0):
+    """
+    Predicts the percent chance of the outcome of the game.
+    
+    :param home_info: Stats for the home team
+    :param away_info: Stats for the away team
+    :param home_spread: The spread of the game, from the home team's perspective
+    :return: The voting classifier probability and the individual estimator probabilities
+    """
+    
     # Load the classifier and scaler
     voting_classifier = joblib.load(base_dir + 'Other\\7 Features No Outliers\\2018VotingClassifier.pkl')
     scaler = joblib.load(base_dir + 'Other\\7 Features No Outliers\\2018Scaler.pkl')
@@ -127,16 +136,46 @@ def predict_game(home_info, away_info, home_spread=0):
 
 
 def predict_home_victory(home_info, away_info, home_spread=0):
+    """
+    Predicts the percent chance of the home team defeating the away team.
+    
+    :param home_info: Stats for the home team
+    :param away_info: Stats for the away team
+    :param home_spread: The spread of the game, from the home team's perspective
+    :return: The voting classifier probability and the individual estimator probabilities for the home team
+    """
+    
     vote_prob, lr_prob, svc_prob, rf_prob = predict_game(home_info, away_info, home_spread)
     return vote_prob[1], lr_prob[1], svc_prob[1], rf_prob[1]
 
 
 def predict_away_victory(home_info, away_info, home_spread=0):
+    """
+    Predicts the percent chance of the away team defeating the home team.
+
+    :param home_info: Stats for the home team
+    :param away_info: Stats for the away team
+    :param home_spread: The spread of the game, from the home team's perspective
+    :return: The voting classifier probability and the individual estimator probabilities for the away team
+    """
+    
     vote_prob, lr_prob, svc_prob, rf_prob = predict_game(home_info, away_info, home_spread)
     return vote_prob[0], lr_prob[0], svc_prob[0], rf_prob[0]
 
 
 def predict_game_outcome(teams, home_name, away_name, home_spread, neutral_location=False, verbose=False):
+    """
+    Predicts the percent chance of the outcome of the game.  Factors in the possibility of a neutral location game.
+
+    :param teams: A list of all the teams in the league
+    :param home_name: The name of the home team
+    :param away_name: The name of the away team
+    :param home_spread: The spread of the game, from the home team's perspective
+    :param neutral_location: If the game is at a neutral location
+    :param verbose: If verbose output should be included
+    :return: The favored teams chance of winning and a message
+    """
+    
     # Get each team
     home = get_team(teams, home_name)
     away = get_team(teams, away_name)
@@ -204,6 +243,31 @@ def update_teams(teams, home_name, home_score, home_touchdowns, home_net_pass_ya
                  home_pass_attempts, home_pass_tds, home_interceptions_thrown, home_total_yards,
                  away_name, away_score, away_touchdowns, away_net_pass_yards, away_pass_completions, away_pass_attempts,
                  away_pass_tds, away_interceptions_thrown, away_total_yards):
+    """
+    Updates each team with the stats from a game, converts game stats to part of team's rolling average stats.
+    
+    :param teams: A list of all the teams in the league
+    :param home_name: The name of the home team
+    :param home_score: The score of the home team
+    :param home_touchdowns: The total number of offensive touchdowns of the home team
+    :param home_net_pass_yards: The net passing yards of the home team
+    :param home_pass_completions: The number of pass completions of the home team
+    :param home_pass_attempts: The number of pass attempts of the home team
+    :param home_pass_tds: The number of passing touchdowns of the home team
+    :param home_interceptions_thrown: The number of interceptions thrown by the home team
+    :param home_total_yards: The total number of offensive yards of the home team
+    :param away_name: The name of the away team
+    :param away_score: The score of the away team
+    :param away_touchdowns: The total number of offensive touchdowns of the away team
+    :param away_net_pass_yards: The net passing yards of the away team
+    :param away_pass_completions: The number of pass completions of the away team
+    :param away_pass_attempts: The number of pass attempts of the away team
+    :param away_pass_tds: The number of passing touchdowns of the away team
+    :param away_interceptions_thrown: The number of interceptions thrown by the away team
+    :param away_total_yards: The total number of offensive yards of the away team
+    :return: An updated list of all the teams in the league
+    """
+    
     # Get the home team info
     home = get_team(teams, home_name)
     home_wins = home[1]
@@ -328,26 +392,41 @@ def update_teams(teams, home_name, home_score, home_touchdowns, home_net_pass_ya
 
 
 def get_week_probabilities(teams, games):
+    """
+    Gets all the game outcome probabilities for each game in a week.
+
+    :param teams: A list of all the teams in the league
+    :param games: A list of all the games in the week
+    :return: The list of probabilities for each game
+    """
+
+    # For each game in the list of games
     probabilities = list()
     for game in games:
+        # Predict the probability and add it to a list
         probabilities.append(predict_game_outcome(teams, game[0][0], game[0][1], game[1], neutral_location=game[2]))
 
+    # Sort the list of probabilities of each game from most likely to least likely
     probabilities.sort(key=lambda outcome: outcome[0], reverse=True)
 
+    # Print a message for each game
     for game in probabilities:
         print(game[1])
     print()
 
+    # Return the list of probabilities for each game
     return probabilities
 
 
 def get_team(teams, team_name):
+    """
+    Gets a specific team in the league based on the team name.
+
+    :param teams: The list of all the teams in the league
+    :param team_name: The name of the team to get
+    :return: The team with the given name
+    """
+
     for team in teams:
         if team[0] == team_name:
             return team
-
-
-def set_team(teams, new_team):
-    for index, team in enumerate(teams):
-        if team[0] == new_team[0]:
-            teams[index] = new_team

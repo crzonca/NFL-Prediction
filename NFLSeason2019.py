@@ -250,14 +250,14 @@ def pre_week_1(teams, week_end_date):
                              'Browns', 30, 2, 327, 26, 43, 2, 0, 417,
                              'Redskins', 10, 1, 189, 18, 34, 1, 3, 271)
 
-    # teams = set_game_outcome(teams, 0,
-    #                          'Saints', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Vikings', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, 0,
-    #                          'Steelers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Buccaneers', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
+    teams = set_game_outcome(teams, -2.5,
+                             'Saints', 25, 2, 196, 22, 33, 2, 1, 337,
+                             'Vikings', 34, 4, 247, 19, 27, 3, 0, 460)
+
+    teams = set_game_outcome(teams, -2.5,
+                             'Steelers', 30, 3, 231, 18, 30, 3, 0, 339,
+                             'Buccaneers', 28, 4, 390, 37, 57, 2, 0, 479)
+
     # teams = set_game_outcome(teams, 0,
     #                          'Chiefs', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Bengals', 0, 0, 0, 0, 0, 0, 0, 0)
@@ -2133,6 +2133,14 @@ def superbowl(teams, week_end_date):
 
 
 def get_team(teams, team_name):
+    """
+    Gets a specific team in the league based on the team name.
+
+    :param teams: The list of all the teams in the league
+    :param team_name: The name of the team to get
+    :return: The team with the given name
+    """
+
     for team in teams:
         if team[0] == team_name:
             return team

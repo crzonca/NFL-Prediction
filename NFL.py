@@ -62,7 +62,12 @@ def run_all():
 
 
 def get_all_data_frames():
-    """Gets all of the csv files in the directory and converts them to pandas DataFrames."""
+    """
+    Gets all of the csv files in the directory and converts them to pandas DataFrames.
+
+    :return: A list of data frames, one for each season
+    """
+
     frames = list()
 
     for file in os.listdir(game_data_dir):
@@ -78,7 +83,13 @@ def get_all_data_frames():
 
 
 def add_point_diff_and_results(frames):
-    """Adds the point differential for each game as well as columns indicating if the home team won or tied."""
+    """
+    Adds the point differential for each game as well as columns indicating if the home team won or tied.
+
+    :param frames: A list of data frames containing the game info, one for each season
+    :return: An updated list of data frames with point differential and results, one for each season
+    """
+
     for df in frames:
         df['game_point_diff'] = df.apply(lambda row: Stats.game_point_diff(row), axis=1)
         df['home_victory'] = df.apply(lambda row: Stats.home_victory(row), axis=1)
@@ -88,8 +99,14 @@ def add_point_diff_and_results(frames):
 
 
 def add_team_records(frames):
-    """Adds columns for the record of each team going into the game.
-    Adds a column for the win percentage of each team going into the game."""
+    """
+    Adds columns for the record of each team going into the game. Adds a column for the win percentage of each team
+    going into the game.
+
+    :param frames: A list of data frames containing the game info, one for each season
+    :return: An updated list of data frames with records and win percentages, one for each season
+    """
+
     # For every data frame
     for df in frames:
 
@@ -157,11 +174,19 @@ def add_team_records(frames):
 
 
 def add_team_elos(frames, regression_factor=.41, k_factor=42):
-    """Adds columns for the Elo for each team going into the game.
+    """
+    Adds columns for the Elo for each team going into the game.
     Elo is calculated from the prior Elo of each team and the result of the game.
     If the team does not have an Elo, it is set to a default value of 1500.
     Team Elos are regressed towards 1500 at the end of each season.
-    https://en.wikipedia.org/wiki/Elo_rating_system"""
+    https://en.wikipedia.org/wiki/Elo_rating_system
+
+    :param frames: A list of data frames containing the game info, one for each season
+    :param regression_factor: The percent to regress each teams elo towards the mean by
+    :param k_factor: The K-factor used in the Elo function calculation
+    :return: An updated list of data frames with team Elos, one for each season
+    """
+
     # Create a dictionary for team elos
     team_elos = dict()
 
@@ -204,7 +229,17 @@ def add_team_elos(frames, regression_factor=.41, k_factor=42):
 
 
 def get_new_elos(home_elo, away_elo, home_victory, home_draw, k_factor):
-    """Calculates the new Elos of each team given their previous Elos and the outcome of the game."""
+    """
+    Calculates the new Elos of each team given their previous Elos and the outcome of the game.
+
+    :param home_elo: The elo of the home team
+    :param away_elo: The elo of the away team
+    :param home_victory: If the home team was victorious
+    :param home_draw: If the game resulted in a draw
+    :param k_factor: The K-factor used in the Elo function calculation
+    :return: The updated elo for each team, based of the game outcome
+    """
+
     q_home = 10 ** (home_elo / 400)
     q_away = 10 ** (away_elo / 400)
 
@@ -225,8 +260,13 @@ def get_new_elos(home_elo, away_elo, home_victory, home_draw, k_factor):
 
 
 def evaluate_season_elo(df):
-    """Evaluates the accuracy of the parameters of the Elo function for a given season
-    based off the brier loss function.  Returns the brier loss score for that season."""
+    """
+    Evaluates the accuracy of the parameters of the Elo function for a given season based off the brier loss function.
+    Returns the brier loss score for that season.
+
+    :param df: A data frame containing the game info for a season
+    :return: The loss of the elo predictions, using the brier loss function
+    """
 
     # Get the elo and result columns
     home_elo_column = df['home_elo']
@@ -254,9 +294,13 @@ def evaluate_season_elo(df):
 
 
 def evaluate_elo(frames):
-    """Evaluates the accuracy of all regression factors and K factors
-    of the Elo function for averaged over all seasons. Returns the best
-    combination of regression factor and K factor."""
+    """
+    Evaluates the accuracy of all regression factors and K factors of the Elo function for averaged over all seasons.
+    Returns the best combination of regression factor and K factor.
+
+    :param frames: A list of data frames containing the game info, one for each season
+    :return: The regression factor and K factor that yeild the least loss
+    """
 
     # Benchmark for best brier and features
     best_brier = 1
@@ -332,7 +376,13 @@ def evaluate_elo(frames):
 
 
 def add_season_totals(frames):
-    """Adds a running total for each stat for each team prior to the game."""
+    """
+    Adds a running total for each stat for each team prior to the game.
+
+    :param frames: A list of data frames containing the game info, one for each season
+    :return: An updated list of data frames with running totals for all stats, one for each season
+    """
+
     # For each season
     for df in frames:
 
@@ -661,7 +711,13 @@ def add_season_totals(frames):
 
 
 def add_season_averages(frames):
-    """Adds a running average for each stat for each team prior to the game."""
+    """
+    Adds a running average for each stat for each team prior to the game.
+
+    :param frames: A list of data frames containing the game info, one for each season
+    :return: An updated list of data frames with running averages for all stats, one for each season
+    """
+
     for df in frames:
         df['home_average_points_for'] = df.apply(lambda row: Stats.home_average_points_for(row), axis=1)
         df['home_average_points_against'] = df.apply(lambda row: Stats.home_average_points_against(row), axis=1)
@@ -731,7 +787,13 @@ def add_season_averages(frames):
 
 
 def add_advanced_stats(frames):
-    """Adds additional stats for each team prior to the game."""
+    """
+    Adds additional stats for each team prior to the game.
+
+    :param frames: A list of data frames containing the game info, one for each season
+    :return: An updated list of data frames with additional stats for each game, one for each season
+    """
+
     for df in frames:
         df['home_average_yards_per_rush_attempt'] = df.apply(lambda row:
                                                              Stats.home_average_yards_per_rush_attempt(row), axis=1)
@@ -781,8 +843,14 @@ def add_advanced_stats(frames):
 
 
 def add_stat_differences(frames):
-    """Calculates the margin between the home and away teams for the averages and advanced stats columns.
-    Differences are from the home team's perspective (home_stat - away_stat)."""
+    """
+    Calculates the margin between the home and away teams for the averages and advanced stats columns.
+    Differences are from the home team's perspective (home_stat - away_stat).
+
+    :param frames: A list of data frames containing the game info, one for each season
+    :return: An updated list of data frames with stat differences for each game, one for each season
+    """
+
     for df in frames:
         df['win_pct_diff'] = df.apply(lambda row: Stats.win_pct_diff(row), axis=1)
         df['elo_diff'] = df.apply(lambda row: Stats.elo_diff(row), axis=1)
@@ -843,7 +911,12 @@ def add_stat_differences(frames):
 
 
 def combine_frames(frames):
-    """Combines all of the season data frames into a total frame and writes it to a csv file."""
+    """
+    Combines all of the season data frames into a total frame and writes it to a csv file.
+
+    :param frames:  A list of data frames containing the game info, one for each season
+    :return: One data frame containing the game info for all games since 2002
+    """
 
     # Check that all seasons have the same number of columns
     check_consistent_length(*[frame.T for frame in frames])
@@ -912,7 +985,13 @@ def combine_frames(frames):
 
 
 def plot_corr(df=None):
-    """Gets the correlation between all relevant features and the home_victory label."""
+    """
+    Gets the correlation between all relevant features and the home_victory label.
+
+    :param df: The data frame containing the features to plot the correlation for
+    :return: The series containing the sorted correlations between each feature and the home_victory label
+    """
+
     if df is None:
         # Get the data frame for all seasons
         df = pd.read_csv(game_data_dir + '20022018.csv')
@@ -978,7 +1057,13 @@ def plot_corr(df=None):
 
 
 def get_best_features(df=None):
-    """Gets the set of at least 10 features that explains the variance for the y label."""
+    """
+    Gets the set of at most 10 features that explains the variance for the y label.
+
+    :param df: The data frame containing all games to get the best features from
+    :return: The list of features the contribute most towards explaining the variance
+    """
+
     if df is None:
         # Get the data frame for all seasons
         df = pd.read_csv(game_data_dir + '20022018.csv')
@@ -1113,8 +1198,15 @@ def get_best_features(df=None):
 
 
 def evaluate_model_parameters(contributing_features, df=None):
-    """Does a grid search on 6 different models to find the best parameters,
-    evaluates each set of parameters on brier loss score and accuracy."""
+    """
+    Does a grid search on 6 different models to find the best parameters,
+    evaluates each set of parameters on brier loss score and accuracy.
+
+    :param contributing_features: The list of features to use in the models
+    :param df: The data frame containing all games to train each model
+    :return: Void
+    """
+
     if df is None:
         # Get the data frame for all seasons
         df = pd.read_csv(game_data_dir + '20022018.csv')
@@ -1175,8 +1267,16 @@ def evaluate_model_parameters(contributing_features, df=None):
 
 
 def tune_logistic_regression(X, y, skf, scores):
-    """Does a grid search over different parameters for a logistic regression model.
-    Returns the model with the least brier loss and the most accurate model."""
+    """
+    Does a grid search over different parameters for a logistic regression model.
+    Returns the model with the least brier loss and the most accurate model.
+
+    :param X: The feature values
+    :param y: The predicted class values
+    :param skf: The stratified K fold
+    :param scores: The metrics to evaluate hyper parameter tuning on
+    :return: The best model for each metric
+    """
 
     # Create a list of dicts to try parameter combinations over
     print('Logistic Regression')
@@ -1236,8 +1336,16 @@ def tune_logistic_regression(X, y, skf, scores):
 
 
 def tune_gauss_naive_bayes(X, y, skf, scores):
-    """Does a grid search over different parameters for a gaussian naive bayes model.
-    Returns the model with the least brier loss and the most accurate model."""
+    """
+    Does a grid search over different parameters for a gaussian naive bayes model.
+    Returns the model with the least brier loss and the most accurate model.
+
+    :param X: The feature values
+    :param y: The predicted class values
+    :param skf: The stratified K fold
+    :param scores: The metrics to evaluate hyper parameter tuning on
+    :return: The best model for each metric
+    """
 
     # Create a list of dicts to try parameter combinations over
     print('Gaussian Naive Bayes')
@@ -1276,8 +1384,16 @@ def tune_gauss_naive_bayes(X, y, skf, scores):
 
 
 def tune_bernoulli_naive_bayes(X, y, skf, scores):
-    """Does a grid search over different parameters for a bernoulli naive bayes model.
-    Returns the model with the least brier loss and the most accurate model."""
+    """
+    Does a grid search over different parameters for a bernoulli naive bayes model.
+    Returns the model with the least brier loss and the most accurate model.
+
+    :param X: The feature values
+    :param y: The predicted class values
+    :param skf: The stratified K fold
+    :param scores: The metrics to evaluate hyper parameter tuning on
+    :return: The best model for each metric
+    """
 
     # Create a list of dicts to try parameter combinations over
     print('Bernoulli Naive Bayes')
@@ -1317,8 +1433,17 @@ def tune_bernoulli_naive_bayes(X, y, skf, scores):
 
 
 def tune_random_forest(X, y, feature_col_names, skf, scores):
-    """Does a grid search over different parameters for a random forest model.
-    Returns the model with the least brier loss and the most accurate model."""
+    """
+    Does a grid search over different parameters for a random forest model.
+    Returns the model with the least brier loss and the most accurate model.
+
+    :param X: The feature values
+    :param y: The predicted class values
+    :param feature_col_names: The list of feature column names
+    :param skf: The stratified K fold
+    :param scores: The metrics to evaluate hyper parameter tuning on
+    :return: The best model for each metric
+    """
 
     # Create a list of dicts to try parameter combinations over
     print('Random Forest')
@@ -1369,8 +1494,16 @@ def tune_random_forest(X, y, feature_col_names, skf, scores):
 
 
 def tune_k_nearest_neighbors(X, y, skf, scores):
-    """Does a grid search over different parameters for a K nearest neighbors model.
-    Returns the model with the least brier loss and the most accurate model."""
+    """
+    Does a grid search over different parameters for a K nearest neighbors model.
+    Returns the model with the least brier loss and the most accurate model.
+
+    :param X: The feature values
+    :param y: The predicted class values
+    :param skf: The stratified K fold
+    :param scores: The metrics to evaluate hyper parameter tuning on
+    :return: The best model for each metric
+    """
 
     # Create a list of dicts to try parameter combinations over
     print('K Nearest Neighbors')
@@ -1413,8 +1546,16 @@ def tune_k_nearest_neighbors(X, y, skf, scores):
 
 
 def tune_svc_classifier(X, y, skf, scores):
-    """Does a grid search over different parameters for a C support vector classification model.
-    Returns the model with the least brier loss and the most accurate model."""
+    """
+    Does a grid search over different parameters for a C support vector classification model.
+    Returns the model with the least brier loss and the most accurate model.
+
+    :param X: The feature values
+    :param y: The predicted class values
+    :param skf: The stratified K fold
+    :param scores: The metrics to evaluate hyper parameter tuning on
+    :return: The best model for each metric
+    """
 
     # Create a list of dicts to try parameter combinations over
     print('C Support Vector Classifier')
@@ -1464,7 +1605,13 @@ def tune_svc_classifier(X, y, skf, scores):
 
 
 def print_grid_search_details(clf, filename):
-    """Prints the results of the grid search to a file and the console."""
+    """
+    Prints the results of the grid search to a file and the console.
+
+    :param clf: The classifier to print the details for
+    :param filename: The name of the file to write to details to
+    :return: Void
+    """
 
     # Set the directory to write files to
     filename = other_dir + '7 Features No Outliers\\Scores\\' + filename
@@ -1496,7 +1643,11 @@ def print_grid_search_details(clf, filename):
 
 
 def get_best_knn():
-    """Gets the SVC model that yielded the best result."""
+    """
+    Gets the SVC model that yielded the best result.
+
+    :return: The best model
+    """
 
     return KNeighborsClassifier(algorithm='kd_tree',
                                 leaf_size=30,
@@ -1506,7 +1657,11 @@ def get_best_knn():
 
 
 def get_best_logistic_regression():
-    """Gets the logistic regression model that yielded the best result."""
+    """
+    Gets the logistic regression model that yielded the best result.
+
+    :return: The best model
+    """
 
     return LogisticRegression(C=0.06,
                               class_weight=None,
@@ -1518,7 +1673,11 @@ def get_best_logistic_regression():
 
 
 def get_best_svc():
-    """Gets the SVC model that yielded the best result."""
+    """
+    Gets the SVC model that yielded the best result.
+
+    :return: The best model
+    """
 
     return SVC(C=10,
                gamma=0.001,
@@ -1527,7 +1686,11 @@ def get_best_svc():
 
 
 def get_best_random_forest():
-    """Gets the random forest model that yielded the best result."""
+    """
+    Gets the random forest model that yielded the best result.
+
+    :return: The best model
+    """
 
     return RandomForestClassifier(n_estimators=1000,
                                   max_features=4,
@@ -1536,8 +1699,14 @@ def get_best_random_forest():
 
 
 def get_voting_classifier(contributing_features, df=None):
-    """Creates a voting classifier based on the top 3 estimators,
-    estimators are weighted by the normalized inverse of their respective briers."""
+    """
+    Creates a voting classifier based on the top 3 estimators,
+    estimators are weighted by the normalized inverse of their respective briers.
+
+    :param contributing_features: A list of features the best explain the variance
+    :param df: A data frame containing the game data to train the estimators on
+    :return: The trained voting classifier
+    """
 
     if df is None:
         # Get the data frame for all seasons
@@ -1597,6 +1766,12 @@ def get_voting_classifier(contributing_features, df=None):
 
 
 def evaluate_2018_season():
+    """
+    Evaluates a voting classifier based on the 2018 season.
+
+    :return: Void
+    """
+
     # Set the directory to write files to
     filename = other_dir + '7 Features No Outliers\\Scores\\2018Confusion.txt'
 
@@ -1713,6 +1888,15 @@ def evaluate_2018_season():
 
 
 def get_metrics(y_true, y_pred, filename):
+    """
+    Creates a confusion matrix and prints detains about classification predictions.
+
+    :param y_true: The actual game outcomes
+    :param y_pred: The predicted game outcomes
+    :param filename: The name of the file to write the reuslts to
+    :return: Void
+    """
+
     y_true = pd.to_numeric(y_true)
     outcome_counts = y_true.value_counts()
     outcome_positive = outcome_counts.loc[1]
@@ -1860,6 +2044,11 @@ def get_metrics(y_true, y_pred, filename):
 
 
 def visualize_2018_season():
+    """
+    Creates a visual representation of the prediction results for evaluating the 2018 season.
+
+    :return: Void
+    """
     predictions = pd.read_csv(other_dir + '7 Features No Outliers\\Scores\\2018Predictions.csv')
 
     for num, game in enumerate(predictions.values):
@@ -1884,6 +2073,11 @@ def visualize_2018_season():
 
 
 def analyze_results():
+    """
+    Analyzes grid search results to determine best set of hyper parameters.
+
+    :return: The sorted list of hyper parameters, sorted based on accuracy and loss
+    """
     with open(other_dir + '7 Features No Outliers\\Scores\\logistic_regression_brier_score_loss.txt') as brier:
         with open(other_dir + '7 Features No Outliers\\Scores\\logistic_regression_accuracy.txt') as accuracy:
             brier_lines = brier.readlines()[4:]

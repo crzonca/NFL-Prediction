@@ -603,7 +603,7 @@ def get_chance_against_average(teams, team):
 
     # Calculate the teams chances of victory if they were the home team and if they were the away team
     home_vote_prob, home_lr_prob, home_svc_prob, home_rf_prob = Predictor.predict_home_victory(team, avg_team, -spread)
-    away_vote_prob, away_lr_prob, away_svc_prob, away_rf_prob = Predictor.predict_away_victory(avg_team, team, spread)
+    away_vote_prob, away_lr_prob, away_svc_prob, away_rf_prob = Predictor.predict_away_victory(avg_team, team, -spread)
 
     # Return the average of the teams chance of victory
     avg_prob = (home_vote_prob + away_vote_prob) / 2
