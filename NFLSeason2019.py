@@ -258,17 +258,17 @@ def pre_week_1(teams, week_end_date):
                              'Steelers', 30, 3, 231, 18, 30, 3, 0, 339,
                              'Buccaneers', 28, 4, 390, 37, 57, 2, 0, 479)
 
-    # teams = set_game_outcome(teams, 0,
-    #                          'Chiefs', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Bengals', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, 0,
-    #                          'Raiders', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Rams', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, 0,
-    #                          '49ers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Cowboys', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, -3.5,
+                             'Chiefs', 38, 5, 285, 23, 38, 3, 1, 400,
+                             'Bengals', 17, 2, 253, 28, 46, 1, 1, 274)
+
+    teams = set_game_outcome(teams, -5,
+                             'Raiders', 14, 2, 258, 26, 37, 1, 2, 407,
+                             'Rams', 3, 0, 133, 15, 28, 0, 0, 190)
+
+    teams = set_game_outcome(teams, -4.5,
+                             '49ers', 17, 2, 251, 26, 37, 2, 2, 339,
+                             'Cowboys', 9, 0, 239, 29, 50, 0, 0, 294)
 
     return teams
 
