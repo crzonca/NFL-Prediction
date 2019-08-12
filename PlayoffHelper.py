@@ -888,6 +888,14 @@ def get_playoff_picture(teams, verbose=False):
 def sort_by_tiebreakers(teams):
     """
     Sorts a list of teams based on the NFL playoff tiebreaker rules.
+    1) Win Percentage
+    2) Head to Head Record
+    3) Divisional Record
+    4) Common Record
+    5) Conference Record
+    6) Strength of Victory
+    7) Strength of Schedule
+    8) Point Differential
 
     :param teams: The list of all the teams in the league
     :return: The list of all the teams in the league sorted by the tiebreaker rules
