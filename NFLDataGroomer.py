@@ -1,11 +1,8 @@
 import os
 import statistics
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
-from scipy import stats
 from scipy.stats import norm
 from sklearn.metrics import brier_score_loss
 from sklearn.utils import check_consistent_length
@@ -965,12 +962,6 @@ def remove_outliers(df):
     for feature in relevant_columns:
         series = df[feature]
         (mean, dev) = norm.fit(series)
-        sns.distplot(series, fit=norm)
-
-        plt.legend(['Normal dist. ($\mu=$ {:.2f} and $\sigma=$ {:.2f} )'.format(mean, dev)],
-                   loc='best')
-        plt.ylabel('Frequency')
-        plt.title(feature + ' Distribution')
 
         print(feature)
         print('Skewness: {:.3f}'.format(series.skew()))
@@ -979,11 +970,6 @@ def remove_outliers(df):
         print('Mean: {:.3f}'.format(mean))
         print('Std. Dev.: {:.3f}'.format(dev))
         print()
-
-        # Get the QQ-plot
-        fig = plt.figure()
-        res = stats.probplot(series, plot=plt)
-        plt.show()
 
     # Remove extreme outliers
     print('Removing outliers')
@@ -1007,3 +993,9 @@ def remove_outliers(df):
         print()
 
     return df
+
+
+def get_all_games_no_outliers():
+    all_games = pd.read_csv(game_data_dir + '20022018.csv')
+    all_games = remove_outliers(all_games)
+    return all_games
