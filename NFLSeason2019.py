@@ -278,59 +278,59 @@ def pre_week_2(teams, week_end_date):
         Predictor.get_week_probabilities(teams, Playoffs.get_pre_week2_schedule())
 
     # Results
-    # teams = set_game_outcome(teams,
-    #                          spread=0,
-    #                          home_name='Giants',
-    #                          home_score=0,
-    #                          home_touchdowns=0,
-    #                          home_net_pass_yards=0,
-    #                          home_pass_completions=0,
-    #                          home_pass_attempts=0,
-    #                          home_pass_tds=0,
-    #                          home_interceptions_thrown=0,
-    #                          home_total_yards=0,
-    #                          away_name='Bears',
-    #                          away_score=0,
-    #                          away_touchdowns=0,
-    #                          away_net_pass_yards=0,
-    #                          away_pass_completions=0,
-    #                          away_pass_attempts=0,
-    #                          away_pass_tds=0,
-    #                          away_interceptions_thrown=0,
-    #                          away_total_yards=0)
-    #
+    teams = set_game_outcome(teams,
+                             spread=-2.5,
+                             home_name='Giants',
+                             home_score=32,
+                             home_touchdowns=4,
+                             home_net_pass_yards=250,
+                             home_pass_completions=21,
+                             home_pass_attempts=30,
+                             home_pass_tds=3,
+                             home_interceptions_thrown=1,
+                             home_total_yards=411,
+                             away_name='Bears',
+                             away_score=13,
+                             away_touchdowns=1,
+                             away_net_pass_yards=131,
+                             away_pass_completions=18,
+                             away_pass_attempts=31,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=0,
+                             away_total_yards=165)
+
     teams = set_game_outcome(teams, -4,
                              'Redskins', 13, 1, 153, 12, 23, 1, 0, 212,
                              'Bengals', 23, 2, 243, 30, 43, 2, 1, 335)
-    #
+
     # teams = set_game_outcome(teams, 0,
     #                          'Vikings', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Seahawks', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
+
     teams = set_game_outcome(teams, -1.5,
                              'Falcons', 10, 1, 253, 27, 43, 0, 1, 340,
                              'Jets', 22, 2, 103, 13, 20, 1, 0, 199)
-    #
-    # teams = set_game_outcome(teams, 0,
-    #                          'Panthers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Bills', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, 0,
-    #                          'Buccaneers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Dolphins', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
+
+    teams = set_game_outcome(teams, -1.5,
+                             'Panthers', 14, 1, 155, 22, 42, 1, 1, 258,
+                             'Bills', 27, 2, 279, 21, 31, 1, 1, 373)
+
+    teams = set_game_outcome(teams, -2.5,
+                             'Buccaneers', 16, 1, 234, 21, 37, 1, 0, 309,
+                             'Dolphins', 14, 1, 162, 19, 38, 1, 1, 280)
+
     teams = set_game_outcome(teams, -3,
                              'Cardinals', 26, 3, 259, 21, 38, 3, 0, 374,
                              'Raiders', 33, 4, 250, 21, 24, 3, 0, 373)
-    #
+
     # teams = set_game_outcome(teams, 0,
     #                          'Rams', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Cowboys', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
+
     teams = set_game_outcome(teams, -3.5,
                              'Ravens', 26, 2, 172, 16, 26, 1, 1, 343,
                              'Packers', 13, 1, 171, 18, 33, 1, 0, 226)
-    #
+
     # teams = set_game_outcome(teams, 0,
     #                          'Steelers', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Chiefs', 0, 0, 0, 0, 0, 0, 0, 0)
@@ -342,11 +342,11 @@ def pre_week_2(teams, week_end_date):
     # teams = set_game_outcome(teams, 0,
     #                          'Colts', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Browns', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
+
     teams = set_game_outcome(teams, -3,
                              'Jaguars', 10, 1, 191, 21, 38, 0, 0, 250,
                              'Eagles', 24, 3, 185, 17, 31, 1, 1, 324)
-    #
+
     # teams = set_game_outcome(teams, 0,
     #                          'Titans', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Patriots', 0, 0, 0, 0, 0, 0, 0, 0)
