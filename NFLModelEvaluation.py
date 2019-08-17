@@ -13,10 +13,6 @@ game_data_dir = '..\\Projects\\nfl\\NFL_Prediction\\Game Data\\'
 other_dir = '..\\Projects\\nfl\\NFL_Prediction\\Other\\'
 
 
-def evaluate_models():
-    evaluate_2018_season()
-
-
 def evaluate_2018_season():
     """
     Evaluates a voting classifier based on the 2018 season.
@@ -25,10 +21,10 @@ def evaluate_2018_season():
     """
 
     # Set the directory to write files to
-    filename = other_dir + '7 Features No Outliers\\Scores\\2018Confusion.txt'
+    filename = other_dir + '7 Features No Outliers\\Scores\\2017\\2018Confusion.txt'
 
-    voting_classifier = joblib.load(other_dir + '7 Features No Outliers\\2017VotingClassifier.pkl')
-    scaler = joblib.load(other_dir + '7 Features No Outliers\\2017Scaler.pkl')
+    voting_classifier = joblib.load(other_dir + '7 Features No Outliers\\Scores\\2017\\2017VotingClassifier.pkl')
+    scaler = joblib.load(other_dir + '7 Features No Outliers\\Scores\\2017\\2017Scaler.pkl')
 
     last_season = pd.read_csv(game_data_dir + '20022018.csv').values[-267:]
     last_season = pd.DataFrame(last_season)
@@ -104,7 +100,7 @@ def evaluate_2018_season():
     print('Voting Classifier:', round((.25 - vote_brier) * 26700, 2), file=open(filename, 'a'))
     print('', file=open(filename, 'a'))
 
-    results.to_csv(other_dir + '7 Features No Outliers\\Scores\\2018Predictions.csv', index=False)
+    results.to_csv(other_dir + '7 Features No Outliers\\Scores\\2017\\2018Predictions.csv', index=False)
 
     rounded_rf = rf.apply(lambda row: round(row))
     rounded_svc = svc.apply(lambda row: round(row))
@@ -136,7 +132,7 @@ def evaluate_2018_season():
     print('-' * 120, file=open(filename, 'a'))
     get_metrics(outcome, rounded_vote, filename)
 
-    # visualize_2018_season()
+    visualize_2018_season()
 
 
 def get_metrics(y_true, y_pred, filename):
@@ -301,7 +297,7 @@ def visualize_2018_season():
 
     :return: Void
     """
-    predictions = pd.read_csv(other_dir + '7 Features No Outliers\\Scores\\2018Predictions.csv')
+    predictions = pd.read_csv(other_dir + '7 Features No Outliers\\Scores\\2017\\2018Predictions.csv')
 
     for num, game in enumerate(predictions.values):
         vote_prob = int(round(game[3] * 100))
