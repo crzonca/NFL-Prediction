@@ -1,16 +1,99 @@
 import statistics
+import sys
 
 import joblib
 import pandas as pd
+from sklearn.dummy import DummyClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import brier_score_loss
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import f1_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
+from sklearn.preprocessing import StandardScaler
 
 game_data_dir = '..\\Projects\\nfl\\NFL_Prediction\\Game Data\\'
 other_dir = '..\\Projects\\nfl\\NFL_Prediction\\Other\\'
+
+
+def dummy_classify_2018_season(feature_list):
+    """
+    Evaluates a voting classifier based on the 2018 season.
+
+    :return: Void
+    """
+
+    df = pd.read_csv(game_data_dir + '20022018.csv')
+
+    X = df[feature_list].values[:-267]
+    y = df['home_victory'].values[:-267]
+
+    scaler = StandardScaler()
+    scaler.fit(X)
+    X = scaler.transform(X)
+
+    # Set the directory to write files to
+    filename = other_dir + '7 Features No Outliers\\Scores\\2017\\2018Confusion_Dummy.txt'
+
+    classifier = DummyClassifier(strategy='prior', random_state=42)
+    classifier.fit(X, y.ravel())
+
+    last_season = pd.read_csv(game_data_dir + '20022018.csv').values[-267:]
+    last_season = pd.DataFrame(last_season)
+
+    results = pd.DataFrame(columns=['prediction', 'outcome'])
+    for game in last_season.values:
+        home_victory = game[71]
+        home_spread = game[7]
+        elo_diff = game[240]
+        average_scoring_margin_diff = game[285]
+        win_pct_diff = game[239]
+        average_touchdowns_diff = game[283]
+        average_passer_rating_diff = game[282]
+        average_total_yards_diff = game[255]
+
+        game_features = (home_spread,
+                         elo_diff,
+                         average_scoring_margin_diff,
+                         win_pct_diff,
+                         average_touchdowns_diff,
+                         average_passer_rating_diff,
+                         average_total_yards_diff)
+
+        # Convert the features to a data frame and scale it
+        game = pd.DataFrame([game_features])
+        game = scaler.transform(game)
+
+        # Get the voting classifier probability
+        prob = classifier.predict_proba(game)[0][1]
+
+        game_df = pd.DataFrame([[prob, home_victory]], columns=['prediction', 'outcome'])
+
+        results = results.append(game_df)
+
+    outcome = results['outcome']
+    prediction = results['prediction']
+
+    dummy_brier = brier_score_loss(outcome, prediction)
+    print('Dummy Classifier Brier Score Loss:', round(dummy_brier, 4))
+    print('Dummy Classifier Brier Score Loss:', round(dummy_brier, 4), file=open(filename, 'a'))
+    print('', file=open(filename, 'a'))
+
+    print('Dummy Classifier:', round((.25 - dummy_brier) * 26700, 2))
+    print('Dummy Classifier:', round((.25 - dummy_brier) * 26700, 2), file=open(filename, 'a'))
+    print('', file=open(filename, 'a'))
+
+    results.to_csv(other_dir + '7 Features No Outliers\\Scores\\2017\\2018Predictions_Dummy.csv', index=False)
+
+    rounded_prediction = prediction.apply(lambda row: round(row))
+
+    print('Dummy Classifier')
+    print('-' * 120)
+    print('Dummy Classifier', file=open(filename, 'a'))
+    print('-' * 120, file=open(filename, 'a'))
+    get_metrics(outcome, rounded_prediction, filename)
+
+    visualize_2018_season()
 
 
 def evaluate_2018_season():
@@ -164,8 +247,14 @@ def get_metrics(y_true, y_pred, filename):
     print('', file=open(filename, 'a'))
 
     predicted_counts = y_pred.value_counts()
-    predicted_positive = predicted_counts.loc[1]
-    predicted_negative = predicted_counts.loc[0]
+    if 1 in predicted_counts.index:
+        predicted_positive = predicted_counts.loc[1]
+    else:
+        predicted_positive = 0
+    if 0 in predicted_counts.index:
+        predicted_negative = predicted_counts.loc[0]
+    else:
+        predicted_negative = 0
     print('Predicted home victories:', predicted_positive)
     print('Predicted home defeats:', predicted_negative)
     print('Predicted home victories:', predicted_positive, file=open(filename, 'a'))
@@ -209,21 +298,21 @@ def get_metrics(y_true, y_pred, filename):
     print('Prediction precision:', round(precision * 100, 2),
           str(true_positive) + '/' + str(predicted_positive), file=open(filename, 'a'))
 
-    false_discovery = false_positive / predicted_positive
+    false_discovery = false_positive / predicted_positive if predicted_positive > 0 else 0
     print('False discovery rate:', round(false_discovery * 100, 2),
           str(false_positive) + '/' + str(predicted_positive))
 
     print('False discovery rate:', round(false_discovery * 100, 2),
           str(false_positive) + '/' + str(predicted_positive), file=open(filename, 'a'))
 
-    negative_prediction = true_negative / predicted_negative
+    negative_prediction = true_negative / predicted_negative if predicted_negative > 0 else 0
     print('Negative prediction rate:', round(negative_prediction * 100, 2),
           str(true_negative) + '/' + str(predicted_negative))
 
     print('Negative prediction rate:', round(negative_prediction * 100, 2),
           str(true_negative) + '/' + str(predicted_negative), file=open(filename, 'a'))
 
-    false_omission = false_negative / predicted_negative
+    false_omission = false_negative / predicted_negative if predicted_negative > 0 else 0
     print('False omission rate:', round(false_omission * 100, 2),
           str(false_negative) + '/' + str(predicted_negative))
     print()
@@ -261,14 +350,14 @@ def get_metrics(y_true, y_pred, filename):
           str(false_positive) + '/' + str(outcome_negative), file=open(filename, 'a'))
     print('', file=open(filename, 'a'))
 
-    positive_likelihood = recall / fall_out
+    positive_likelihood = recall / fall_out if fall_out > 0 else recall / sys.maxsize
     print('Positive likelihood ratio:', round(positive_likelihood, 4),
           str(round(recall * 100, 2)) + '/' + str(round(fall_out * 100, 2)))
 
     print('Positive likelihood ratio:', round(positive_likelihood, 4),
           str(round(recall * 100, 2)) + '/' + str(round(fall_out * 100, 2)), file=open(filename, 'a'))
 
-    negative_likelihood = miss_rate / specificity
+    negative_likelihood = miss_rate / specificity if specificity > 0 else miss_rate / sys.maxsize
     print('Negative likelihood ratio:', round(negative_likelihood, 4),
           str(round(miss_rate * 100, 2)) + '/' + str(round(specificity * 100, 2)))
     print()
@@ -277,7 +366,7 @@ def get_metrics(y_true, y_pred, filename):
           str(round(miss_rate * 100, 2)) + '/' + str(round(specificity * 100, 2)), file=open(filename, 'a'))
     print('', file=open(filename, 'a'))
 
-    diagnostic_odds = positive_likelihood / negative_likelihood
+    diagnostic_odds = positive_likelihood / negative_likelihood if negative_likelihood > 0 else sys.maxsize
     print('Diagnostic odds ratio:', round(diagnostic_odds, 4),
           str(round(positive_likelihood, 4)) + '/' + str(round(negative_likelihood, 4)))
 

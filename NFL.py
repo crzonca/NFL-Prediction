@@ -23,5 +23,8 @@ def nfl():
     # Create the voting classifier
     classifier = Params.get_voting_classifier(features, all_games)
 
-    # Evaluate the results with 2018 as a validation set
+    # Evaluate the model with 2018 as a validation set
     ModelEval.evaluate_2018_season()
+
+    # Compare the model to a dummy classifier
+    ModelEval.dummy_classify_2018_season(features)
