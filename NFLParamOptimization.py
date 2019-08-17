@@ -435,13 +435,13 @@ def get_best_logistic_regression():
     :return: The best model
     """
 
-    return LogisticRegression(C=0.06,
+    return LogisticRegression(C=0.04,
                               class_weight=None,
-                              multi_class='ovr',
+                              multi_class='auto',
                               penalty='l1',
                               random_state=42,
                               solver='saga',
-                              tol=0.001)
+                              tol=0.0001)
 
 
 def get_best_svc():
@@ -521,10 +521,10 @@ def get_voting_classifier(contributing_features, df=None):
     random_forest = get_best_random_forest()
 
     # Create voting classifier from the 3 estimators, weighted by unit vector of the inverse of the briers, soft voting
-    voting_classifier = VotingClassifier(estimators=[('Logistic Regression', logistic_regression),  # .21217, 66.519
-                                                     ('SVC', svc),  # .21244, 66.386
-                                                     ('Random Forest', random_forest)],  # .21353, 66.563
-                                         weights=[0.57822, 0.57727, 0.57656],
+    voting_classifier = VotingClassifier(estimators=[('Logistic Regression', logistic_regression),  # .21199, .73085
+                                                     ('SVC', svc),                                  # .21244, .73071
+                                                     ('Random Forest', random_forest)],             # .21353, .73023
+                                         weights=[0.579149, 0.577922, 0.574972],
                                          voting='soft',
                                          flatten_transform=False)
 

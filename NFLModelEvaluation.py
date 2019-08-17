@@ -330,15 +330,15 @@ def analyze_results():
 
     :return: The sorted list of hyper parameters, sorted based on accuracy and loss
     """
-    with open(other_dir + '7 Features No Outliers\\Scores\\logistic_regression_brier_score_loss.txt') as brier:
-        with open(other_dir + '7 Features No Outliers\\Scores\\logistic_regression_accuracy.txt') as accuracy:
+    with open(other_dir + '7 Features No Outliers\\Scores\\random_forest_brier_score_loss.txt') as brier:
+        with open(other_dir + '7 Features No Outliers\\Scores\\random_forest_f1.txt') as f1:
             brier_lines = brier.readlines()[4:]
-            accuracy_lines = accuracy.readlines()[4:]
+            f1_lines = f1.readlines()[4:]
 
-            tenth = int(len(brier_lines) * .1)
+            tenth = int(len(brier_lines) * .99)
             if tenth > 10:
                 brier_lines = brier_lines[:tenth]
-                accuracy_lines = accuracy_lines[:tenth]
+                f1_lines = f1_lines[:tenth]
 
             briers = dict()
             for brier_line in brier_lines:
@@ -346,11 +346,11 @@ def analyze_results():
                 brier_params = brier_line.split(' for ')[-1]
                 briers[brier_params] = brier_score
 
-            accuracies = dict()
-            for accuracy_line in accuracy_lines:
-                accuracy_score = float(accuracy_line.split()[0])
-                accuracy_params = accuracy_line.split(' for ')[-1]
-                accuracies[accuracy_params] = accuracy_score
+            f1s = dict()
+            for f1_line in f1_lines:
+                f1_score = float(f1_line.split()[0])
+                f1_params = f1_line.split(' for ')[-1]
+                f1s[f1_params] = f1_score
 
             brier_scores = briers.values()
             min_brier = min(brier_scores)
@@ -359,23 +359,21 @@ def analyze_results():
             brier_dev = statistics.stdev(brier_scores)
 
             for brier_key, brier_val in briers.items():
-                # briers[brier_key] = (brier_val - mean_brier) / brier_dev
                 briers[brier_key] = (brier_val - min_brier) / (max_brier - min_brier)
 
-            accuracies_scores = accuracies.values()
-            min_accuracy = min(accuracies_scores)
-            max_accuracy = max(accuracies_scores)
-            mean_accuracy = statistics.mean(accuracies_scores)
-            accuracy_dev = statistics.stdev(accuracies_scores)
+            f1s_scores = f1s.values()
+            min_f1 = min(f1s_scores)
+            max_f1 = max(f1s_scores)
+            mean_f1 = statistics.mean(f1s_scores)
+            f1_dev = statistics.stdev(f1s_scores)
 
-            for accuracy_key, accuracy_val in accuracies.items():
-                # accuracies[accuracy_key] = (accuracy_val - mean_accuracy) / accuracy_dev
-                accuracies[accuracy_key] = (accuracy_val - min_accuracy) / (max_accuracy - min_accuracy)
+            for f1_key, f1_val in f1s.items():
+                f1s[f1_key] = (f1_val - min_f1) / (max_f1 - min_f1)
 
             params = dict()
             for brier_key, brier_val in briers.items():
-                if accuracies.get(brier_key) is not None:
-                    params[brier_key] = brier_val + accuracies.get(brier_key)
+                if f1s.get(brier_key) is not None:
+                    params[brier_key] = brier_val + f1s.get(brier_key)
 
             sorted_params = sorted(params.items(), key=lambda kv: kv[1], reverse=True)
             return sorted_params
