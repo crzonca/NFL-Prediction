@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.exceptions import DataConversionWarning
 from sklearn.externals import joblib
 
-import Projects.nfl.NFL_Prediction.NFL as NFL
+import Projects.nfl.NFL_Prediction.NFLDataGroomer as NFL
 
 warnings.filterwarnings(action='ignore', category=DataConversionWarning)
 base_dir = '..\\Projects\\nfl\\NFL_Prediction\\'
@@ -19,7 +19,7 @@ def predict_game(home_info, away_info, home_spread=0):
     :param home_spread: The spread of the game, from the home team's perspective
     :return: The voting classifier probability and the individual estimator probabilities
     """
-    
+
     # Load the classifier and scaler
     voting_classifier = joblib.load(base_dir + 'Other\\7 Features No Outliers\\2018VotingClassifier.pkl')
     scaler = joblib.load(base_dir + 'Other\\7 Features No Outliers\\2018Scaler.pkl')
@@ -144,7 +144,7 @@ def predict_home_victory(home_info, away_info, home_spread=0):
     :param home_spread: The spread of the game, from the home team's perspective
     :return: The voting classifier probability and the individual estimator probabilities for the home team
     """
-    
+
     vote_prob, lr_prob, svc_prob, rf_prob = predict_game(home_info, away_info, home_spread)
     return vote_prob[1], lr_prob[1], svc_prob[1], rf_prob[1]
 
@@ -158,7 +158,7 @@ def predict_away_victory(home_info, away_info, home_spread=0):
     :param home_spread: The spread of the game, from the home team's perspective
     :return: The voting classifier probability and the individual estimator probabilities for the away team
     """
-    
+
     vote_prob, lr_prob, svc_prob, rf_prob = predict_game(home_info, away_info, home_spread)
     return vote_prob[0], lr_prob[0], svc_prob[0], rf_prob[0]
 
@@ -175,7 +175,7 @@ def predict_game_outcome(teams, home_name, away_name, home_spread, neutral_locat
     :param verbose: If verbose output should be included
     :return: The favored teams chance of winning and a message
     """
-    
+
     # Get each team
     home = get_team(teams, home_name)
     away = get_team(teams, away_name)
@@ -267,7 +267,7 @@ def update_teams(teams, home_name, home_score, home_touchdowns, home_net_pass_ya
     :param away_total_yards: The total number of offensive yards of the away team
     :return: An updated list of all the teams in the league
     """
-    
+
     # Get the home team info
     home = get_team(teams, home_name)
     home_wins = home[1]
