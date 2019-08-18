@@ -4,7 +4,7 @@ from functools import cmp_to_key
 
 import pandas as pd
 
-import Projects.nfl.NFL_Prediction.NFL as NFL
+import Projects.nfl.NFL_Prediction.Core.NFLDataGroomer as NFL
 import Projects.nfl.NFL_Prediction.StandingsHelper as Standings
 
 completed_games = pd.DataFrame(columns=['home_team', 'away_team', 'home_score', 'away_score', 'home_spread',

@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.exceptions import DataConversionWarning
 from sklearn.externals import joblib
 
-import Projects.nfl.NFL_Prediction.NFLDataGroomer as NFL
+import Projects.nfl.NFL_Prediction.Core.NFLDataGroomer as NFL
 
 warnings.filterwarnings(action='ignore', category=DataConversionWarning)
 base_dir = '..\\Projects\\nfl\\NFL_Prediction\\'

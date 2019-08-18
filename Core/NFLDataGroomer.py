@@ -7,7 +7,7 @@ from scipy.stats import norm
 from sklearn.metrics import brier_score_loss
 from sklearn.utils import check_consistent_length
 
-from Projects.nfl.NFL_Prediction import StatsHelper as Stats
+from Projects.nfl.NFL_Prediction.Core import StatsHelper as Stats
 
 game_data_dir = '..\\Projects\\nfl\\NFL_Prediction\\Game Data\\'
 other_dir = '..\\Projects\\nfl\\NFL_Prediction\\Other\\'

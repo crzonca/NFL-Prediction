@@ -1,7 +1,7 @@
-import Projects.nfl.NFL_Prediction.NFLDataGroomer as Groomer
-import Projects.nfl.NFL_Prediction.NFLFeatureSelection as FeatureSelection
-import Projects.nfl.NFL_Prediction.NFLModelEvaluation as ModelEval
-import Projects.nfl.NFL_Prediction.NFLParamOptimization as Params
+import Projects.nfl.NFL_Prediction.Core.NFLDataGroomer as Groomer
+import Projects.nfl.NFL_Prediction.Core.NFLFeatureSelection as FeatureSelection
+import Projects.nfl.NFL_Prediction.Core.NFLModelEvaluation as ModelEval
+import Projects.nfl.NFL_Prediction.Core.NFLParamOptimization as Params
 
 
 def nfl():
