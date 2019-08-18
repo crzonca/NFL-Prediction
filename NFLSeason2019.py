@@ -338,10 +338,10 @@ def pre_week_2(teams, week_end_date):
     # teams = set_game_outcome(teams, 0,
     #                          'Texans', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Lions', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, 0,
-    #                          'Colts', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Browns', 0, 0, 0, 0, 0, 0, 0, 0)
+
+    teams = set_game_outcome(teams, -3,
+                             'Colts', 18, 2, 309, 30, 44, 2, 0, 382,
+                             'Browns', 21, 3, 207, 20, 31, 3, 0, 271)
 
     teams = set_game_outcome(teams, -3,
                              'Jaguars', 10, 1, 191, 21, 38, 0, 0, 250,
