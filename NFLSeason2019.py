@@ -303,9 +303,9 @@ def pre_week_2(teams, week_end_date):
                              'Redskins', 13, 1, 153, 12, 23, 1, 0, 212,
                              'Bengals', 23, 2, 243, 30, 43, 2, 1, 335)
 
-    # teams = set_game_outcome(teams, 0,
-    #                          'Vikings', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Seahawks', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, -3.5,
+                             'Vikings', 25, 3, 272, 28, 35, 2, 1, 409,
+                             'Seahawks', 19, 0, 145, 12, 27, 0, 1, 221)
 
     teams = set_game_outcome(teams, -1.5,
                              'Falcons', 10, 1, 253, 27, 43, 0, 1, 340,
@@ -323,21 +323,21 @@ def pre_week_2(teams, week_end_date):
                              'Cardinals', 26, 3, 259, 21, 38, 3, 0, 374,
                              'Raiders', 33, 4, 250, 21, 24, 3, 0, 373)
 
-    # teams = set_game_outcome(teams, 0,
-    #                          'Rams', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Cowboys', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, 2.5,
+                             'Rams', 10, 1, 203, 26, 41, 1, 1, 270,
+                             'Cowboys', 14, 2, 157, 22, 34, 1, 1, 251)
 
     teams = set_game_outcome(teams, -3.5,
                              'Ravens', 26, 2, 172, 16, 26, 1, 1, 343,
                              'Packers', 13, 1, 171, 18, 33, 1, 0, 226)
 
-    # teams = set_game_outcome(teams, 0,
-    #                          'Steelers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Chiefs', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, 0,
-    #                          'Texans', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Lions', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, 2.5,
+                             'Steelers', 17, 2, 205, 18, 30, 1, 1, 329,
+                             'Chiefs', 7, 1, 206, 22, 43, 1, 0, 315)
+
+    teams = set_game_outcome(teams, -4.5,
+                             'Texans', 30, 2, 252, 20, 33, 2, 1, 410,
+                             'Lions', 23, 2, 298, 21, 37, 1, 1, 388)
 
     teams = set_game_outcome(teams, -3,
                              'Colts', 18, 2, 309, 30, 44, 2, 0, 382,
@@ -347,17 +347,17 @@ def pre_week_2(teams, week_end_date):
                              'Jaguars', 10, 1, 191, 21, 38, 0, 0, 250,
                              'Eagles', 24, 3, 185, 17, 31, 1, 1, 324)
 
-    # teams = set_game_outcome(teams, 0,
-    #                          'Titans', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Patriots', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, 0,
-    #                          'Broncos', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          '49ers', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, 0,
-    #                          'Chargers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Saints', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, 1,
+                             'Titans', 17, 2, 206, 17, 33, 2, 0, 306,
+                             'Patriots', 22, 3, 240, 20, 27, 1, 1, 363)
+
+    teams = set_game_outcome(teams, -2.5,
+                             'Broncos', 15, 1, 102, 19, 38, 0, 1, 215,
+                             '49ers', 24, 3, 93, 8, 20, 1, 1, 278)
+
+    teams = set_game_outcome(teams, -2.5,
+                             'Chargers', 17, 1, 226, 22, 37, 1, 2, 304,
+                             'Saints', 19, 2, 161, 16, 27, 2, 1, 324)
 
     return teams
 

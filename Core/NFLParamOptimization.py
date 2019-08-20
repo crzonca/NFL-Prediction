@@ -2,6 +2,7 @@ import joblib
 import maya
 import numpy as np
 import pandas as pd
+from scipy.stats import norm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import VotingClassifier
 from sklearn.linear_model import LogisticRegression
@@ -141,6 +142,7 @@ def tune_logistic_regression(X, y, skf, scores):
                            logistic_regression_parameters,
                            cv=skf,
                            scoring='%s' % score,
+                           return_train_score=True,
                            verbose=2)
         clf.fit(X, y.ravel())
 
@@ -189,6 +191,7 @@ def tune_gauss_naive_bayes(X, y, skf, scores):
                            naive_bayes_parameters,
                            cv=skf,
                            scoring='%s' % score,
+                           return_train_score=True,
                            verbose=2)
         clf.fit(X, y.ravel())
 
@@ -249,6 +252,7 @@ def tune_random_forest(X, y, feature_col_names, skf, scores):
                            random_forest_parameters,
                            cv=skf,
                            scoring='%s' % score,
+                           return_train_score=True,
                            verbose=2,
                            n_jobs=2)
         clf.fit(X, y.ravel())
@@ -279,7 +283,7 @@ def tune_k_nearest_neighbors(X, y, skf, scores):
 
     # Create a list of dicts to try parameter combinations over
     print('K Nearest Neighbors')
-    k_neighbors_parameters = [{'n_neighbors': range(3, 141, 2),
+    k_neighbors_parameters = [{'n_neighbors': range(3, 71, 2),
                                'weights': ['uniform', 'distance'],
                                'algorithm': ['auto'],
                                'leaf_size': range(1, 31),
@@ -302,6 +306,7 @@ def tune_k_nearest_neighbors(X, y, skf, scores):
                            k_neighbors_parameters,
                            cv=skf,
                            scoring='%s' % score,
+                           return_train_score=True,
                            verbose=2)
         clf.fit(X, y.ravel())
 
@@ -360,6 +365,7 @@ def tune_svc_classifier(X, y, skf, scores):
                            support_vector_parameters,
                            cv=skf,
                            scoring='%s' % score,
+                           return_train_score=True,
                            verbose=2,
                            n_jobs=2)
         clf.fit(X, y.ravel())
@@ -403,12 +409,22 @@ def print_grid_search_details(clf, filename):
     print('\nGrid scores on development set:')
     print('\nGrid scores on development set:', file=open(filename, 'a'))
 
-    means = clf.cv_results_['mean_test_score']
-    stds = clf.cv_results_['std_test_score']
-    results = list(zip(means, stds, clf.cv_results_['params'], clf.cv_results_['rank_test_score']))
-    for mean, std, params, rank in sorted(results, key=lambda tup: tup[3]):
-        print('%0.5f (+/-%0.03f) for %r' % (mean, std * 2, params))
-        print('%0.5f (+/-%0.03f) for %r' % (mean, std * 2, params), file=open(filename, 'a'))
+    test_means = clf.cv_results_['mean_test_score']
+    test_stds = clf.cv_results_['std_test_score']
+    train_means = clf.cv_results_['mean_train_score']
+    train_stds = clf.cv_results_['std_train_score']
+    results = list(zip(test_means,
+                       test_stds,
+                       train_means,
+                       train_stds,
+                       clf.cv_results_['params'],
+                       clf.cv_results_['rank_test_score']))
+    for test_mean, test_std, train_mean, train_std, params, rank in sorted(results, key=lambda tup: tup[5]):
+        normal_dist = norm(train_mean, train_std)
+        probability = 2 * min(normal_dist.cdf(test_mean), normal_dist.sf(test_mean))
+        print('%0.5f (+/-%0.03f) for %r probability %0.03f' % (test_mean, test_std * 2, params, probability))
+        print('%0.5f (+/-%0.03f) for %r probability %0.03f' % (test_mean, test_std * 2, params, probability),
+              file=open(filename, 'a'))
 
     print()
     print('', file=open(filename, 'a'))

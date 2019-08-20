@@ -428,13 +428,13 @@ def analyze_results():
             briers = dict()
             for brier_line in brier_lines:
                 brier_score = float(brier_line.split()[0])
-                brier_params = brier_line.split(' for ')[-1]
+                brier_params = brier_line.split(' for ')[-1].split(' probability ')[0]
                 briers[brier_params] = brier_score
 
             f1s = dict()
             for f1_line in f1_lines:
                 f1_score = float(f1_line.split()[0])
-                f1_params = f1_line.split(' for ')[-1]
+                f1_params = f1_line.split(' for ')[-1].split(' probability ')[0]
                 f1s[f1_params] = f1_score
 
             brier_scores = briers.values()
