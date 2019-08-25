@@ -426,6 +426,14 @@ def print_grid_search_details(clf, filename):
         print('%0.5f (+/-%0.03f) for %r probability %0.03f' % (test_mean, test_std * 2, params, probability),
               file=open(filename, 'a'))
 
+    search = pd.DataFrame.from_dict(clf.cv_results_)
+    search['probability'] = search.apply(
+        lambda row: 2 * min(norm(row['mean_train_score'], row['std_train_score']).cdf(row['mean_test_score']),
+                            norm(row['mean_train_score'], row['std_train_score']).sf(row['mean_test_score'])), axis=1)
+
+    csv_filename = filename.replace('.txt', '.csv')
+    search.to_csv(csv_filename, index=False)
+
     print()
     print('', file=open(filename, 'a'))
 
