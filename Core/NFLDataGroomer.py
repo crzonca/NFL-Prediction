@@ -17,8 +17,8 @@ def groom_data():
     frames = get_all_data_frames()
     frames = add_point_diff_and_results(frames)
     frames = add_team_records(frames)
-    best_reg, best_k = evaluate_elo(frames)
-    frames = add_team_elos(frames, regression_factor=best_reg, k_factor=best_k)
+    # best_reg, best_k = evaluate_elo(frames)
+    # frames = add_team_elos(frames, regression_factor=best_reg, k_factor=best_k)
     frames = add_team_elos(frames)
     frames = add_season_totals(frames)
     frames = add_season_averages(frames)
@@ -41,6 +41,7 @@ def get_all_data_frames():
     for file in os.listdir(game_data_dir):
         if (os.path.splitext(file)[1] == '.csv'
                 and os.path.splitext(file)[0] != '20022018'
+                and os.path.splitext(file)[0] != '19952018'
                 and os.path.splitext(file)[0] != '20022017'):
             with open(game_data_dir + file, 'r') as season_csv:
                 df = pd.read_csv(season_csv, encoding='utf-8')
@@ -141,7 +142,7 @@ def add_team_records(frames):
     return frames
 
 
-def add_team_elos(frames, regression_factor=.41, k_factor=42):
+def add_team_elos(frames, regression_factor=.44, k_factor=42):
     """
     Adds columns for the Elo for each team going into the game.
     Elo is calculated from the prior Elo of each team and the result of the game.
@@ -883,14 +884,11 @@ def combine_frames(frames):
     Combines all of the season data frames into a total frame and writes it to a csv file.
 
     :param frames:  A list of data frames containing the game info, one for each season
-    :return: One data frame containing the game info for all games since 2002
+    :return: One data frame containing the game info for all games since 1995
     """
 
     # Check that all seasons have the same number of columns
     check_consistent_length(*[frame.T for frame in frames])
-
-    # Check that all seasons have the same number of rows
-    check_consistent_length(*frames)
 
     # Combine all seasons into one dataframe
     combined = pd.concat(frames, sort=False)
@@ -947,7 +945,7 @@ def combine_frames(frames):
        always has home field advantage. These games however are of minimal impact due to their rarity.  Almost 96% of 
        the home victories are during the regular season (between teams that are on average of equal strength)."""
 
-    combined.to_csv(game_data_dir + '20022018.csv', index=False)
+    combined.to_csv(game_data_dir + '19952018.csv', index=False)
 
     return combined
 
@@ -996,6 +994,6 @@ def remove_outliers(df):
 
 
 def get_all_games_no_outliers():
-    all_games = pd.read_csv(game_data_dir + '20022018.csv')
+    all_games = pd.read_csv(game_data_dir + '19952018.csv')
     all_games = remove_outliers(all_games)
     return all_games
