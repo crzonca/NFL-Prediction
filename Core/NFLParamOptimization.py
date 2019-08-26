@@ -392,7 +392,7 @@ def print_grid_search_details(clf, filename):
     """
 
     # Set the directory to write files to
-    filename = other_dir + '7 Features No Outliers\\Scores\\' + filename
+    filename = other_dir + '7 Features\\Scores\\' + filename
 
     # Print the best parameter found in the search along with its score
     print('Best parameters set found on development set:')
@@ -537,7 +537,7 @@ def get_voting_classifier(contributing_features, df=None):
     X = scaler.transform(X)
 
     # Pickle the scaler
-    joblib.dump(scaler, other_dir + '7 Features No Outliers\\2018Scaler.pkl')
+    joblib.dump(scaler, other_dir + '7 Features\\2018Scaler.pkl')
 
     # Get the classification models
     logistic_regression = get_best_logistic_regression()
@@ -556,6 +556,6 @@ def get_voting_classifier(contributing_features, df=None):
     voting_classifier.fit(X, y.ravel())
 
     # Pickle the voting classifier
-    joblib.dump(voting_classifier, other_dir + '7 Features No Outliers\\2018VotingClassifier.pkl')
+    joblib.dump(voting_classifier, other_dir + '7 Features\\2018VotingClassifier.pkl')
 
     return voting_classifier

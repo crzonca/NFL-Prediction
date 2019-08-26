@@ -19,7 +19,13 @@ other_dir = '..\\Projects\\nfl\\NFL_Prediction\\Other\\'
 
 def get_best_features(df=None):
     won_series = plot_corr(df)
-    pca_feature_selection(df)
+    best_features = pca_feature_selection(df)
+
+    columns_to_keep = list()
+    columns_to_keep.extend(list(filter(lambda f: 'diff' in f, df.columns.values)))
+    columns_to_keep.extend(list(filter(lambda f: 'home_spread' in f, df.columns.values)))
+    columns_to_keep.remove('game_point_diff')
+    # best_features = recursive_feature_elimination(df, columns_to_keep)
 
     best_features = ['home_spread', 'elo_diff', 'average_scoring_margin_diff', 'win_pct_diff',
                      'average_touchdowns_diff', 'average_passer_rating_diff', 'average_total_yards_diff']
@@ -281,7 +287,7 @@ def recursive_feature_elimination(df, feature_list):
     print('RFECV Brier')
     rfecv_br = RFECV(estimator=clf, min_features_to_select=num_features, cv=skf, scoring='brier_score_loss')
     rfecv_br.fit(X, y.ravel())
-    print_top_features(rfecv_br, feature_list)
+    brier_features = print_top_features(rfecv_br, feature_list)
     br_features_to_scores = zip(feature_list, rfecv_br.ranking_)
     br_features_to_scores = sorted(br_features_to_scores, key=lambda x: x[1])
     for item in br_features_to_scores:
@@ -291,12 +297,14 @@ def recursive_feature_elimination(df, feature_list):
     print('RFECV F1')
     rfecv_f1 = RFECV(estimator=clf, min_features_to_select=num_features, cv=skf, scoring='f1')
     rfecv_f1.fit(X, y.ravel())
-    print_top_features(rfecv_f1, feature_list)
+    f1_features = print_top_features(rfecv_f1, feature_list)
     f1_features_to_scores = zip(feature_list, rfecv_f1.ranking_)
     f1_features_to_scores = sorted(f1_features_to_scores, key=lambda x: x[1])
     for item in f1_features_to_scores:
         print(item[0], item[1])
     print()
+
+    return brier_features
 
 
 def print_top_features(selector, feature_list):

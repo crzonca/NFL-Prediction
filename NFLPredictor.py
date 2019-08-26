@@ -21,8 +21,8 @@ def predict_game(home_info, away_info, home_spread=0):
     """
 
     # Load the classifier and scaler
-    voting_classifier = joblib.load(base_dir + 'Other\\7 Features No Outliers\\2018VotingClassifier.pkl')
-    scaler = joblib.load(base_dir + 'Other\\7 Features No Outliers\\2018Scaler.pkl')
+    voting_classifier = joblib.load(base_dir + 'Other\\7 Features 2002\\2018VotingClassifier.pkl')
+    scaler = joblib.load(base_dir + 'Other\\7 Features 2002\\2018Scaler.pkl')
 
     # Get the home team's info
     home_wins = home_info[1]

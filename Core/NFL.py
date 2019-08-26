@@ -12,7 +12,7 @@ def nfl():
     all_games = Groomer.get_all_games_no_outliers()
 
     # Select the best features
-    features = FeatureSelection.get_best_features()
+    features = FeatureSelection.get_best_features(all_games)
 
     # Tune each algorithm's hyper parameters
     Params.evaluate_model_parameters(features, all_games)

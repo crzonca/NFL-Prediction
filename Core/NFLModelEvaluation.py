@@ -33,7 +33,7 @@ def dummy_classify_2018_season(feature_list):
     X = scaler.transform(X)
 
     # Set the directory to write files to
-    filename = other_dir + '7 Features No Outliers\\Scores\\2017\\2018Confusion_Dummy.txt'
+    filename = other_dir + '7 Features\\Scores\\2017\\2018Confusion_Dummy.txt'
 
     classifier = DummyClassifier(strategy='prior', random_state=42)
     classifier.fit(X, y.ravel())
@@ -83,7 +83,7 @@ def dummy_classify_2018_season(feature_list):
     print('Dummy Classifier:', round((.25 - dummy_brier) * 26700, 2), file=open(filename, 'a'))
     print('', file=open(filename, 'a'))
 
-    results.to_csv(other_dir + '7 Features No Outliers\\Scores\\2017\\2018Predictions_Dummy.csv', index=False)
+    results.to_csv(other_dir + '7 Features\\Scores\\2017\\2018Predictions_Dummy.csv', index=False)
 
     rounded_prediction = prediction.apply(lambda row: round(row))
 
@@ -104,10 +104,10 @@ def evaluate_2018_season():
     """
 
     # Set the directory to write files to
-    filename = other_dir + '7 Features No Outliers\\Scores\\2017\\2018Confusion.txt'
+    filename = other_dir + '7 Features\\Scores\\2017\\2018Confusion.txt'
 
-    voting_classifier = joblib.load(other_dir + '7 Features No Outliers\\Scores\\2017\\2017VotingClassifier.pkl')
-    scaler = joblib.load(other_dir + '7 Features No Outliers\\Scores\\2017\\2017Scaler.pkl')
+    voting_classifier = joblib.load(other_dir + '7 Features\\Scores\\2017\\2017VotingClassifier.pkl')
+    scaler = joblib.load(other_dir + '7 Features\\Scores\\2017\\2017Scaler.pkl')
 
     last_season = pd.read_csv(game_data_dir + '20022018.csv').values[-267:]
     last_season = pd.DataFrame(last_season)
@@ -183,7 +183,7 @@ def evaluate_2018_season():
     print('Voting Classifier:', round((.25 - vote_brier) * 26700, 2), file=open(filename, 'a'))
     print('', file=open(filename, 'a'))
 
-    results.to_csv(other_dir + '7 Features No Outliers\\Scores\\2017\\2018Predictions.csv', index=False)
+    results.to_csv(other_dir + '7 Features\\Scores\\2017\\2018Predictions.csv', index=False)
 
     rounded_rf = rf.apply(lambda row: round(row))
     rounded_svc = svc.apply(lambda row: round(row))
@@ -386,7 +386,7 @@ def visualize_2018_season():
 
     :return: Void
     """
-    predictions = pd.read_csv(other_dir + '7 Features No Outliers\\Scores\\2017\\2018Predictions.csv')
+    predictions = pd.read_csv(other_dir + '7 Features\\Scores\\2017\\2018Predictions.csv')
 
     for num, game in enumerate(predictions.values):
         vote_prob = int(round(game[3] * 100))
@@ -415,8 +415,8 @@ def analyze_results():
 
     :return: The sorted list of hyper parameters, sorted based on accuracy and loss
     """
-    with open(other_dir + '7 Features No Outliers\\Scores\\random_forest_brier_score_loss.txt') as brier:
-        with open(other_dir + '7 Features No Outliers\\Scores\\random_forest_f1.txt') as f1:
+    with open(other_dir + '7 Features\\Scores\\random_forest_brier_score_loss.txt') as brier:
+        with open(other_dir + '7 Features\\Scores\\random_forest_f1.txt') as f1:
             brier_lines = brier.readlines()[4:]
             f1_lines = f1.readlines()[4:]
 
