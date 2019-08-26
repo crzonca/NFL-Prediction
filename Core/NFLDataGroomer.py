@@ -142,7 +142,7 @@ def add_team_records(frames):
     return frames
 
 
-def add_team_elos(frames, regression_factor=.44, k_factor=42):
+def add_team_elos(frames, regression_factor=.41, k_factor=42):
     """
     Adds columns for the Elo for each team going into the game.
     Elo is calculated from the prior Elo of each team and the result of the game.
