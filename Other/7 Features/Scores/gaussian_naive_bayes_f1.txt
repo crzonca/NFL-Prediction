@@ -1,28 +1,56 @@
 Best parameters set found on development set:
-0.74034 (+/-0.004) for {'var_smoothing': 10}
+0.73788 (+/-0.008) for {'var_smoothing': 10}
 
 Grid scores on development set:
-0.74034 (+/-0.004) for {'var_smoothing': 10} probability 0.678
-0.73472 (+/-0.000) for {'var_smoothing': 1000} probability 1.000
-0.73472 (+/-0.000) for {'var_smoothing': 100} probability 1.000
-0.70087 (+/-0.021) for {'var_smoothing': 1} probability 0.900
-0.68261 (+/-0.023) for {'var_smoothing': 0.1} probability 0.772
-0.68197 (+/-0.023) for {'var_smoothing': 0.001} probability 0.618
-0.68197 (+/-0.023) for {'var_smoothing': 0.0001} probability 0.632
-0.68197 (+/-0.023) for {'var_smoothing': 1e-05} probability 0.632
-0.68197 (+/-0.023) for {'var_smoothing': 1e-06} probability 0.632
-0.68197 (+/-0.023) for {'var_smoothing': 1e-07} probability 0.632
-0.68197 (+/-0.023) for {'var_smoothing': 1e-08} probability 0.632
-0.68197 (+/-0.023) for {'var_smoothing': 1e-09} probability 0.632
-0.68197 (+/-0.023) for {'var_smoothing': 1e-10} probability 0.632
-0.68197 (+/-0.023) for {'var_smoothing': 1e-11} probability 0.632
-0.68197 (+/-0.023) for {'var_smoothing': 1e-12} probability 0.632
-0.68197 (+/-0.023) for {'var_smoothing': 1e-13} probability 0.632
-0.68197 (+/-0.023) for {'var_smoothing': 1e-14} probability 0.632
-0.68197 (+/-0.023) for {'var_smoothing': 1e-15} probability 0.632
-0.68197 (+/-0.023) for {'var_smoothing': 1e-16} probability 0.632
-0.68197 (+/-0.023) for {'var_smoothing': 1e-17} probability 0.632
-0.68197 (+/-0.023) for {'var_smoothing': 1e-18} probability 0.632
-0.68197 (+/-0.023) for {'var_smoothing': 1e-19} probability 0.632
-0.68197 (+/-0.024) for {'var_smoothing': 0.01} probability 0.689
+0.73788 (+/-0.008) for {'var_smoothing': 10} probability 0.353
+0.72844 (+/-0.000) for {'var_smoothing': 1000} probability 0.999
+0.72844 (+/-0.000) for {'var_smoothing': 100} probability 0.999
+0.69871 (+/-0.017) for {'var_smoothing': 1} probability 0.797
+0.68111 (+/-0.018) for {'var_smoothing': 0.1} probability 0.665
+0.67989 (+/-0.019) for {'var_smoothing': 0.01} probability 0.691
+0.67989 (+/-0.019) for {'var_smoothing': 0.001} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 0.0001} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-05} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-06} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-07} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-08} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-09} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-10} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-11} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-12} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-13} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-14} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-15} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-16} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-17} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-18} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-19} probability 0.701
+
+Best parameters set found on development set:
+0.73788 (+/-0.008) for {'var_smoothing': 10}
+
+Grid scores on development set:
+0.73788 (+/-0.008) for {'var_smoothing': 10} probability 0.353
+0.72844 (+/-0.000) for {'var_smoothing': 1000} probability 0.999
+0.72844 (+/-0.000) for {'var_smoothing': 100} probability 0.999
+0.69871 (+/-0.017) for {'var_smoothing': 1} probability 0.797
+0.68111 (+/-0.018) for {'var_smoothing': 0.1} probability 0.665
+0.67989 (+/-0.019) for {'var_smoothing': 0.01} probability 0.691
+0.67989 (+/-0.019) for {'var_smoothing': 0.001} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 0.0001} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-05} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-06} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-07} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-08} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-09} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-10} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-11} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-12} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-13} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-14} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-15} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-16} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-17} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-18} probability 0.701
+0.67989 (+/-0.019) for {'var_smoothing': 1e-19} probability 0.701
 
