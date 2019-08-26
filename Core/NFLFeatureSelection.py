@@ -17,9 +17,12 @@ game_data_dir = '..\\Projects\\nfl\\NFL_Prediction\\Game Data\\'
 other_dir = '..\\Projects\\nfl\\NFL_Prediction\\Other\\'
 
 
-def get_best_features():
-    won_series = plot_corr()
-    best_features = pca_feature_selection()
+def get_best_features(df=None):
+    won_series = plot_corr(df)
+    pca_feature_selection(df)
+
+    best_features = ['home_spread', 'elo_diff', 'average_scoring_margin_diff', 'win_pct_diff',
+                     'average_touchdowns_diff', 'average_passer_rating_diff', 'average_total_yards_diff']
 
     won_series = won_series.filter(best_features).sort_values(kind='quicksort', ascending=False)
     best_features = list(won_series.index)
@@ -36,11 +39,11 @@ def plot_corr(df=None):
 
     if df is None:
         # Get the data frame for all seasons
-        df = pd.read_csv(game_data_dir + '20022018.csv')
+        df = pd.read_csv(game_data_dir + '19952018.csv')
 
     # Print a description of all the games
     games_description = df.describe()
-    games_description.to_csv(other_dir + '20022018Description.csv')
+    games_description.to_csv(other_dir + '19952018Description.csv')
     print(games_description.to_string())
     print()
 
@@ -108,11 +111,11 @@ def plot_top_features_corr(df=None):
 
     if df is None:
         # Get the data frame for all seasons
-        df = pd.read_csv(game_data_dir + '20022018.csv')
+        df = pd.read_csv(game_data_dir + '19952018.csv')
 
     # Print a description of all the games
     games_description = df.describe()
-    games_description.to_csv(other_dir + '20022018Description.csv')
+    games_description.to_csv(other_dir + '19952018Description.csv')
     print(games_description.to_string())
     print()
 
@@ -178,7 +181,7 @@ def pca_feature_selection(df=None):
 
     if df is None:
         # Get the data frame for all seasons
-        df = pd.read_csv(game_data_dir + '20022018.csv')
+        df = pd.read_csv(game_data_dir + '19952018.csv')
 
     # Drop all columns that arent the label, the spread or a team difference
     columns_to_keep = list()
@@ -199,7 +202,7 @@ def pca_feature_selection(df=None):
     y = df[predicted_class_name].values
 
     # Fit the PCA
-    n = .997
+    n = .998
     pca = PCA(n_components=n).fit(X)
 
     # Plot the total percentage of variance explained by the number of features used
@@ -222,7 +225,10 @@ def pca_feature_selection(df=None):
     contributing_features = print_top_features(skb, feature_col_names)
 
     # Correlation matrix revealed high correlation between points for and touchdowns
-    contributing_features.remove('average_points_for_diff')
+    if 'average_points_for_diff' in contributing_features:
+        contributing_features.remove('average_points_for_diff')
+    if 'average_points_against_diff' in contributing_features:
+        contributing_features.remove('average_points_against_diff')
 
     # Plot the correlation between the top 8 features
     columns_to_drop = list(set(feature_col_names) - set(contributing_features))
@@ -285,7 +291,7 @@ def recursive_feature_elimination(df, feature_list):
     print('RFECV F1')
     rfecv_f1 = RFECV(estimator=clf, min_features_to_select=num_features, cv=skf, scoring='f1')
     rfecv_f1.fit(X, y.ravel())
-    # print_top_features(rfecv_f1, feature_list)
+    print_top_features(rfecv_f1, feature_list)
     f1_features_to_scores = zip(feature_list, rfecv_f1.ranking_)
     f1_features_to_scores = sorted(f1_features_to_scores, key=lambda x: x[1])
     for item in f1_features_to_scores:
