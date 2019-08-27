@@ -141,10 +141,10 @@ def print_full_standings(teams, eliminated_teams, include_title=True):
         team_info.append(round(team[2]))
         team_info.append(round(team[3]))
         team_info.append(team[4])
-        team_info.append(round(team[5], 1))
-        team_info.append(round(team[6], 1))
-        team_info.append(round(team[5] - team[6], 1))
-        team_info.append(round(team[7], 1))
+        team_info.append(round(team[5], 3))
+        team_info.append(round(team[6], 3))
+        team_info.append(round(team[5] - team[6], 3))
+        team_info.append(round(team[7], 3))
         average_completion_pct = team[9] / team[10] if team[10] > 0 else 0
         a = (average_completion_pct - .3) * 5
         average_yards_per_pass_attempt = team[8] / team[10] if team[10] > 0 else 0
