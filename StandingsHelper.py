@@ -322,6 +322,7 @@ def print_schedule_difficulty(teams, remaining=False):
     """
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
     import statistics
+    from scipy.stats import norm
 
     # Get each teams schedule difficulty
     team_tuples = list()
@@ -335,7 +336,8 @@ def print_schedule_difficulty(teams, remaining=False):
     # Calculate the mean and deviation for all the schedule difficulties
     all_difficulties = [tup[1] for tup in team_tuples]
     mean_difficulty = statistics.mean(all_difficulties)
-    difficulty_deviation = statistics.pstdev(all_difficulties)
+    difficulty_deviation = statistics.stdev(all_difficulties)
+    difficulty_norm = norm(mean_difficulty, difficulty_deviation)
 
     # Standardize each team's difficulty
     schedule_difficulties = list()
@@ -344,7 +346,7 @@ def print_schedule_difficulty(teams, remaining=False):
         schedule_difficulty = team_tuple[1]
         deviation = team_tuple[2]
 
-        schedule_difficulty = (schedule_difficulty - mean_difficulty) / difficulty_deviation
+        schedule_difficulty = difficulty_norm.cdf(schedule_difficulty) * 100
 
         schedule_difficulties.append((team, schedule_difficulty, deviation))
 
