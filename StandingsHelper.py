@@ -155,7 +155,7 @@ def print_full_standings(teams, eliminated_teams, include_title=True):
         d = 2.375 - (average_ints_per_attempt * 25)
         passer_rating = ((a + b + c + d) / 6) * 100
         team_info.append(round(passer_rating, 3))
-        team_info.append(round(team[13], 1))
+        team_info.append(round(team[13], 3))
         row = row + team_info
         table.add_row(row)
 
