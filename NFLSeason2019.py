@@ -15,7 +15,7 @@ def season():
     eliminated_teams = list()
 
     # Preseason
-    if maya.now() < maya.when('3 September 2019', timezone='US/Central'):
+    if maya.now() < maya.when('30 August 2019', timezone='US/Central'):
         nfl_teams = handle_week(nfl_teams, 'Preseason Week 1', pre_week_1, eliminated_teams, '6 August 2019')
         nfl_teams = handle_week(nfl_teams, 'Preseason Week 2', pre_week_2, eliminated_teams, '13 August 2019')
         nfl_teams = handle_week(nfl_teams, 'Preseason Week 3', pre_week_3, eliminated_teams, '20 August 2019')
@@ -497,13 +497,13 @@ def pre_week_4(teams, week_end_date):
                              'Saints', 13, 2, 181, 22, 30, 1, 0, 302,
                              'Dolphins', 16, 1, 228, 22, 29, 1, 0, 345)
 
-    # teams = set_game_outcome(teams, 4,
-    #                          'Chargers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          '49ers', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, -2.5,
-    #                          'Seahawks', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Raiders', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, 4,
+                             '49ers', 24, 3, 122, 13, 25, 1, 2, 285,
+                             'Chargers', 27, 3, 152, 13, 22, 0, 2, 343)
+
+    teams = set_game_outcome(teams, -2.5,
+                             'Seahawks', 17, 2, 80, 5, 14, 2, 0, 214,
+                             'Raiders', 15, 1, 214, 29, 40, 0, 0, 328)
 
     teams = set_game_outcome(teams, -3,
                              'Bills', 27, 2, 162, 22, 33, 1, 0, 282,
@@ -533,9 +533,9 @@ def pre_week_4(teams, week_end_date):
                              'Jaguars', 12, 1, 102, 17, 38, 0, 0, 259,
                              'Falcons', 31, 4, 170, 15, 25, 1, 0, 425)
 
-    # teams = set_game_outcome(teams, -2,
-    #                          'Broncos', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Cardinals', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, -2,
+                             'Broncos', 20, 2, 216, 20, 34, 1, 3, 340,
+                             'Cardinals', 7, 1, 176, 20, 33, 1, 1, 229)
 
     return teams
 

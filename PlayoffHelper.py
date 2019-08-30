@@ -180,7 +180,7 @@ def get_pre_week4_schedule():
     games.append(create_match_up('Packers', 'Chiefs', -2.5))
     games.append(create_match_up('Panthers', 'Steelers', 3.5))
     games.append(create_match_up('Saints', 'Dolphins', -3.5))
-    games.append(create_match_up('Chargers', '49ers', 4))
+    games.append(create_match_up('49ers', 'Chargers', -4))
     games.append(create_match_up('Seahawks', 'Raiders', -2.5))
     games.append(create_match_up('Bills', 'Vikings', -3))
     games.append(create_match_up('Patriots', 'Giants', -2.5))
