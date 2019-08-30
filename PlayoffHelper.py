@@ -197,22 +197,22 @@ def get_pre_week4_schedule():
 def get_week1_schedule():
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Bears', 'Packers', -4))
+    games.append(create_match_up('Bears', 'Packers', -3))
     games.append(create_match_up('Panthers', 'Rams', 3))
     games.append(create_match_up('Eagles', 'Redskins', -8.5))
-    games.append(create_match_up('Jets', 'Bills', -3.5))
+    games.append(create_match_up('Jets', 'Bills', -3))
     games.append(create_match_up('Vikings', 'Falcons', -4))
-    games.append(create_match_up('Dolphins', 'Ravens', 4))
-    games.append(create_match_up('Jaguars', 'Chiefs', 4.5))
-    games.append(create_match_up('Browns', 'Titans', -5))
-    games.append(create_match_up('Chargers', 'Colts', -3))
-    games.append(create_match_up('Seahawks', 'Bengals', -8))
+    games.append(create_match_up('Dolphins', 'Ravens', 5))
+    games.append(create_match_up('Jaguars', 'Chiefs', 4))
+    games.append(create_match_up('Browns', 'Titans', -5.5))
+    games.append(create_match_up('Chargers', 'Colts', -7))
+    games.append(create_match_up('Seahawks', 'Bengals', -9.5))
     games.append(create_match_up('Buccaneers', '49ers', -1))
-    games.append(create_match_up('Cowboys', 'Giants', -7.5))
-    games.append(create_match_up('Cardinals', 'Lions', 1))
+    games.append(create_match_up('Cowboys', 'Giants', -7))
+    games.append(create_match_up('Cardinals', 'Lions', 2.5))
     games.append(create_match_up('Patriots', 'Steelers', -6))
     games.append(create_match_up('Saints', 'Texans', -7))
-    games.append(create_match_up('Raiders', 'Broncos', -2.5))
+    games.append(create_match_up('Raiders', 'Broncos', -1.5))
 
     return games
 
