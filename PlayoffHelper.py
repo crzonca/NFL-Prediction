@@ -202,17 +202,17 @@ def get_week1_schedule():
     games.append(create_match_up('Eagles', 'Redskins', -8.5))
     games.append(create_match_up('Jets', 'Bills', -3))
     games.append(create_match_up('Vikings', 'Falcons', -4))
-    games.append(create_match_up('Dolphins', 'Ravens', 5))
+    games.append(create_match_up('Dolphins', 'Ravens', 6.5))
     games.append(create_match_up('Jaguars', 'Chiefs', 4))
     games.append(create_match_up('Browns', 'Titans', -5.5))
-    games.append(create_match_up('Chargers', 'Colts', -7))
+    games.append(create_match_up('Chargers', 'Colts', -6.5))
     games.append(create_match_up('Seahawks', 'Bengals', -9.5))
     games.append(create_match_up('Buccaneers', '49ers', -1))
     games.append(create_match_up('Cowboys', 'Giants', -7))
     games.append(create_match_up('Cardinals', 'Lions', 2.5))
-    games.append(create_match_up('Patriots', 'Steelers', -6))
+    games.append(create_match_up('Patriots', 'Steelers', -6.5))
     games.append(create_match_up('Saints', 'Texans', -7))
-    games.append(create_match_up('Raiders', 'Broncos', -1.5))
+    games.append(create_match_up('Raiders', 'Broncos', 0))
 
     return games
 
