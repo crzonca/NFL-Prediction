@@ -223,6 +223,18 @@ def predict_game_outcome(teams, home_name, away_name, home_spread, neutral_locat
         away_lr_prob_formatted = round(away_lr_prob * 100, 2)
         away_svc_prob_formatted = round(away_svc_prob * 100, 2)
         away_rf_prob_formatted = round(away_rf_prob * 100, 2)
+
+        print('*' * 120, '\n')
+
+        if home_spread > 0:
+            print('>> The ' + away_name + ' are favored to beat the ' + home_name + ' by ' +
+                  str(home_spread) + ' points')
+        elif home_spread < 0:
+            print('>> The ' + home_name + ' are favored to beat the ' + away_name + ' by ' +
+                  str(-home_spread) + ' points')
+        else:
+            print('>> The spread is even')
+
         print('>> ' + message)
         print()
         print('>> Logistic Regression ' + home_name + ' Victory Probability: ' + str(home_lr_prob_formatted) + '%')

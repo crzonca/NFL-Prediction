@@ -5,6 +5,7 @@ from functools import cmp_to_key
 import pandas as pd
 
 import Projects.nfl.NFL_Prediction.Core.NFLDataGroomer as NFL
+import Projects.nfl.NFL_Prediction.OddsHelper as Odds
 import Projects.nfl.NFL_Prediction.StandingsHelper as Standings
 
 completed_games = pd.DataFrame(columns=['home_team', 'away_team', 'home_score', 'away_score', 'home_spread',
@@ -59,550 +60,592 @@ def get_schedule():
     """
 
     games = list()
-    games.extend(get_week1_schedule())
-    games.extend(get_week2_schedule())
-    games.extend(get_week3_schedule())
-    games.extend(get_week4_schedule())
+    games.extend(get_week1_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_week2_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_week3_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_week4_schedule(week_end_date=None, get_odds=False))
 
-    games.extend(get_week5_schedule())
-    games.extend(get_week6_schedule())
-    games.extend(get_week7_schedule())
-    games.extend(get_week8_schedule())
+    games.extend(get_week5_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_week6_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_week7_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_week8_schedule(week_end_date=None, get_odds=False))
 
-    games.extend(get_week9_schedule())
-    games.extend(get_week10_schedule())
-    games.extend(get_week11_schedule())
-    games.extend(get_week12_schedule())
+    games.extend(get_week9_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_week10_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_week11_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_week12_schedule(week_end_date=None, get_odds=False))
 
-    games.extend(get_week13_schedule())
-    games.extend(get_week14_schedule())
-    games.extend(get_week15_schedule())
-    games.extend(get_week16_schedule())
+    games.extend(get_week13_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_week14_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_week15_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_week16_schedule(week_end_date=None, get_odds=False))
 
-    games.extend(get_week17_schedule())
-    games.extend(get_wildcard_schedule())
-    games.extend(get_divisional_schedule())
-    games.extend(get_conference_schedule())
-    games.extend(get_superbowl_schedule())
+    games.extend(get_week17_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_wildcard_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_divisional_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_conference_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_superbowl_schedule(week_end_date=None, get_odds=False))
     return games
 
 
-def create_match_up(home_name, away_name, home_spread, neutral_location=False):
+def create_match_up(home_name, away_name, home_spread=0.0, odds=None, neutral_location=False):
     """
     Creates a representation of an instance of an NFL game.
 
     :param home_name: The name of the home team
     :param away_name: The name of the away team
     :param home_spread: The spread of the game from the home teams perspective
+    :param odds: The list of odds information for upcoming games
     :param neutral_location: If the game is at a neutral location
     :return: The match up
     """
+    if odds:
+        odds = list(filter(
+            lambda g: any(home_name in name for name in g[0]) and any(away_name in name for name in g[0]), odds))
+        if len(odds) != 1:
+            raise Exception(away_name + ' at ' + home_name + ' not found')
+        else:
+            game = odds[0]
+            home_spread = game[2]
 
     return (home_name, away_name), home_spread, neutral_location
 
 
-def get_pre_week1_schedule():
+def get_week1_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Falcons', 'Broncos', 2.5))
-    games.append(create_match_up('Giants', 'Jets', 2.5))
-    games.append(create_match_up('Eagles', 'Titans', -1.5))
-    games.append(create_match_up('Bears', 'Panthers', -3))
-    games.append(create_match_up('Lions', 'Patriots', -2.5))
-    games.append(create_match_up('Packers', 'Texans', -1.5))
-    games.append(create_match_up('Saints', 'Vikings', -2.5))
-    games.append(create_match_up('Cardinals', 'Chargers', -3))
-    games.append(create_match_up('49ers', 'Cowboys', -4.5))
-    games.append(create_match_up('Seahawks', 'Broncos', 2))
-    games.append(create_match_up('Bills', 'Colts', 1.5))
-    games.append(create_match_up('Dolphins', 'Falcons', -4))
-    games.append(create_match_up('Ravens', 'Jaguars', -3.5))
-    games.append(create_match_up('Browns', 'Redskins', -1.5))
-    games.append(create_match_up('Steelers', 'Buccaneers', -2.5))
-    games.append(create_match_up('Chiefs', 'Bengals', -3.5))
-    games.append(create_match_up('Raiders', 'Rams', -5))
+    games.append(create_match_up('Bears', 'Packers', odds=odds))
+    games.append(create_match_up('Panthers', 'Rams', odds=odds))
+    games.append(create_match_up('Eagles', 'Redskins', odds=odds))
+    games.append(create_match_up('Jets', 'Bills', odds=odds))
+    games.append(create_match_up('Vikings', 'Falcons', odds=odds))
+    games.append(create_match_up('Dolphins', 'Ravens', odds=odds))
+    games.append(create_match_up('Jaguars', 'Chiefs', odds=odds))
+    games.append(create_match_up('Browns', 'Titans', odds=odds))
+    games.append(create_match_up('Chargers', 'Colts', odds=odds))
+    games.append(create_match_up('Seahawks', 'Bengals', odds=odds))
+    games.append(create_match_up('Buccaneers', '49ers', odds=odds))
+    games.append(create_match_up('Cowboys', 'Giants', odds=odds))
+    games.append(create_match_up('Cardinals', 'Lions', odds=odds))
+    games.append(create_match_up('Patriots', 'Steelers', odds=odds))
+    games.append(create_match_up('Saints', 'Texans', odds=odds))
+    games.append(create_match_up('Raiders', 'Broncos', odds=odds))
 
     return games
 
 
-def get_pre_week2_schedule():
+def get_week2_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Giants', 'Bears', -2.5))
-    games.append(create_match_up('Redskins', 'Bengals', -4))
-    games.append(create_match_up('Vikings', 'Seahawks', -3.5))
-    games.append(create_match_up('Falcons', 'Jets', -1.5))
-    games.append(create_match_up('Panthers', 'Bills', -1.5))
-    games.append(create_match_up('Buccaneers', 'Dolphins', -2.5))
-    games.append(create_match_up('Cardinals', 'Raiders', -3))
-    games.append(create_match_up('Rams', 'Cowboys', 2.5))
-    games.append(create_match_up('Ravens', 'Packers', -3.5))
-    games.append(create_match_up('Steelers', 'Chiefs', 2.5))
-    games.append(create_match_up('Texans', 'Lions', -4.5))
-    games.append(create_match_up('Colts', 'Browns', -3))
-    games.append(create_match_up('Jaguars', 'Eagles', -3))
-    games.append(create_match_up('Titans', 'Patriots', 1))
-    games.append(create_match_up('Broncos', '49ers', -2.5))
-    games.append(create_match_up('Chargers', 'Saints', -2.5))
+    games.append(create_match_up('Panthers', 'Buccaneers', odds=odds))
+    games.append(create_match_up('Ravens', 'Cardinals', odds=odds))
+    games.append(create_match_up('Redskins', 'Cowboys', odds=odds))
+    games.append(create_match_up('Titans', 'Colts', odds=odds))
+    games.append(create_match_up('Steelers', 'Seahawks', odds=odds))
+    games.append(create_match_up('Giants', 'Bills', odds=odds))
+    games.append(create_match_up('Bengals', '49ers', odds=odds))
+    games.append(create_match_up('Lions', 'Chargers', odds=odds))
+    games.append(create_match_up('Packers', 'Vikings', odds=odds))
+    games.append(create_match_up('Texans', 'Jaguars', odds=odds))
+    games.append(create_match_up('Dolphins', 'Patriots', odds=odds))
+    games.append(create_match_up('Raiders', 'Chiefs', odds=odds))
+    games.append(create_match_up('Rams', 'Saints', odds=odds))
+    games.append(create_match_up('Broncos', 'Bears', odds=odds))
+    games.append(create_match_up('Falcons', 'Eagles', odds=odds))
+    games.append(create_match_up('Jets', 'Browns', odds=odds))
 
     return games
 
 
-def get_pre_week3_schedule():
+def get_week3_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Cowboys', 'Texans', 0))
-    games.append(create_match_up('Eagles', 'Ravens', 0))
-    games.append(create_match_up('Lions', 'Bills', 0))
-    games.append(create_match_up('Vikings', 'Cardinals', 0))
-    games.append(create_match_up('Falcons', 'Redskins', 0))
-    games.append(create_match_up('Buccaneers', 'Browns', 0))
-    games.append(create_match_up('Rams', 'Broncos', 0))
-    games.append(create_match_up('Dolphins', 'Jaguars', 0))
-    games.append(create_match_up('Patriots', 'Panthers', 0))
-    games.append(create_match_up('Jets', 'Saints', 0))
-    games.append(create_match_up('Bengals', 'Giants', 0))
-    games.append(create_match_up('Colts', 'Bears', 0))
-    games.append(create_match_up('Titans', 'Steelers', 0))
-    games.append(create_match_up('Chiefs', '49ers', 0))
-    games.append(create_match_up('Raiders', 'Packers', 0))
-    games.append(create_match_up('Chargers', 'Seahawks', 0))
+    games.append(create_match_up('Jaguars', 'Titans', odds=odds))
+    games.append(create_match_up('Bills', 'Bengals', odds=odds))
+    games.append(create_match_up('Eagles', 'Lions', odds=odds))
+    games.append(create_match_up('Patriots', 'Jets', odds=odds))
+    games.append(create_match_up('Vikings', 'Raiders', odds=odds))
+    games.append(create_match_up('Chiefs', 'Ravens', odds=odds))
+    games.append(create_match_up('Colts', 'Falcons', odds=odds))
+    games.append(create_match_up('Packers', 'Broncos', odds=odds))
+    games.append(create_match_up('Cowboys', 'Dolphins', odds=odds))
+    games.append(create_match_up('Buccaneers', 'Giants', odds=odds))
+    games.append(create_match_up('Cardinals', 'Panthers', odds=odds))
+    games.append(create_match_up('49ers', 'Steelers', odds=odds))
+    games.append(create_match_up('Seahawks', 'Saints', odds=odds))
+    games.append(create_match_up('Chargers', 'Texans', odds=odds))
+    games.append(create_match_up('Browns', 'Rams', odds=odds))
+    games.append(create_match_up('Redskins', 'Bears', odds=odds))
 
     return games
 
 
-def get_pre_week4_schedule():
+def get_week4_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Cowboys', 'Buccaneers', -5))
-    games.append(create_match_up('Redskins', 'Ravens', 6))
-    games.append(create_match_up('Bears', 'Titans', -2.5))
-    games.append(create_match_up('Packers', 'Chiefs', -2.5))
-    games.append(create_match_up('Panthers', 'Steelers', 3.5))
-    games.append(create_match_up('Saints', 'Dolphins', -3.5))
-    games.append(create_match_up('49ers', 'Chargers', -4))
-    games.append(create_match_up('Seahawks', 'Raiders', -2.5))
-    games.append(create_match_up('Bills', 'Vikings', -3))
-    games.append(create_match_up('Patriots', 'Giants', -2.5))
-    games.append(create_match_up('Jets', 'Eagles', -4))
-    games.append(create_match_up('Bengals', 'Colts', -3))
-    games.append(create_match_up('Browns', 'Lions', -4.5))
-    games.append(create_match_up('Texans', 'Rams', -2.5))
-    games.append(create_match_up('Jaguars', 'Falcons', -4))
-    games.append(create_match_up('Broncos', 'Cardinals', -2))
+    games.append(create_match_up('Packers', 'Eagles', odds=odds))
+    games.append(create_match_up('Falcons', 'Titans', odds=odds))
+    games.append(create_match_up('Giants', 'Redskins', odds=odds))
+    games.append(create_match_up('Dolphins', 'Chargers', odds=odds))
+    games.append(create_match_up('Colts', 'Raiders', odds=odds))
+    games.append(create_match_up('Texans', 'Panthers', odds=odds))
+    games.append(create_match_up('Lions', 'Chiefs', odds=odds))
+    games.append(create_match_up('Ravens', 'Browns', odds=odds))
+    games.append(create_match_up('Bills', 'Patriots', odds=odds))
+    games.append(create_match_up('Rams', 'Buccaneers', odds=odds))
+    games.append(create_match_up('Cardinals', 'Seahawks', odds=odds))
+    games.append(create_match_up('Bears', 'Vikings', odds=odds))
+    games.append(create_match_up('Broncos', 'Jaguars', odds=odds))
+    games.append(create_match_up('Saints', 'Cowboys', odds=odds))
+    games.append(create_match_up('Steelers', 'Bengals', odds=odds))
 
     return games
 
 
-def get_week1_schedule():
+def get_week5_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Bears', 'Packers', -3))
-    games.append(create_match_up('Panthers', 'Rams', 3))
-    games.append(create_match_up('Eagles', 'Redskins', -8.5))
-    games.append(create_match_up('Jets', 'Bills', -3))
-    games.append(create_match_up('Vikings', 'Falcons', -4))
-    games.append(create_match_up('Dolphins', 'Ravens', 6.5))
-    games.append(create_match_up('Jaguars', 'Chiefs', 4))
-    games.append(create_match_up('Browns', 'Titans', -5.5))
-    games.append(create_match_up('Chargers', 'Colts', -6.5))
-    games.append(create_match_up('Seahawks', 'Bengals', -9.5))
-    games.append(create_match_up('Buccaneers', '49ers', -1))
-    games.append(create_match_up('Cowboys', 'Giants', -7))
-    games.append(create_match_up('Cardinals', 'Lions', 2.5))
-    games.append(create_match_up('Patriots', 'Steelers', -6.5))
-    games.append(create_match_up('Saints', 'Texans', -7))
-    games.append(create_match_up('Raiders', 'Broncos', 0))
+    games.append(create_match_up('Seahawks', 'Rams', odds=odds))
+    games.append(create_match_up('Panthers', 'Jaguars', odds=odds))
+    games.append(create_match_up('Redskins', 'Patriots', odds=odds))
+    games.append(create_match_up('Titans', 'Bills', odds=odds))
+    games.append(create_match_up('Steelers', 'Ravens', odds=odds))
+    games.append(create_match_up('Bengals', 'Cardinals', odds=odds))
+    games.append(create_match_up('Texans', 'Falcons', odds=odds))
+    games.append(create_match_up('Saints', 'Buccaneers', odds=odds))
+    games.append(create_match_up('Giants', 'Vikings', odds=odds))
+    games.append(create_match_up('Raiders', 'Bears', odds=odds, neutral_location=True))
+    games.append(create_match_up('Eagles', 'Jets', odds=odds))
+    games.append(create_match_up('Chargers', 'Broncos', odds=odds))
+    games.append(create_match_up('Cowboys', 'Packers', odds=odds))
+    games.append(create_match_up('Chiefs', 'Colts', odds=odds))
+    games.append(create_match_up('49ers', 'Browns', odds=odds))
 
     return games
 
 
-def get_week2_schedule():
+def get_week6_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Panthers', 'Buccaneers', 0))
-    games.append(create_match_up('Ravens', 'Cardinals', 0))
-    games.append(create_match_up('Redskins', 'Cowboys', 0))
-    games.append(create_match_up('Titans', 'Colts', 0))
-    games.append(create_match_up('Steelers', 'Seahawks', 0))
-    games.append(create_match_up('Giants', 'Bills', 0))
-    games.append(create_match_up('Bengals', '49ers', 0))
-    games.append(create_match_up('Lions', 'Chargers', 0))
-    games.append(create_match_up('Packers', 'Vikings', 0))
-    games.append(create_match_up('Texans', 'Jaguars', 0))
-    games.append(create_match_up('Dolphins', 'Patriots', 0))
-    games.append(create_match_up('Raiders', 'Chiefs', 0))
-    games.append(create_match_up('Rams', 'Saints', 0))
-    games.append(create_match_up('Broncos', 'Bears', 0))
-    games.append(create_match_up('Falcons', 'Eagles', 0))
-    games.append(create_match_up('Jets', 'Browns', 0))
+    games.append(create_match_up('Patriots', 'Giants', odds=odds))
+    games.append(create_match_up('Buccaneers', 'Panthers', odds=odds, neutral_location=True))
+    games.append(create_match_up('Dolphins', 'Redskins', odds=odds))
+    games.append(create_match_up('Vikings', 'Eagles', odds=odds))
+    games.append(create_match_up('Chiefs', 'Texans', odds=odds))
+    games.append(create_match_up('Jaguars', 'Saints', odds=odds))
+    games.append(create_match_up('Browns', 'Seahawks', odds=odds))
+    games.append(create_match_up('Ravens', 'Bengals', odds=odds))
+    games.append(create_match_up('Rams', '49ers', odds=odds))
+    games.append(create_match_up('Cardinals', 'Falcons', odds=odds))
+    games.append(create_match_up('Jets', 'Cowboys', odds=odds))
+    games.append(create_match_up('Broncos', 'Titans', odds=odds))
+    games.append(create_match_up('Chargers', 'Steelers', odds=odds))
+    games.append(create_match_up('Packers', 'Lions', odds=odds))
 
     return games
 
 
-def get_week3_schedule():
+def get_week7_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Jaguars', 'Titans', 0))
-    games.append(create_match_up('Bills', 'Bengals', 0))
-    games.append(create_match_up('Eagles', 'Lions', 0))
-    games.append(create_match_up('Patriots', 'Jets', 0))
-    games.append(create_match_up('Vikings', 'Raiders', 0))
-    games.append(create_match_up('Chiefs', 'Ravens', 0))
-    games.append(create_match_up('Colts', 'Falcons', 0))
-    games.append(create_match_up('Packers', 'Broncos', 0))
-    games.append(create_match_up('Cowboys', 'Dolphins', 0))
-    games.append(create_match_up('Buccaneers', 'Giants', 0))
-    games.append(create_match_up('Cardinals', 'Panthers', 0))
-    games.append(create_match_up('49ers', 'Steelers', 0))
-    games.append(create_match_up('Seahawks', 'Saints', 0))
-    games.append(create_match_up('Chargers', 'Texans', 0))
-    games.append(create_match_up('Browns', 'Rams', 0))
-    games.append(create_match_up('Redskins', 'Bears', 0))
+    games.append(create_match_up('Broncos', 'Chiefs', odds=odds))
+    games.append(create_match_up('Bills', 'Dolphins', odds=odds))
+    games.append(create_match_up('Bengals', 'Jaguars', odds=odds))
+    games.append(create_match_up('Lions', 'Vikings', odds=odds))
+    games.append(create_match_up('Packers', 'Raiders', odds=odds))
+    games.append(create_match_up('Falcons', 'Rams', odds=odds))
+    games.append(create_match_up('Colts', 'Texans', odds=odds))
+    games.append(create_match_up('Redskins', '49ers', odds=odds))
+    games.append(create_match_up('Giants', 'Cardinals', odds=odds))
+    games.append(create_match_up('Titans', 'Chargers', odds=odds))
+    games.append(create_match_up('Bears', 'Saints', odds=odds))
+    games.append(create_match_up('Seahawks', 'Ravens', odds=odds))
+    games.append(create_match_up('Cowboys', 'Eagles', odds=odds))
+    games.append(create_match_up('Jets', 'Patriots', odds=odds))
 
     return games
 
 
-def get_week4_schedule():
+def get_week8_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Packers', 'Eagles', 0))
-    games.append(create_match_up('Falcons', 'Titans', 0))
-    games.append(create_match_up('Giants', 'Redskins', 0))
-    games.append(create_match_up('Dolphins', 'Chargers', 0))
-    games.append(create_match_up('Colts', 'Raiders', 0))
-    games.append(create_match_up('Texans', 'Panthers', 0))
-    games.append(create_match_up('Lions', 'Chiefs', 0))
-    games.append(create_match_up('Ravens', 'Browns', 0))
-    games.append(create_match_up('Bills', 'Patriots', 0))
-    games.append(create_match_up('Rams', 'Buccaneers', 0))
-    games.append(create_match_up('Cardinals', 'Seahawks', 0))
-    games.append(create_match_up('Bears', 'Vikings', 0))
-    games.append(create_match_up('Broncos', 'Jaguars', 0))
-    games.append(create_match_up('Saints', 'Cowboys', 0))
-    games.append(create_match_up('Steelers', 'Bengals', 0))
+    games.append(create_match_up('Vikings', 'Redskins', odds=odds))
+    games.append(create_match_up('Falcons', 'Seahawks', odds=odds))
+    games.append(create_match_up('Titans', 'Buccaneers', odds=odds))
+    games.append(create_match_up('Saints', 'Cardinals', odds=odds))
+    games.append(create_match_up('Rams', 'Bengals', odds=odds, neutral_location=True))
+    games.append(create_match_up('Jaguars', 'Jets', odds=odds))
+    games.append(create_match_up('Bills', 'Eagles', odds=odds))
+    games.append(create_match_up('Bears', 'Chargers', odds=odds))
+    games.append(create_match_up('Lions', 'Giants', odds=odds))
+    games.append(create_match_up('Texans', 'Raiders', odds=odds))
+    games.append(create_match_up('49ers', 'Panthers', odds=odds))
+    games.append(create_match_up('Patriots', 'Browns', odds=odds))
+    games.append(create_match_up('Colts', 'Broncos', odds=odds))
+    games.append(create_match_up('Chiefs', 'Packers', odds=odds))
+    games.append(create_match_up('Steelers', 'Dolphins', odds=odds))
 
     return games
 
 
-def get_week5_schedule():
+def get_week9_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Seahawks', 'Rams', 0))
-    games.append(create_match_up('Panthers', 'Jaguars', 0))
-    games.append(create_match_up('Redskins', 'Patriots', 0))
-    games.append(create_match_up('Titans', 'Bills', 0))
-    games.append(create_match_up('Steelers', 'Ravens', 0))
-    games.append(create_match_up('Bengals', 'Cardinals', 0))
-    games.append(create_match_up('Texans', 'Falcons', 0))
-    games.append(create_match_up('Saints', 'Buccaneers', 0))
-    games.append(create_match_up('Giants', 'Vikings', 0))
-    games.append(create_match_up('Raiders', 'Bears', 0, True))
-    games.append(create_match_up('Eagles', 'Jets', 0))
-    games.append(create_match_up('Chargers', 'Broncos', 0))
-    games.append(create_match_up('Cowboys', 'Packers', 0))
-    games.append(create_match_up('Chiefs', 'Colts', 0))
-    games.append(create_match_up('49ers', 'Browns', 0))
+    games.append(create_match_up('Cardinals', '49ers', odds=odds))
+    games.append(create_match_up('Jaguars', 'Texans', odds=odds, neutral_location=True))
+    games.append(create_match_up('Eagles', 'Bears', odds=odds))
+    games.append(create_match_up('Steelers', 'Colts', odds=odds))
+    games.append(create_match_up('Dolphins', 'Jets', odds=odds))
+    games.append(create_match_up('Chiefs', 'Vikings', odds=odds))
+    games.append(create_match_up('Panthers', 'Titans', odds=odds))
+    games.append(create_match_up('Bills', 'Redskins', odds=odds))
+    games.append(create_match_up('Seahawks', 'Buccaneers', odds=odds))
+    games.append(create_match_up('Raiders', 'Lions', odds=odds))
+    games.append(create_match_up('Chargers', 'Packers', odds=odds))
+    games.append(create_match_up('Broncos', 'Browns', odds=odds))
+    games.append(create_match_up('Ravens', 'Patriots', odds=odds))
+    games.append(create_match_up('Giants', 'Cowboys', odds=odds))
 
     return games
 
 
-def get_week6_schedule():
+def get_week10_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Patriots', 'Giants', 0))
-    games.append(create_match_up('Buccaneers', 'Panthers', 0, True))
-    games.append(create_match_up('Dolphins', 'Redskins', 0))
-    games.append(create_match_up('Vikings', 'Eagles', 0))
-    games.append(create_match_up('Chiefs', 'Texans', 0))
-    games.append(create_match_up('Jaguars', 'Saints', 0))
-    games.append(create_match_up('Browns', 'Seahawks', 0))
-    games.append(create_match_up('Ravens', 'Bengals', 0))
-    games.append(create_match_up('Rams', '49ers', 0))
-    games.append(create_match_up('Cardinals', 'Falcons', 0))
-    games.append(create_match_up('Jets', 'Cowboys', 0))
-    games.append(create_match_up('Broncos', 'Titans', 0))
-    games.append(create_match_up('Chargers', 'Steelers', 0))
-    games.append(create_match_up('Packers', 'Lions', 0))
+    games.append(create_match_up('Raiders', 'Chargers', odds=odds))
+    games.append(create_match_up('Bengals', 'Ravens', odds=odds))
+    games.append(create_match_up('Browns', 'Bills', odds=odds))
+    games.append(create_match_up('Packers', 'Panthers', odds=odds))
+    games.append(create_match_up('Saints', 'Falcons', odds=odds))
+    games.append(create_match_up('Bears', 'Lions', odds=odds))
+    games.append(create_match_up('Jets', 'Giants', odds=odds, neutral_location=True))
+    games.append(create_match_up('Titans', 'Chiefs', odds=odds))
+    games.append(create_match_up('Buccaneers', 'Cardinals', odds=odds))
+    games.append(create_match_up('Colts', 'Dolphins', odds=odds))
+    games.append(create_match_up('Steelers', 'Rams', odds=odds))
+    games.append(create_match_up('Cowboys', 'Vikings', odds=odds))
+    games.append(create_match_up('49ers', 'Seahawks', odds=odds))
 
     return games
 
 
-def get_week7_schedule():
+def get_week11_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Broncos', 'Chiefs', 0))
-    games.append(create_match_up('Bills', 'Dolphins', 0))
-    games.append(create_match_up('Bengals', 'Jaguars', 0))
-    games.append(create_match_up('Lions', 'Vikings', 0))
-    games.append(create_match_up('Packers', 'Raiders', 0))
-    games.append(create_match_up('Falcons', 'Rams', 0))
-    games.append(create_match_up('Colts', 'Texans', 0))
-    games.append(create_match_up('Redskins', '49ers', 0))
-    games.append(create_match_up('Giants', 'Cardinals', 0))
-    games.append(create_match_up('Titans', 'Chargers', 0))
-    games.append(create_match_up('Bears', 'Saints', 0))
-    games.append(create_match_up('Seahawks', 'Ravens', 0))
-    games.append(create_match_up('Cowboys', 'Eagles', 0))
-    games.append(create_match_up('Jets', 'Patriots', 0))
+    games.append(create_match_up('Browns', 'Steelers', odds=odds))
+    games.append(create_match_up('Panthers', 'Falcons', odds=odds))
+    games.append(create_match_up('Lions', 'Cowboys', odds=odds))
+    games.append(create_match_up('Colts', 'Jaguars', odds=odds))
+    games.append(create_match_up('Dolphins', 'Bills', odds=odds))
+    games.append(create_match_up('Ravens', 'Texans', odds=odds))
+    games.append(create_match_up('Vikings', 'Broncos', odds=odds))
+    games.append(create_match_up('Redskins', 'Jets', odds=odds))
+    games.append(create_match_up('Buccaneers', 'Saints', odds=odds))
+    games.append(create_match_up('49ers', 'Cardinals', odds=odds))
+    games.append(create_match_up('Raiders', 'Bengals', odds=odds))
+    games.append(create_match_up('Eagles', 'Patriots', odds=odds))
+    games.append(create_match_up('Rams', 'Bears', odds=odds))
+    games.append(create_match_up('Chargers', 'Chiefs', odds=odds, neutral_location=True))
 
     return games
 
 
-def get_week8_schedule():
+def get_week12_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Vikings', 'Redskins', 0))
-    games.append(create_match_up('Falcons', 'Seahawks', 0))
-    games.append(create_match_up('Titans', 'Buccaneers', 0))
-    games.append(create_match_up('Saints', 'Cardinals', 0))
-    games.append(create_match_up('Rams', 'Bengals', 0, True))
-    games.append(create_match_up('Jaguars', 'Jets', 0))
-    games.append(create_match_up('Bills', 'Eagles', 0))
-    games.append(create_match_up('Bears', 'Chargers', 0))
-    games.append(create_match_up('Lions', 'Giants', 0))
-    games.append(create_match_up('Texans', 'Raiders', 0))
-    games.append(create_match_up('49ers', 'Panthers', 0))
-    games.append(create_match_up('Patriots', 'Browns', 0))
-    games.append(create_match_up('Colts', 'Broncos', 0))
-    games.append(create_match_up('Chiefs', 'Packers', 0))
-    games.append(create_match_up('Steelers', 'Dolphins', 0))
+    games.append(create_match_up('Texans', 'Colts', odds=odds))
+    games.append(create_match_up('Bills', 'Broncos', odds=odds))
+    games.append(create_match_up('Bears', 'Giants', odds=odds))
+    games.append(create_match_up('Bengals', 'Steelers', odds=odds))
+    games.append(create_match_up('Browns', 'Dolphins', odds=odds))
+    games.append(create_match_up('Falcons', 'Buccaneers', odds=odds))
+    games.append(create_match_up('Saints', 'Panthers', odds=odds))
+    games.append(create_match_up('Redskins', 'Lions', odds=odds))
+    games.append(create_match_up('Jets', 'Raiders', odds=odds))
+    games.append(create_match_up('Titans', 'Jaguars', odds=odds))
+    games.append(create_match_up('Patriots', 'Cowboys', odds=odds))
+    games.append(create_match_up('49ers', 'Packers', odds=odds))
+    games.append(create_match_up('Eagles', 'Seahawks', odds=odds))
+    games.append(create_match_up('Rams', 'Ravens', odds=odds))
 
     return games
 
 
-def get_week9_schedule():
+def get_week13_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Cardinals', '49ers', 0))
-    games.append(create_match_up('Jaguars', 'Texans', 0, True))
-    games.append(create_match_up('Eagles', 'Bears', 0))
-    games.append(create_match_up('Steelers', 'Colts', 0))
-    games.append(create_match_up('Dolphins', 'Jets', 0))
-    games.append(create_match_up('Chiefs', 'Vikings', 0))
-    games.append(create_match_up('Panthers', 'Titans', 0))
-    games.append(create_match_up('Bills', 'Redskins', 0))
-    games.append(create_match_up('Seahawks', 'Buccaneers', 0))
-    games.append(create_match_up('Raiders', 'Lions', 0))
-    games.append(create_match_up('Chargers', 'Packers', 0))
-    games.append(create_match_up('Broncos', 'Browns', 0))
-    games.append(create_match_up('Ravens', 'Patriots', 0))
-    games.append(create_match_up('Giants', 'Cowboys', 0))
+    games.append(create_match_up('Lions', 'Bears', odds=odds))
+    games.append(create_match_up('Cowboys', 'Bills', odds=odds))
+    games.append(create_match_up('Falcons', 'Saints', odds=odds))
+    games.append(create_match_up('Colts', 'Titans', odds=odds))
+    games.append(create_match_up('Bengals', 'Jets', odds=odds))
+    games.append(create_match_up('Panthers', 'Redskins', odds=odds))
+    games.append(create_match_up('Ravens', '49ers', odds=odds))
+    games.append(create_match_up('Jaguars', 'Buccaneers', odds=odds))
+    games.append(create_match_up('Giants', 'Packers', odds=odds))
+    games.append(create_match_up('Dolphins', 'Eagles', odds=odds))
+    games.append(create_match_up('Chiefs', 'Raiders', odds=odds))
+    games.append(create_match_up('Cardinals', 'Rams', odds=odds))
+    games.append(create_match_up('Steelers', 'Browns', odds=odds))
+    games.append(create_match_up('Broncos', 'Chargers', odds=odds))
+    games.append(create_match_up('Texans', 'Patriots', odds=odds))
+    games.append(create_match_up('Seahawks', 'Vikings', odds=odds))
 
     return games
 
 
-def get_week10_schedule():
+def get_week14_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Raiders', 'Chargers', 0))
-    games.append(create_match_up('Bengals', 'Ravens', 0))
-    games.append(create_match_up('Browns', 'Bills', 0))
-    games.append(create_match_up('Packers', 'Panthers', 0))
-    games.append(create_match_up('Saints', 'Falcons', 0))
-    games.append(create_match_up('Bears', 'Lions', 0))
-    games.append(create_match_up('Jets', 'Giants', 0, True))
-    games.append(create_match_up('Titans', 'Chiefs', 0))
-    games.append(create_match_up('Buccaneers', 'Cardinals', 0))
-    games.append(create_match_up('Colts', 'Dolphins', 0))
-    games.append(create_match_up('Steelers', 'Rams', 0))
-    games.append(create_match_up('Cowboys', 'Vikings', 0))
-    games.append(create_match_up('49ers', 'Seahawks', 0))
+    games.append(create_match_up('Bears', 'Cowboys', odds=odds))
+    games.append(create_match_up('Falcons', 'Panthers', odds=odds))
+    games.append(create_match_up('Buccaneers', 'Colts', odds=odds))
+    games.append(create_match_up('Jets', 'Dolphins', odds=odds))
+    games.append(create_match_up('Saints', '49ers', odds=odds))
+    games.append(create_match_up('Vikings', 'Lions', odds=odds))
+    games.append(create_match_up('Texans', 'Broncos', odds=odds))
+    games.append(create_match_up('Bills', 'Ravens', odds=odds))
+    games.append(create_match_up('Browns', 'Bengals', odds=odds))
+    games.append(create_match_up('Packers', 'Redskins', odds=odds))
+    games.append(create_match_up('Jaguars', 'Chargers', odds=odds))
+    games.append(create_match_up('Cardinals', 'Steelers', odds=odds))
+    games.append(create_match_up('Raiders', 'Titans', odds=odds))
+    games.append(create_match_up('Patriots', 'Chiefs', odds=odds))
+    games.append(create_match_up('Rams', 'Seahawks', odds=odds))
+    games.append(create_match_up('Eagles', 'Giants', odds=odds))
 
     return games
 
 
-def get_week11_schedule():
+def get_week15_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Browns', 'Steelers', 0))
-    games.append(create_match_up('Panthers', 'Falcons', 0))
-    games.append(create_match_up('Lions', 'Cowboys', 0))
-    games.append(create_match_up('Colts', 'Jaguars', 0))
-    games.append(create_match_up('Dolphins', 'Bills', 0))
-    games.append(create_match_up('Ravens', 'Texans', 0))
-    games.append(create_match_up('Vikings', 'Broncos', 0))
-    games.append(create_match_up('Redskins', 'Jets', 0))
-    games.append(create_match_up('Buccaneers', 'Saints', 0))
-    games.append(create_match_up('49ers', 'Cardinals', 0))
-    games.append(create_match_up('Raiders', 'Bengals', 0))
-    games.append(create_match_up('Eagles', 'Patriots', 0))
-    games.append(create_match_up('Rams', 'Bears', 0))
-    games.append(create_match_up('Chargers', 'Chiefs', 0, True))
+    games.append(create_match_up('Ravens', 'Jets', odds=odds))
+    games.append(create_match_up('Panthers', 'Seahawks', odds=odds))
+    games.append(create_match_up('Redskins', 'Eagles', odds=odds))
+    games.append(create_match_up('Titans', 'Texans', odds=odds))
+    games.append(create_match_up('Steelers', 'Bills', odds=odds))
+    games.append(create_match_up('Giants', 'Dolphins', odds=odds))
+    games.append(create_match_up('Chiefs', 'Broncos', odds=odds))
+    games.append(create_match_up('Bengals', 'Patriots', odds=odds))
+    games.append(create_match_up('Lions', 'Buccaneers', odds=odds))
+    games.append(create_match_up('Packers', 'Bears', odds=odds))
+    games.append(create_match_up('Raiders', 'Jaguars', odds=odds))
+    games.append(create_match_up('Cardinals', 'Browns', odds=odds))
+    games.append(create_match_up('49ers', 'Falcons', odds=odds))
+    games.append(create_match_up('Cowboys', 'Rams', odds=odds))
+    games.append(create_match_up('Chargers', 'Vikings', odds=odds))
+    games.append(create_match_up('Saints', 'Colts', odds=odds))
 
     return games
 
 
-def get_week12_schedule():
+def get_week16_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Texans', 'Colts', 0))
-    games.append(create_match_up('Bills', 'Broncos', 0))
-    games.append(create_match_up('Bears', 'Giants', 0))
-    games.append(create_match_up('Bengals', 'Steelers', 0))
-    games.append(create_match_up('Browns', 'Dolphins', 0))
-    games.append(create_match_up('Falcons', 'Buccaneers', 0))
-    games.append(create_match_up('Saints', 'Panthers', 0))
-    games.append(create_match_up('Redskins', 'Lions', 0))
-    games.append(create_match_up('Jets', 'Raiders', 0))
-    games.append(create_match_up('Titans', 'Jaguars', 0))
-    games.append(create_match_up('Patriots', 'Cowboys', 0))
-    games.append(create_match_up('49ers', 'Packers', 0))
-    games.append(create_match_up('Eagles', 'Seahawks', 0))
-    games.append(create_match_up('Rams', 'Ravens', 0))
+    games.append(create_match_up('Broncos', 'Lions', odds=odds))
+    games.append(create_match_up('Chargers', 'Raiders', odds=odds))
+    games.append(create_match_up('Redskins', 'Giants', odds=odds))
+    games.append(create_match_up('Titans', 'Saints', odds=odds))
+    games.append(create_match_up('Jets', 'Steelers', odds=odds))
+    games.append(create_match_up('Patriots', 'Bills', odds=odds))
+    games.append(create_match_up('49ers', 'Rams', odds=odds))
+    games.append(create_match_up('Buccaneers', 'Texans', odds=odds))
+    games.append(create_match_up('Falcons', 'Jaguars', odds=odds))
+    games.append(create_match_up('Browns', 'Ravens', odds=odds))
+    games.append(create_match_up('Colts', 'Panthers', odds=odds))
+    games.append(create_match_up('Dolphins', 'Bengals', odds=odds))
+    games.append(create_match_up('Seahawks', 'Cardinals', odds=odds))
+    games.append(create_match_up('Eagles', 'Cowboys', odds=odds))
+    games.append(create_match_up('Bears', 'Chiefs', odds=odds))
+    games.append(create_match_up('Vikings', 'Packers', odds=odds))
 
     return games
 
 
-def get_week13_schedule():
+def get_week17_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Lions', 'Bears', 0))
-    games.append(create_match_up('Cowboys', 'Bills', 0))
-    games.append(create_match_up('Falcons', 'Saints', 0))
-    games.append(create_match_up('Colts', 'Titans', 0))
-    games.append(create_match_up('Bengals', 'Jets', 0))
-    games.append(create_match_up('Panthers', 'Redskins', 0))
-    games.append(create_match_up('Ravens', '49ers', 0))
-    games.append(create_match_up('Jaguars', 'Buccaneers', 0))
-    games.append(create_match_up('Giants', 'Packers', 0))
-    games.append(create_match_up('Dolphins', 'Eagles', 0))
-    games.append(create_match_up('Chiefs', 'Raiders', 0))
-    games.append(create_match_up('Cardinals', 'Rams', 0))
-    games.append(create_match_up('Steelers', 'Browns', 0))
-    games.append(create_match_up('Broncos', 'Chargers', 0))
-    games.append(create_match_up('Texans', 'Patriots', 0))
-    games.append(create_match_up('Seahawks', 'Vikings', 0))
+    games.append(create_match_up('Ravens', 'Steelers', odds=odds))
+    games.append(create_match_up('Bills', 'Jets', odds=odds))
+    games.append(create_match_up('Buccaneers', 'Falcons', odds=odds))
+    games.append(create_match_up('Giants', 'Eagles', odds=odds))
+    games.append(create_match_up('Panthers', 'Saints', odds=odds))
+    games.append(create_match_up('Bengals', 'Browns', odds=odds))
+    games.append(create_match_up('Cowboys', 'Redskins', odds=odds))
+    games.append(create_match_up('Lions', 'Packers', odds=odds))
+    games.append(create_match_up('Texans', 'Titans', odds=odds))
+    games.append(create_match_up('Jaguars', 'Colts', odds=odds))
+    games.append(create_match_up('Chiefs', 'Chargers', odds=odds))
+    games.append(create_match_up('Vikings', 'Bears', odds=odds))
+    games.append(create_match_up('Patriots', 'Dolphins', odds=odds))
+    games.append(create_match_up('Broncos', 'Raiders', odds=odds))
+    games.append(create_match_up('Rams', 'Cardinals', odds=odds))
+    games.append(create_match_up('Seahawks', '49ers', odds=odds))
+    return games
+
+
+def get_wildcard_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
+    games = list()
+    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
+    # games.append(create_match_up('Cowboys', 'Buccaneers', odds=odds))
+    # games.append(create_match_up('Redskins', 'Ravens', odds=odds))
+    # games.append(create_match_up('Bears', 'Titans', odds=odds))
+    # games.append(create_match_up('Packers', 'Chiefs', odds=odds))
 
     return games
 
 
-def get_week14_schedule():
+def get_divisional_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Bears', 'Cowboys', 0))
-    games.append(create_match_up('Falcons', 'Panthers', 0))
-    games.append(create_match_up('Buccaneers', 'Colts', 0))
-    games.append(create_match_up('Jets', 'Dolphins', 0))
-    games.append(create_match_up('Saints', '49ers', 0))
-    games.append(create_match_up('Vikings', 'Lions', 0))
-    games.append(create_match_up('Texans', 'Broncos', 0))
-    games.append(create_match_up('Bills', 'Ravens', 0))
-    games.append(create_match_up('Browns', 'Bengals', 0))
-    games.append(create_match_up('Packers', 'Redskins', 0))
-    games.append(create_match_up('Jaguars', 'Chargers', 0))
-    games.append(create_match_up('Cardinals', 'Steelers', 0))
-    games.append(create_match_up('Raiders', 'Titans', 0))
-    games.append(create_match_up('Patriots', 'Chiefs', 0))
-    games.append(create_match_up('Rams', 'Seahawks', 0))
-    games.append(create_match_up('Eagles', 'Giants', 0))
+    # games.append(create_match_up('Cowboys', 'Buccaneers', odds=odds))
+    # games.append(create_match_up('Redskins', 'Ravens', odds=odds))
+    # games.append(create_match_up('Bears', 'Titans', odds=odds))
+    # games.append(create_match_up('Packers', 'Chiefs', odds=odds))
 
     return games
 
 
-def get_week15_schedule():
+def get_conference_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Ravens', 'Jets', 0))
-    games.append(create_match_up('Panthers', 'Seahawks', 0))
-    games.append(create_match_up('Redskins', 'Eagles', 0))
-    games.append(create_match_up('Titans', 'Texans', 0))
-    games.append(create_match_up('Steelers', 'Bills', 0))
-    games.append(create_match_up('Giants', 'Dolphins', 0))
-    games.append(create_match_up('Chiefs', 'Broncos', 0))
-    games.append(create_match_up('Bengals', 'Patriots', 0))
-    games.append(create_match_up('Lions', 'Buccaneers', 0))
-    games.append(create_match_up('Packers', 'Bears', 0))
-    games.append(create_match_up('Raiders', 'Jaguars', 0))
-    games.append(create_match_up('Cardinals', 'Browns', 0))
-    games.append(create_match_up('49ers', 'Falcons', 0))
-    games.append(create_match_up('Cowboys', 'Rams', 0))
-    games.append(create_match_up('Chargers', 'Vikings', 0))
-    games.append(create_match_up('Saints', 'Colts', 0))
+    # games.append(create_match_up('Bears', 'Titans', odds=odds))
+    # games.append(create_match_up('Packers', 'Chiefs', odds=odds))
 
     return games
 
 
-def get_week16_schedule():
+def get_superbowl_schedule(week_end_date, get_odds=True):
+    if get_odds:
+        odds = Odds.get_odds()
+        odds = list(filter(lambda game: game[1] <= week_end_date, odds))
+    else:
+        odds = None
+
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Broncos', 'Lions', 0))
-    games.append(create_match_up('Chargers', 'Raiders', 0))
-    games.append(create_match_up('Redskins', 'Giants', 0))
-    games.append(create_match_up('Titans', 'Saints', 0))
-    games.append(create_match_up('Jets', 'Steelers', 0))
-    games.append(create_match_up('Patriots', 'Bills', 0))
-    games.append(create_match_up('49ers', 'Rams', 0))
-    games.append(create_match_up('Buccaneers', 'Texans', 0))
-    games.append(create_match_up('Falcons', 'Jaguars', 0))
-    games.append(create_match_up('Browns', 'Ravens', 0))
-    games.append(create_match_up('Colts', 'Panthers', 0))
-    games.append(create_match_up('Dolphins', 'Bengals', 0))
-    games.append(create_match_up('Seahawks', 'Cardinals', 0))
-    games.append(create_match_up('Eagles', 'Cowboys', 0))
-    games.append(create_match_up('Bears', 'Chiefs', 0))
-    games.append(create_match_up('Vikings', 'Packers', 0))
-
-    return games
-
-
-def get_week17_schedule():
-    games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Ravens', 'Steelers', 0))
-    games.append(create_match_up('Bills', 'Jets', 0))
-    games.append(create_match_up('Buccaneers', 'Falcons', 0))
-    games.append(create_match_up('Giants', 'Eagles', 0))
-    games.append(create_match_up('Panthers', 'Saints', 0))
-    games.append(create_match_up('Bengals', 'Browns', 0))
-    games.append(create_match_up('Cowboys', 'Redskins', 0))
-    games.append(create_match_up('Lions', 'Packers', 0))
-    games.append(create_match_up('Texans', 'Titans', 0))
-    games.append(create_match_up('Jaguars', 'Colts', 0))
-    games.append(create_match_up('Chiefs', 'Chargers', 0))
-    games.append(create_match_up('Vikings', 'Bears', 0))
-    games.append(create_match_up('Patriots', 'Dolphins', 0))
-    games.append(create_match_up('Broncos', 'Raiders', 0))
-    games.append(create_match_up('Rams', 'Cardinals', 0))
-    games.append(create_match_up('Seahawks', '49ers', 0))
-    return games
-
-
-def get_wildcard_schedule():
-    games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    # games.append(create_match_up('Cowboys', 'Buccaneers', 0))
-    # games.append(create_match_up('Redskins', 'Ravens', 0))
-    # games.append(create_match_up('Bears', 'Titans', 0))
-    # games.append(create_match_up('Packers', 'Chiefs', 0))
-
-    return games
-
-
-def get_divisional_schedule():
-    games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    # games.append(create_match_up('Cowboys', 'Buccaneers', 0))
-    # games.append(create_match_up('Redskins', 'Ravens', 0))
-    # games.append(create_match_up('Bears', 'Titans', 0))
-    # games.append(create_match_up('Packers', 'Chiefs', 0))
-
-    return games
-
-
-def get_conference_schedule():
-    games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    # games.append(create_match_up('Bears', 'Titans', 0))
-    # games.append(create_match_up('Packers', 'Chiefs', 0))
-
-    return games
-
-
-def get_superbowl_schedule():
-    games = list()
-    # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    # games.append(create_match_up('Bears', 'Titans', 0, True))
+    # games.append(create_match_up('Bears', 'Titans', odds=odds, neutral_location=True))
 
     return games
 
