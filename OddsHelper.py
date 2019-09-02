@@ -33,7 +33,7 @@ def get_odds(week_end_date):
     for game in data:
         # Get the teams
         teams = game.get('teams')
-        favored_team = teams[0]
+        first_team = teams[0]
         home_team = game.get('home_team')
 
         # Get the time of the game
@@ -63,7 +63,7 @@ def get_odds(week_end_date):
             points = spreads.get('points')
 
             # Get the spread from the home team perspective
-            if favored_team == home_team:
+            if first_team == home_team:
                 home_spread = points[0]
             else:
                 home_spread = points[1]
