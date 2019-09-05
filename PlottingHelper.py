@@ -337,6 +337,9 @@ def plot_team_elo_over_season(title, team_names, show_plot=True):
     # Set the style
     sns.set(style="ticks")
 
+    # Get all the teams in the league
+    teams = Season.nfl_teams
+
     # For each team in the list of teams
     all_teams_games = list()
     for team_name in team_names:
@@ -364,7 +367,6 @@ def plot_team_elo_over_season(title, team_names, show_plot=True):
         elos = pd.Series(team_games.lookup(team_games.index, home.map({True: 'home_elo', False: 'away_elo'})))
 
         # Get the team from its name
-        teams = Season.nfl_teams
         team = Season.get_team(teams, team_name)
 
         # Get and add the teams current elo
@@ -404,6 +406,15 @@ def plot_team_elo_over_season(title, team_names, show_plot=True):
 
     # Remove the x margins
     plt.margins(x=0)
+
+    # Get the min an max y values
+    min_elo = min([team[4] for team in teams])
+    max_elo = max([team[4] for team in teams])
+    plt.ylim(min_elo - 15, max_elo + 15)
+
+    # Save the figure
+    save_name = title.replace(' ', '_')
+    plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\Trends\\' + save_name + '.png', dpi=300)
 
     # Display the plot if desired
     if show_plot:
