@@ -175,7 +175,7 @@ def week_1(teams, week_end_date):
 
     # Results
     # teams = set_game_outcome(teams,
-    #                          spread=0,
+    #                          spread=-3,
     #                          home_name='Bears',
     #                          home_score=0,
     #                          home_touchdowns=0,

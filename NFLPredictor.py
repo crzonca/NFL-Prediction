@@ -403,12 +403,13 @@ def update_teams(teams, home_name, home_score, home_touchdowns, home_net_pass_ya
     return teams
 
 
-def get_week_probabilities(teams, games):
+def get_week_probabilities(teams, games, verbose=False):
     """
     Gets all the game outcome probabilities for each game in a week.
 
     :param teams: A list of all the teams in the league
     :param games: A list of all the games in the week
+    :param verbose: If verbose output is desired
     :return: The list of probabilities for each game
     """
 
@@ -416,7 +417,8 @@ def get_week_probabilities(teams, games):
     probabilities = list()
     for game in games:
         # Predict the probability and add it to a list
-        probabilities.append(predict_game_outcome(teams, game[0][0], game[0][1], game[1], neutral_location=game[2]))
+        probabilities.append(predict_game_outcome(teams, game[0][0], game[0][1], game[1], neutral_location=game[2],
+                                                  verbose=verbose))
 
     # Sort the list of probabilities of each game from most likely to least likely
     probabilities.sort(key=lambda outcome: outcome[0], reverse=True)
