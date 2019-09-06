@@ -104,9 +104,9 @@ def create_match_up(home_name, away_name, home_spread=0.0, odds=None, neutral_lo
         odds = list(filter(lambda g: any(home_name in name for name in g[0]) and
                                      any(away_name in name for name in g[0]), odds))
         if len(odds) < 1:
-            raise Exception(away_name + ' at ' + home_name + ' not found')
+            print(away_name + ' at ' + home_name + ' not found')
         elif len(odds) > 1:
-            raise Exception('Multiple instances of ' + away_name + ' at ' + home_name + ' found')
+            print('Multiple instances of ' + away_name + ' at ' + home_name + ' found')
         else:
             game = odds[0]
             home_spread = game[2]
