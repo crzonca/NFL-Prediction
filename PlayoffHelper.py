@@ -1379,7 +1379,7 @@ def get_schedule_difficulty(teams, team_name, remaining=False):
     # Filter the total schedule down to just the games the team is in
     teams_schedule = list(filter(lambda g: g[0] == team_name or g[1] == team_name, schedule))
     if len(teams_schedule) == 0:
-        return 0
+        return 0, 0
 
     # For each game in the teams schedule
     opponent_elos = list()
