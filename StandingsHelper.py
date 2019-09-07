@@ -314,14 +314,15 @@ def print_monte_carlo_simulation(teams):
 
 def print_schedule_difficulty(teams, remaining=False):
     """
-    Displays the schedule difficulty information for all teams in the league.
+    Displays the schedule difficulty information for all teams in the league. Displays schedule difficulty as a
+    percentile compared to other difficulties.  Percentile is based off a normal distribution centered at 1500 with a
+    deviation derived by bootstrapping other schedule difficulties using typical team strengths.
 
     :param teams: The list of all the teams in the league
     :param remaining: If the schedule difficulty should only be based off of each teams remaining games
     :return: Void
     """
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
-    import statistics
     from scipy.stats import norm
 
     # Get each teams schedule difficulty
@@ -333,11 +334,8 @@ def print_schedule_difficulty(teams, remaining=False):
     # Sort the teams
     sorted_by_difficulty = sorted(team_tuples, key=lambda tup: tup[1], reverse=True)
 
-    # Calculate the mean and deviation for all the schedule difficulties
-    all_difficulties = [tup[1] for tup in team_tuples]
-    mean_difficulty = statistics.mean(all_difficulties)
-    difficulty_deviation = statistics.stdev(all_difficulties)
-    difficulty_norm = norm(mean_difficulty, difficulty_deviation)
+    # Create a normal distribution for schedule difficulties
+    difficulty_norm = norm(1500, 13.615)
 
     # Standardize each team's difficulty
     schedule_difficulties = list()
