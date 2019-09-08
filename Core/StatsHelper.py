@@ -356,6 +356,12 @@ def home_average_passer_rating(row):
     ints_per_attempt = (row['home_average_interceptions_thrown'] / row['home_average_pass_attempts']
                         if row['home_average_pass_attempts'] > 0 else 0)
     d = 2.375 - (ints_per_attempt * 25)
+
+    a = 2.375 if a > 2.375 else 0 if a < 0 else a
+    b = 2.375 if b > 2.375 else 0 if b < 0 else b
+    c = 2.375 if c > 2.375 else 0 if c < 0 else c
+    d = 2.375 if d > 2.375 else 0 if d < 0 else d
+
     return ((a + b + c + d) / 6) * 100
 
 
@@ -437,6 +443,12 @@ def away_average_passer_rating(row):
     ints_per_attempt = (row['away_average_interceptions_thrown'] / row['away_average_pass_attempts']
                         if row['away_average_pass_attempts'] > 0 else 0)
     d = 2.375 - (ints_per_attempt * 25)
+
+    a = 2.375 if a > 2.375 else 0 if a < 0 else a
+    b = 2.375 if b > 2.375 else 0 if b < 0 else b
+    c = 2.375 if c > 2.375 else 0 if c < 0 else c
+    d = 2.375 if d > 2.375 else 0 if d < 0 else d
+
     return ((a + b + c + d) / 6) * 100
 
 

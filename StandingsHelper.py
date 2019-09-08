@@ -131,6 +131,28 @@ def print_full_standings(teams, eliminated_teams, include_title=True):
                          'Touchdowns', 'Passer Rating', 'Total Yards'])
     table.float_format = '0.3'
 
+    def calculate_passer_rating(yards, completions, attempts, tds, ints):
+        average_completion_pct = completions / attempts if attempts > 0 else 0
+        a = (average_completion_pct - .3) * 5
+
+        average_yards_per_pass_attempt = yards / attempts if attempts > 0 else 0
+        b = (average_yards_per_pass_attempt - 3) * .25
+
+        average_passing_touchdowns_per_attempt = tds / attempts if attempts > 0 else 0
+        c = average_passing_touchdowns_per_attempt * 20
+
+        average_ints_per_attempt = ints / attempts if attempts > 0 else 0
+        d = 2.375 - (average_ints_per_attempt * 25)
+
+        a = 2.375 if a > 2.375 else 0 if a < 0 else a
+        b = 2.375 if b > 2.375 else 0 if b < 0 else b
+        c = 2.375 if c > 2.375 else 0 if c < 0 else c
+        d = 2.375 if d > 2.375 else 0 if d < 0 else d
+
+        rating = ((a + b + c + d) / 6) * 100
+
+        return rating
+
     # Add the info to the rows for each team that isnt eliminated
     for rank, team in enumerate(teams):
         row = list()
@@ -145,15 +167,7 @@ def print_full_standings(teams, eliminated_teams, include_title=True):
         team_info.append(round(team[6], 3))
         team_info.append(round(team[5] - team[6], 3))
         team_info.append(round(team[7], 3))
-        average_completion_pct = team[9] / team[10] if team[10] > 0 else 0
-        a = (average_completion_pct - .3) * 5
-        average_yards_per_pass_attempt = team[8] / team[10] if team[10] > 0 else 0
-        b = (average_yards_per_pass_attempt - 3) * .25
-        average_passing_touchdowns_per_attempt = team[11] / team[10] if team[10] > 0 else 0
-        c = average_passing_touchdowns_per_attempt * 20
-        average_ints_per_attempt = team[12] / team[10] if team[10] > 0 else 0
-        d = 2.375 - (average_ints_per_attempt * 25)
-        passer_rating = ((a + b + c + d) / 6) * 100
+        passer_rating = calculate_passer_rating(team[8], team[9], team[10], team[11], team[12])
         team_info.append(round(passer_rating, 3))
         team_info.append(round(team[13], 3))
         row = row + team_info
