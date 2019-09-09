@@ -945,7 +945,7 @@ def combine_frames(frames):
        always has home field advantage. These games however are of minimal impact due to their rarity.  Almost 96% of 
        the home victories are during the regular season (between teams that are on average of equal strength)."""
 
-    combined.to_csv(game_data_dir + '19952018.csv', index=False)
+    combined.to_csv(game_data_dir + '20022018.csv', index=False)
 
     return combined
 
@@ -994,6 +994,6 @@ def remove_outliers(df):
 
 
 def get_all_games_no_outliers():
-    all_games = pd.read_csv(game_data_dir + '19952018.csv')
+    all_games = pd.read_csv(game_data_dir + '20022018.csv')
     all_games = remove_outliers(all_games)
     return all_games

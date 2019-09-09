@@ -45,11 +45,11 @@ def plot_corr(df=None):
 
     if df is None:
         # Get the data frame for all seasons
-        df = pd.read_csv(game_data_dir + '19952018.csv')
+        df = pd.read_csv(game_data_dir + '20022018.csv')
 
     # Print a description of all the games
     games_description = df.describe()
-    games_description.to_csv(other_dir + '19952018Description.csv')
+    games_description.to_csv(other_dir + '20022018Description.csv')
     print(games_description.to_string())
     print()
 
@@ -117,11 +117,11 @@ def plot_top_features_corr(df=None):
 
     if df is None:
         # Get the data frame for all seasons
-        df = pd.read_csv(game_data_dir + '19952018.csv')
+        df = pd.read_csv(game_data_dir + '20022018.csv')
 
     # Print a description of all the games
     games_description = df.describe()
-    games_description.to_csv(other_dir + '19952018Description.csv')
+    games_description.to_csv(other_dir + '20022018Description.csv')
     print(games_description.to_string())
     print()
 
@@ -187,7 +187,7 @@ def pca_feature_selection(df=None):
 
     if df is None:
         # Get the data frame for all seasons
-        df = pd.read_csv(game_data_dir + '19952018.csv')
+        df = pd.read_csv(game_data_dir + '20022018.csv')
 
     # Drop all columns that arent the label, the spread or a team difference
     columns_to_keep = list()

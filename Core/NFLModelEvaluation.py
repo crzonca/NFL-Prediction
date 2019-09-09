@@ -415,8 +415,8 @@ def analyze_results():
 
     :return: The sorted list of hyper parameters, sorted based on accuracy and loss
     """
-    with open(other_dir + '7 Features\\Scores\\random_forest_brier_score_loss.txt') as brier:
-        with open(other_dir + '7 Features\\Scores\\random_forest_f1.txt') as f1:
+    with open(other_dir + '7 Features\\Scores\\svc_brier_score_loss.txt') as brier:
+        with open(other_dir + '7 Features\\Scores\\svc_f1.txt') as f1:
             brier_lines = brier.readlines()[4:]
             f1_lines = f1.readlines()[4:]
 

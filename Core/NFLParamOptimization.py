@@ -36,7 +36,7 @@ def evaluate_model_parameters(contributing_features, df=None):
 
     if df is None:
         # Get the data frame for all seasons
-        df = pd.read_csv(game_data_dir + '19952018.csv')
+        df = pd.read_csv(game_data_dir + '20022018.csv')
 
     # Filter the columns to keep
     columns_to_keep = list()
@@ -506,7 +506,7 @@ def get_voting_classifier(contributing_features, df=None):
 
     if df is None:
         # Get the data frame for all seasons
-        df = pd.read_csv(game_data_dir + '19952018.csv')
+        df = pd.read_csv(game_data_dir + '20022018.csv')
 
     # Drop all columns except for the most important features, and the predicted label
     columns_to_keep = list()
