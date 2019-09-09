@@ -21,7 +21,7 @@ def season():
     print('*' * 120, '\n')
 
     # Plot the regular seasons initial ratings
-    Plotter.plot_elo_function(nfl_teams, '', 'Initial Ratings')
+    Plotter.plot_elo_function(nfl_teams, '', 'Initial Ratings', show_plot=False)
 
     # Regular Season
     print('Regular Season')
@@ -243,10 +243,10 @@ def week_1(teams, week_end_date):
                              'Cardinals', 27, 2, 275, 29, 54, 2, 1, 387,
                              'Lions', 27, 3, 361, 27, 45, 3, 0, 477)
 
-    # teams = set_game_outcome(teams, 0,
-    #                          'Patriots', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Steelers', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
+    teams = set_game_outcome(teams, -5.5,
+                             'Patriots', 33, 3, 366, 25, 37, 3, 0, 465,
+                             'Steelers', 3, 0, 276, 27, 47, 0, 1, 308)
+
     # teams = set_game_outcome(teams, 0,
     #                          'Saints', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Texans', 0, 0, 0, 0, 0, 0, 0, 0)
