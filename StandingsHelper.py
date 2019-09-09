@@ -108,6 +108,29 @@ def print_standings(teams, eliminated_teams, include_title=True):
     print()
 
 
+def calculate_passer_rating(yards, completions, attempts, tds, ints):
+    average_completion_pct = completions / attempts if attempts > 0 else 0
+    a = (average_completion_pct - .3) * 5
+
+    average_yards_per_pass_attempt = yards / attempts if attempts > 0 else 0
+    b = (average_yards_per_pass_attempt - 3) * .25
+
+    average_passing_touchdowns_per_attempt = tds / attempts if attempts > 0 else 0
+    c = average_passing_touchdowns_per_attempt * 20
+
+    average_ints_per_attempt = ints / attempts if attempts > 0 else 0
+    d = 2.375 - (average_ints_per_attempt * 25)
+
+    a = 2.375 if a > 2.375 else 0 if a < 0 else a
+    b = 2.375 if b > 2.375 else 0 if b < 0 else b
+    c = 2.375 if c > 2.375 else 0 if c < 0 else c
+    d = 2.375 if d > 2.375 else 0 if d < 0 else d
+
+    rating = ((a + b + c + d) / 6) * 100
+
+    return rating
+
+
 def print_full_standings(teams, eliminated_teams, include_title=True):
     """
     Displays the full team standings information for a set of teams.
@@ -130,28 +153,6 @@ def print_full_standings(teams, eliminated_teams, include_title=True):
     table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo', 'Points', 'Points Against', 'Point Diff.',
                          'Touchdowns', 'Passer Rating', 'Total Yards'])
     table.float_format = '0.3'
-
-    def calculate_passer_rating(yards, completions, attempts, tds, ints):
-        average_completion_pct = completions / attempts if attempts > 0 else 0
-        a = (average_completion_pct - .3) * 5
-
-        average_yards_per_pass_attempt = yards / attempts if attempts > 0 else 0
-        b = (average_yards_per_pass_attempt - 3) * .25
-
-        average_passing_touchdowns_per_attempt = tds / attempts if attempts > 0 else 0
-        c = average_passing_touchdowns_per_attempt * 20
-
-        average_ints_per_attempt = ints / attempts if attempts > 0 else 0
-        d = 2.375 - (average_ints_per_attempt * 25)
-
-        a = 2.375 if a > 2.375 else 0 if a < 0 else a
-        b = 2.375 if b > 2.375 else 0 if b < 0 else b
-        c = 2.375 if c > 2.375 else 0 if c < 0 else c
-        d = 2.375 if d > 2.375 else 0 if d < 0 else d
-
-        rating = ((a + b + c + d) / 6) * 100
-
-        return rating
 
     # Add the info to the rows for each team that isnt eliminated
     for rank, team in enumerate(teams):
@@ -178,6 +179,31 @@ def print_full_standings(teams, eliminated_teams, include_title=True):
         print('Standings')
     print(table)
     print()
+
+
+def get_full_standings_csv(teams):
+    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    import pandas as pd
+
+    # Sort the teams by playoff tiebreakers
+    teams = Playoffs.sort_by_tiebreakers(teams)
+
+    standings = pd.DataFrame()
+    standings['Rank'] = range(1, 33)
+    standings['Name'] = [team[0] for team in teams]
+    standings['Wins'] = [team[1] for team in teams]
+    standings['Losses'] = [team[2] for team in teams]
+    standings['Ties'] = [team[3] for team in teams]
+    standings['Elo'] = [team[4] for team in teams]
+    standings['Points'] = [team[5] for team in teams]
+    standings['Points Against'] = [team[6] for team in teams]
+    standings['Point Differential'] = [team[5] - team[6] for team in teams]
+    standings['Touchdowns'] = [team[7] for team in teams]
+    standings['Passer Rating'] = [calculate_passer_rating(team[8], team[9], team[10], team[11], team[12])
+                                  for team in teams]
+    standings['Total Yards'] = [team[13] for team in teams]
+
+    standings.to_csv('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\2019Standings.csv', index=False)
 
 
 def print_division_rankings(teams):

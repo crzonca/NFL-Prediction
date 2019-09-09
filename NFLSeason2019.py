@@ -46,17 +46,21 @@ def season():
     eliminated_teams.extend([])
 
     # Regular Season remaining schedule difficulty
-    Standings.print_schedule_difficulty(nfl_teams, remaining=True)
+    if maya.now() < maya.when('31 December 2019', timezone='US/Central'):
+        Standings.print_schedule_difficulty(nfl_teams, remaining=True)
 
     # Playoff Info
     print('Current Playoff Picture:')
     afc_playoff_teams, nfc_playoff_teams = Playoffs.get_playoff_picture(nfl_teams, verbose=True)
+
     print('-' * 15 + 'AFC' + '-' * 15)
     Playoffs.create_playoff_bracket(afc_playoff_teams)
     print()
+
     print('-' * 15 + 'NFC' + '-' * 15)
     Playoffs.create_playoff_bracket(nfc_playoff_teams)
     print()
+
     print('*' * 120, '\n')
 
     # Playoffs
@@ -69,12 +73,18 @@ def season():
     eliminated_teams.extend([])
     nfl_teams = handle_week(nfl_teams, 'Superbowl', superbowl, eliminated_teams, '28 January 2020')
 
+    # Save the standings csv
+    Standings.get_full_standings_csv(nfl_teams)
+
     # Final Outcome
     Playoffs.monte_carlo(nfl_teams)
     league = Playoffs.get_league_structure()
     for conf_name, conf in league.items():
         for div_name, division in conf.items():
             Plotter.plot_team_elo_over_season(div_name, division)
+
+    if maya.now() > maya.when('28 January 2020', timezone='US/Central'):
+        Playoffs.completed_games.to_csv('..\\Projects\\nfl\\NFL_Prediction\\Game Data\\2019.csv', index=False)
 
 
 def set_up_teams():
