@@ -182,6 +182,13 @@ def print_full_standings(teams, eliminated_teams, include_title=True):
 
 
 def get_full_standings_csv(teams):
+    """
+    Gets the league's full standings and writes it to a csv file.
+
+    :param teams: The list of teams to include in the standings
+    :return: Void
+    """
+
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
     import pandas as pd
 
@@ -352,7 +359,7 @@ def print_monte_carlo_simulation(teams):
     print()
 
 
-def print_schedule_difficulty(teams, remaining=False):
+def print_schedule_difficulty(teams, remaining=False, completed=False):
     """
     Displays the schedule difficulty information for all teams in the league. Displays schedule difficulty as a
     percentile compared to other difficulties.  Percentile is based off a normal distribution centered at 1500 with a
@@ -360,6 +367,7 @@ def print_schedule_difficulty(teams, remaining=False):
 
     :param teams: The list of all the teams in the league
     :param remaining: If the schedule difficulty should only be based off of each teams remaining games
+    :param completed: If the schedule difficulty of only completed games should be used
     :return: Void
     """
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
@@ -368,7 +376,10 @@ def print_schedule_difficulty(teams, remaining=False):
     # Get each teams schedule difficulty
     team_tuples = list()
     for team in teams:
-        schedule_difficulty, deviation = Playoffs.get_schedule_difficulty(teams, team[0], remaining)
+        if completed:
+            schedule_difficulty, deviation = Playoffs.get_completed_schedule_difficulty(team[0])
+        else:
+            schedule_difficulty, deviation = Playoffs.get_schedule_difficulty(teams, team[0], remaining)
         team_tuples.append((team, schedule_difficulty, deviation))
 
     # Sort the teams
@@ -409,10 +420,13 @@ def print_schedule_difficulty(teams, remaining=False):
         table.add_row(row)
 
     # Print the table
-    if remaining:
-        print('Remaining Schedule Difficulties')
+    if completed:
+        print('Completed Schedule Difficulties')
     else:
-        print('Schedule Difficulties')
+        if remaining:
+            print('Remaining Schedule Difficulties')
+        else:
+            print('Schedule Difficulties')
     print(table)
     print()
 

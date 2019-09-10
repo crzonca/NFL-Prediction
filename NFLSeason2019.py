@@ -46,8 +46,9 @@ def season():
     eliminated_teams.extend([])
 
     # Regular Season remaining schedule difficulty
-    if maya.now() < maya.when('31 December 2019', timezone='US/Central'):
-        Standings.print_schedule_difficulty(nfl_teams, remaining=True)
+    Standings.print_schedule_difficulty(nfl_teams,
+                                        remaining=True,
+                                        completed=maya.now() >= maya.when('31 December 2019', timezone='US/Central'))
 
     # Playoff Info
     print('Current Playoff Picture:')

@@ -1404,6 +1404,32 @@ def get_schedule_difficulty(teams, team_name, remaining=False):
     return statistics.mean(opponent_elos), deviation
 
 
+def get_completed_schedule_difficulty(team_name):
+    """
+    Gets the average difficulty of all the opponents a team has faced.
+
+    :param team_name: The name of the team to get the difficulty for
+    :return: The average elo of each opposing team that the team has faced.
+    """
+
+    team_completed_games = completed_games.loc[(completed_games['home_team'] == team_name) |
+                                               (completed_games['away_team'] == team_name)]
+
+    if len(team_completed_games) == 0:
+        return 0, 0
+
+    home = pd.Series(team_completed_games['home_team'] == team_name)
+    opponent_elos = pd.Series(team_completed_games.lookup(team_completed_games.index, home.map({True: 'away_elo',
+                                                                                                False: 'home_elo'})))
+
+    if len(opponent_elos) > 1:
+        deviation = statistics.pstdev(opponent_elos)
+    else:
+        deviation = 0
+
+    return statistics.mean(opponent_elos), deviation
+
+
 def create_playoff_bracket(teams):
     """
     Creates formatted playoff brackets for the start of the playoffs.  Creates one bracket per conference and places
