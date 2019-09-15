@@ -226,6 +226,8 @@ def predict_game_outcome(teams, home_name, away_name, home_spread, neutral_locat
 
         print('*' * 120, '\n')
 
+        home_spread = round(home_spread * 2) / 2
+
         if home_spread > 0:
             print('>> The ' + away_name + ' are favored to beat the ' + home_name + ' by ' +
                   str(home_spread) + ' points')
