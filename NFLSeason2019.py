@@ -347,10 +347,10 @@ def week_2(teams, week_end_date):
                              'Broncos', 14, 1, 282, 35, 50, 1, 1, 372,
                              'Bears', 16, 1, 120, 16, 27, 0, 0, 273)
 
-    # teams = set_game_outcome(teams, 0,
-    #                          'Falcons', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Eagles', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
+    teams = set_game_outcome(teams, 1,
+                             'Falcons', 24, 3, 310, 27, 43, 3, 3, 367,
+                             'Eagles', 20, 2, 237, 28, 48, 1, 2, 286)
+
     # teams = set_game_outcome(teams, 0,
     #                          'Jets', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Browns', 0, 0, 0, 0, 0, 0, 0, 0)
