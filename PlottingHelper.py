@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from adjustText import adjust_text
 
 
 def plot_elo_function(teams,
@@ -192,19 +193,26 @@ def plot_elo_function(teams,
     ax.annotate(s='S+', xy=((s_plus + s_plus + elo_dev / 3) / 2 - 3, -2))
 
     # Label each teams marker with the team name
+    team_name_labels = list()
     for i, percent in enumerate(percents):
         if i % 2 == 0:
             offset = (20, -5)
         else:
             chars = min(len(team_names[i]), 8)
             chars = max(chars, 6)
-            offset = (chars * -10, 0)
-        ax.annotate(s=team_names[i],
-                    xy=(actual_elos[i], percent),
-                    xytext=offset,
-                    textcoords='offset points',
-                    arrowprops=dict(arrowstyle='-',
-                                    color='black'))
+            offset = (chars * -10, 2)
+        team_name_labels.append(ax.annotate(s=team_names[i],
+                                            xy=(actual_elos[i], percent),
+                                            xytext=offset,
+                                            textcoords='offset points',
+                                            arrowprops=dict(arrowstyle='-',
+                                                            color='black')))
+
+    # Adjust name labels so they don't overlap
+    adjust_text(texts=team_name_labels,
+                autoalign='xy',
+                force_text=.01,
+                only_move={'text': 'xy'})
 
     # Add titles
     if plot_name:

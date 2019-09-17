@@ -21,7 +21,8 @@ def season():
     print('*' * 120, '\n')
 
     # Plot the regular seasons initial ratings
-    Plotter.plot_elo_function(nfl_teams, '', 'Initial Ratings', show_plot=False)
+    if maya.now() < maya.when('3 September 2019', timezone='US/Central'):
+        Plotter.plot_elo_function(nfl_teams, '', 'Initial Ratings')
 
     # Regular Season
     print('Regular Season')
