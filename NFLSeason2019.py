@@ -352,9 +352,9 @@ def week_2(teams, week_end_date):
                              'Falcons', 24, 3, 310, 27, 43, 3, 3, 367,
                              'Eagles', 20, 2, 237, 28, 48, 1, 2, 286)
 
-    # teams = set_game_outcome(teams, 0,
-    #                          'Jets', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Browns', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, 6.5,
+                             'Jets', 3, 0, 169, 23, 31, 0, 0, 262,
+                             'Browns', 23, 2, 305, 19, 35, 1, 1, 375)
 
     return teams
 
