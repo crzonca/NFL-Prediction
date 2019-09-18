@@ -2,6 +2,7 @@ import statistics
 
 from prettytable import PrettyTable
 
+import Projects.nfl.NFL_Prediction.NFLGraph as Graph
 import Projects.nfl.NFL_Prediction.NFLPredictor as Predictor
 
 
@@ -464,6 +465,37 @@ def print_league_details(teams, eliminated_teams, full_standings=True, divisiona
     # If model rankings are desired, print the model rankings
     if model_rankings:
         print_model_rankings(teams, eliminated_teams)
+
+
+def print_team_pagerank(teams):
+    ranks = Graph.page_rank_teams()
+
+    # Create the table header
+    table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo', 'Score'])
+    table.float_format = '0.2'
+
+    # Add the info to the rows
+    for rank, info in enumerate(ranks):
+        name = info[0]
+        score = round(32 * info[1], 3)
+        row = list()
+        row.append(rank + 1)
+        team = get_team(teams, name)
+        team_info = list()
+        team_info.append(team[0])
+        team_info.append(team[1])
+        team_info.append(team[2])
+        team_info.append(team[3])
+        team_info.append(team[4])
+        team_info.append(score)
+        row = row + team_info
+
+        table.add_row(row)
+
+    # Print the table
+    print('PageRanked Teams')
+    print(table)
+    print()
 
 
 def get_tier(teams, team):

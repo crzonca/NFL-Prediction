@@ -2,6 +2,7 @@ import os
 import statistics
 
 import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -429,3 +430,64 @@ def plot_team_elo_over_season(title, team_names, show_plot=True):
         plt.show()
     else:
         plt.close()
+
+
+def show_graph(nfl):
+    """
+    Displays a plot of the game graph.
+
+    :return: Void
+    """
+
+    # Set the layout of the graph to a circular layout
+    pos = nx.circular_layout(nfl)
+
+    # Get all of the elos of all the nodes
+    elos = list(nx.get_node_attributes(nfl, 'Elo').values())
+
+    def scale_vals(vals, to_update, new_min, new_max):
+        """
+        Scales a value to a new one based on a minimum and maximum and the other values in the list.
+
+        :param vals: All the values in the list
+        :param to_update: The value to scale
+        :param new_min: The minimum value to be scaled to
+        :param new_max: The maximum value to be scaled to
+        :return: Void
+        """
+
+        max_val = max(vals)
+        min_val = min(vals)
+        val_range = max_val - min_val
+        new_range = new_max - new_min
+        intercept = new_max - ((new_range * max_val) / val_range)
+
+        return ((new_range * to_update) / val_range) + intercept
+
+    # Scale each elo to update node size
+    elos = [scale_vals(elos, elo, 14, 32) ** 2 for elo in elos]
+
+    # Draw the nodes in the graph
+    nx.draw_networkx_nodes(nfl,
+                           pos,
+                           node_color='r',
+                           node_size=elos)
+
+    # Draw the edges in the graph
+    nx.draw_networkx_edges(nfl,
+                           pos,
+                           width=2,
+                           edge_color='b')
+
+    # Draw the total margin of victory of the teams
+    edge_weights = nx.get_edge_attributes(nfl, 'weight')
+    nx.draw_networkx_edge_labels(nfl, pos, edge_labels=edge_weights)
+
+    # Draw the team names
+    nx.draw_networkx_labels(nfl,
+                            pos,
+                            font_size=10,
+                            font_family='sans-serif')
+
+    # Show the graph
+    plt.show()

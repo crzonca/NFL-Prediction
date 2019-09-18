@@ -4,6 +4,7 @@ import Projects.nfl.NFL_Prediction.NFLPredictor as Predictor
 import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
 import Projects.nfl.NFL_Prediction.PlottingHelper as Plotter
 import Projects.nfl.NFL_Prediction.StandingsHelper as Standings
+import Projects.nfl.NFL_Prediction.NFLGraph as Graph
 
 nfl_teams = list()
 
@@ -12,6 +13,7 @@ def season():
     # Setup
     global nfl_teams
     nfl_teams = set_up_teams()
+    Graph.create_games_graph()
     eliminated_teams = list()
 
     # Preseason Info
@@ -77,6 +79,12 @@ def season():
 
     # Save the standings csv
     Standings.get_full_standings_csv(nfl_teams)
+
+    # Get the pagerank of the teams
+    Standings.print_team_pagerank(nfl_teams)
+
+    # Show the parity clock
+    Graph.parity_clock()
 
     # Final Outcome
     Playoffs.monte_carlo(nfl_teams)
@@ -1824,5 +1832,7 @@ def set_game_outcome(teams, spread,
                                    home_pass_attempts, home_pass_tds, home_interceptions_thrown, home_total_yards,
                                    away_name, away_score, away_touchdowns, away_net_pass_yards, away_pass_completions,
                                    away_pass_attempts, away_pass_tds, away_interceptions_thrown, away_total_yards)
+
+    Graph.set_game_outcome(teams, home_name, home_score, away_name, away_score)
 
     return teams
