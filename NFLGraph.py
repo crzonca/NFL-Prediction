@@ -1,8 +1,6 @@
 import networkx as nx
 
-import Projects.nfl.NFL_Prediction.PlottingHelper as Plotter
-
-nfl = nx.DiGraph()
+nfl = nx.MultiDiGraph()
 
 
 def create_games_graph():
@@ -180,13 +178,9 @@ def set_game_outcome(teams, home_name, home_score, away_name, away_score):
 
     # Add or update the edges based on the game outcome
     if home_score > away_score:
-        home_won_before = nfl.has_edge(away_name, home_name)
-        home_margin = nfl.get_edge_data(away_name, home_name).get('weight') if home_won_before else 0
-        nfl.add_edge(away_name, home_name, weight=(home_margin + home_score - away_score))
+        nfl.add_edge(away_name, home_name, weight=(home_score - away_score))
     elif away_score > home_score:
-        away_won_before = nfl.has_edge(home_name, away_name)
-        away_margin = nfl.get_edge_data(home_name, away_name).get('weight') if away_won_before else 0
-        nfl.add_edge(home_name, away_name, weight=(away_margin + away_score - home_score))
+        nfl.add_edge(home_name, away_name, weight=(away_score - home_score))
 
 
 def page_rank_teams():
@@ -198,7 +192,7 @@ def page_rank_teams():
 
     global nfl
 
-    ranks = nx.pagerank(nfl)
+    ranks = nx.pagerank_numpy(nfl)
     return sorted(ranks.items(), key=lambda kv: kv[1], reverse=True)
 
 
