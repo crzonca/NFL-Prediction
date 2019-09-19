@@ -472,7 +472,7 @@ def print_team_pagerank(teams):
 
     # Create the table header
     table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo', 'Score'])
-    table.float_format = '0.2'
+    table.float_format = '0.3'
 
     # Add the info to the rows
     for rank, info in enumerate(ranks):
