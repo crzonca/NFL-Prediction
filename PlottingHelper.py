@@ -393,6 +393,7 @@ def plot_team_elo_over_season(title, team_names, show_plot=True):
 
         # Get the elo history for the team
         elos = teams_elos[team_name]
+        elos = elos.dropna()
 
         # Add 2 more weeks of the most recent elo for formatting
         while len(elos) < max_len + 2:
