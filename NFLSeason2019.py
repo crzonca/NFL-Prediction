@@ -447,13 +447,13 @@ def week_3(teams, week_end_date):
                              'Chargers', 20, 2, 293, 31, 46, 2, 0, 366,
                              'Texans', 27, 4, 337, 25, 34, 3, 0, 376)
 
-    # teams = set_game_outcome(teams, 0,
-    #                          'Browns', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Rams', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, 0,
-    #                          'Redskins', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Bears', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, 4,
+                             'Browns', 13, 1, 175, 18, 36, 1, 1, 270,
+                             'Rams', 20, 2, 255, 24, 38, 2, 2, 345)
+
+    teams = set_game_outcome(teams, 5,
+                             'Redskins', 15, 2, 287, 30, 43, 2, 3, 356,
+                             'Bears', 31, 3, 208, 25, 31, 3, 1, 298)
 
     return teams
 
