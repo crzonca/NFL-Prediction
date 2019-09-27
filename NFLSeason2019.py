@@ -463,27 +463,27 @@ def week_4(teams, week_end_date):
         Predictor.get_week_probabilities(teams, Playoffs.get_week4_schedule(week_end_date))
 
     # Results
-    # teams = set_game_outcome(teams,
-    #                          spread=0,
-    #                          home_name='Packers',
-    #                          home_score=0,
-    #                          home_touchdowns=0,
-    #                          home_net_pass_yards=0,
-    #                          home_pass_completions=0,
-    #                          home_pass_attempts=0,
-    #                          home_pass_tds=0,
-    #                          home_interceptions_thrown=0,
-    #                          home_total_yards=0,
-    #                          away_name='Eagles',
-    #                          away_score=0,
-    #                          away_touchdowns=0,
-    #                          away_net_pass_yards=0,
-    #                          away_pass_completions=0,
-    #                          away_pass_attempts=0,
-    #                          away_pass_tds=0,
-    #                          away_interceptions_thrown=0,
-    #                          away_total_yards=0)
-    #
+    teams = set_game_outcome(teams,
+                             spread=-3.5,
+                             home_name='Packers',
+                             home_score=27,
+                             home_touchdowns=3,
+                             home_net_pass_yards=414,
+                             home_pass_completions=34,
+                             home_pass_attempts=53,
+                             home_pass_tds=2,
+                             home_interceptions_thrown=1,
+                             home_total_yards=491,
+                             away_name='Eagles',
+                             away_score=34,
+                             away_touchdowns=5,
+                             away_net_pass_yards=160,
+                             away_pass_completions=16,
+                             away_pass_attempts=27,
+                             away_pass_tds=3,
+                             away_interceptions_thrown=0,
+                             away_total_yards=336)
+
     # teams = set_game_outcome(teams, 0,
     #                          'Falcons', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Titans', 0, 0, 0, 0, 0, 0, 0, 0)

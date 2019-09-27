@@ -238,3 +238,4 @@ def parity_clock():
             cycle = list(reversed(cycle))
             cycle.append(cycle[0])
             print(' -> '.join(cycle))
+        print()
