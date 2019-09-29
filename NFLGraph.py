@@ -235,7 +235,20 @@ def parity_clock():
 
         # Print each cycle
         for cycle in longest_cycles:
+            # Reverse the cycle direction
             cycle = list(reversed(cycle))
+
+            # Add the starting team to the end to complete the loop
             cycle.append(cycle[0])
+
+            # Format new lines if the length of the cycle is too long to print in one line
+            if len(cycle) > 8:
+                cycle[8] = '\n' + cycle[8]
+            if len(cycle) > 16:
+                cycle[16] = '\n' + cycle[16]
+            if len(cycle) > 24:
+                cycle[24] = '\n' + cycle[24]
+
+            # Print the cycle
             print(' -> '.join(cycle))
-        print()
+            print()

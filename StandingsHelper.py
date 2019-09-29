@@ -477,7 +477,7 @@ def print_team_pagerank(teams):
     # Add the info to the rows
     for rank, info in enumerate(ranks):
         name = info[0]
-        score = round(32 * info[1], 3)
+        score = round(100 * info[1], 3)
         row = list()
         row.append(rank + 1)
         team = get_team(teams, name)
