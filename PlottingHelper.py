@@ -363,7 +363,7 @@ def plot_team_elo_over_season(title, team_names, show_plot=True):
     max_len = max([len(team_games) for team_games in all_teams_games])
 
     # Fill out data rows
-    teams_elos = pd.DataFrame(columns=team_names)
+    teams_elos = pd.DataFrame(index=range(max_len + 1), columns=team_names)
 
     # For each team in the list of teams
     for team_name in team_names:
