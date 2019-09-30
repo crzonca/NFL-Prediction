@@ -532,10 +532,10 @@ def week_4(teams, week_end_date):
                              'Broncos', 24, 3, 303, 22, 38, 3, 1, 371,
                              'Jaguars', 26, 2, 186, 19, 33, 2, 0, 455)
 
-    # teams = set_game_outcome(teams, 0,
-    #                          'Saints', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Cowboys', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
+    teams = set_game_outcome(teams, 2.5,
+                             'Saints', 12, 0, 149, 23, 30, 0, 1, 266,
+                             'Cowboys', 10, 1, 212, 22, 33, 0, 1, 257)
+
     # teams = set_game_outcome(teams, 0,
     #                          'Steelers', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Bengals', 0, 0, 0, 0, 0, 0, 0, 0)
