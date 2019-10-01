@@ -536,9 +536,9 @@ def week_4(teams, week_end_date):
                              'Saints', 12, 0, 149, 23, 30, 0, 1, 266,
                              'Cowboys', 10, 1, 212, 22, 33, 0, 1, 257)
 
-    # teams = set_game_outcome(teams, 0,
-    #                          'Steelers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Bengals', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, -3.5,
+                             'Steelers', 27, 3, 260, 27, 31, 2, 0, 326,
+                             'Bengals', 3, 0, 102, 21, 37, 0, 2, 175)
 
     return teams
 
