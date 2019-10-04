@@ -548,27 +548,27 @@ def week_5(teams, week_end_date):
         Predictor.get_week_probabilities(teams, Playoffs.get_week5_schedule(week_end_date))
 
     # Results
-    # teams = set_game_outcome(teams,
-    #                          spread=0,
-    #                          home_name='Seahawks',
-    #                          home_score=0,
-    #                          home_touchdowns=0,
-    #                          home_net_pass_yards=0,
-    #                          home_pass_completions=0,
-    #                          home_pass_attempts=0,
-    #                          home_pass_tds=0,
-    #                          home_interceptions_thrown=0,
-    #                          home_total_yards=0,
-    #                          away_name='Rams',
-    #                          away_score=0,
-    #                          away_touchdowns=0,
-    #                          away_net_pass_yards=0,
-    #                          away_pass_completions=0,
-    #                          away_pass_attempts=0,
-    #                          away_pass_tds=0,
-    #                          away_interceptions_thrown=0,
-    #                          away_total_yards=0)
-    #
+    teams = set_game_outcome(teams,
+                             spread=-1.5,
+                             home_name='Seahawks',
+                             home_score=30,
+                             home_touchdowns=4,
+                             home_net_pass_yards=262,
+                             home_pass_completions=17,
+                             home_pass_attempts=23,
+                             home_pass_tds=4,
+                             home_interceptions_thrown=0,
+                             home_total_yards=429,
+                             away_name='Rams',
+                             away_score=29,
+                             away_touchdowns=3,
+                             away_net_pass_yards=395,
+                             away_pass_completions=29,
+                             away_pass_attempts=49,
+                             away_pass_tds=1,
+                             away_interceptions_thrown=1,
+                             away_total_yards=477)
+
     # teams = set_game_outcome(teams, 0,
     #                          'Panthers', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Jaguars', 0, 0, 0, 0, 0, 0, 0, 0)
