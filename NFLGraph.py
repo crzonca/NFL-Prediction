@@ -22,48 +22,48 @@ def create_all_nfl_teams():
     :return: A list of team representations
     """
 
-    all_teams = list()
-    all_teams.append(create_team_node('Bengals', 'AFC', 'North', elo=1459.57))
-    all_teams.append(create_team_node('Browns', 'AFC', 'North', elo=1514.419))
-    all_teams.append(create_team_node('Ravens', 'AFC', 'North', elo=1534.302))
-    all_teams.append(create_team_node('Steelers', 'AFC', 'North', elo=1542.941))
+    teams = list()
+    teams.append(create_team_node('Bengals', 'AFC', 'North', elo=1459.57, colors=['#FB4F14', '#000000']))
+    teams.append(create_team_node('Browns', 'AFC', 'North', elo=1514.419, colors=['#311D00', '#FF3C00']))
+    teams.append(create_team_node('Ravens', 'AFC', 'North', elo=1534.302, colors=['#241773', '#9E7C0C', '#000000']))
+    teams.append(create_team_node('Steelers', 'AFC', 'North', elo=1542.941, colors=['#FFB612', '#101820']))
 
-    all_teams.append(create_team_node('Bills', 'AFC', 'East', elo=1462.998))
-    all_teams.append(create_team_node('Dolphins', 'AFC', 'East', elo=1380.449))
-    all_teams.append(create_team_node('Jets', 'AFC', 'East', elo=1421.038))
-    all_teams.append(create_team_node('Patriots', 'AFC', 'East', elo=1593.129))
+    teams.append(create_team_node('Bills', 'AFC', 'East', elo=1462.998, colors=['#00338D', '#C60C30']))
+    teams.append(create_team_node('Dolphins', 'AFC', 'East', elo=1380.449, colors=['#008E97', '#FC4C02', '#005778']))
+    teams.append(create_team_node('Jets', 'AFC', 'East', elo=1421.038, colors=['#125740', '#000000']))
+    teams.append(create_team_node('Patriots', 'AFC', 'East', elo=1593.129, colors=['#002244', '#C60C30', '#B0B7BC']))
 
-    all_teams.append(create_team_node('Colts', 'AFC', 'South', elo=1470.814))
-    all_teams.append(create_team_node('Jaguars', 'AFC', 'South', elo=1471.362))
-    all_teams.append(create_team_node('Texans', 'AFC', 'South', elo=1528.406))
-    all_teams.append(create_team_node('Titans', 'AFC', 'South', elo=1489.737))
+    teams.append(create_team_node('Colts', 'AFC', 'South', elo=1470.814, colors=['#002C5F', '#A2AAAD']))
+    teams.append(create_team_node('Jaguars', 'AFC', 'South', elo=1471.362, colors=['#D7A22A', '#006778', '#101820']))
+    teams.append(create_team_node('Texans', 'AFC', 'South', elo=1528.406, colors=['#03202F', '#A71930']))
+    teams.append(create_team_node('Titans', 'AFC', 'South', elo=1489.737, colors=['#0C2340', '#418FDE', '#C8102E']))
 
-    all_teams.append(create_team_node('Broncos', 'AFC', 'West', elo=1506.329))
-    all_teams.append(create_team_node('Chargers', 'AFC', 'West', elo=1570.778))
-    all_teams.append(create_team_node('Chiefs', 'AFC', 'West', elo=1577.908))
-    all_teams.append(create_team_node('Raiders', 'AFC', 'West', elo=1410.342))
+    teams.append(create_team_node('Broncos', 'AFC', 'West', elo=1506.329, colors=['#FB4F14', '#002244']))
+    teams.append(create_team_node('Chargers', 'AFC', 'West', elo=1570.778, colors=['#FFC20E', '#002A5E', '#0080C6']))
+    teams.append(create_team_node('Chiefs', 'AFC', 'West', elo=1577.908, colors=['#E31837', '#FFB81C']))
+    teams.append(create_team_node('Raiders', 'AFC', 'West', elo=1410.342, colors=['#A5ACAF', '#000000']))
 
-    all_teams.append(create_team_node('Bears', 'NFC', 'North', elo=1557.476))
-    all_teams.append(create_team_node('Lions', 'NFC', 'North', elo=1459.433))
-    all_teams.append(create_team_node('Packers', 'NFC', 'North', elo=1532.109))
-    all_teams.append(create_team_node('Vikings', 'NFC', 'North', elo=1531.423))
+    teams.append(create_team_node('Bears', 'NFC', 'North', elo=1557.476, colors=['#0B162A', '#C83803']))
+    teams.append(create_team_node('Lions', 'NFC', 'North', elo=1459.433, colors=['#0076B6', '#B0B7BC']))
+    teams.append(create_team_node('Packers', 'NFC', 'North', elo=1532.109, colors=['#203731', '#FFB612']))
+    teams.append(create_team_node('Vikings', 'NFC', 'North', elo=1531.423, colors=['#4F2683', '#FFC62F']))
 
-    all_teams.append(create_team_node('Cowboys', 'NFC', 'East', elo=1528.68))
-    all_teams.append(create_team_node('Eagles', 'NFC', 'East', elo=1545.958))
-    all_teams.append(create_team_node('Giants', 'NFC', 'East', elo=1460.393))
-    all_teams.append(create_team_node('Redskins', 'NFC', 'East', elo=1430.362))
+    teams.append(create_team_node('Cowboys', 'NFC', 'East', elo=1528.68, colors=['#041E42', '#869397']))
+    teams.append(create_team_node('Eagles', 'NFC', 'East', elo=1545.958, colors=['#004C54', '#A5ACAF']))
+    teams.append(create_team_node('Giants', 'NFC', 'East', elo=1460.393, colors=['#0B2265', '#A71930', '#A5ACAF']))
+    teams.append(create_team_node('Redskins', 'NFC', 'East', elo=1430.362, colors=['#773141', '#FFB612']))
 
-    all_teams.append(create_team_node('Buccaneers', 'NFC', 'South', elo=1474.242))
-    all_teams.append(create_team_node('Falcons', 'NFC', 'South', elo=1474.105))
-    all_teams.append(create_team_node('Panthers', 'NFC', 'South', elo=1509.894))
-    all_teams.append(create_team_node('Saints', 'NFC', 'South', elo=1587.095))
+    teams.append(create_team_node('Buccaneers', 'NFC', 'South', elo=1474.242, colors=['#D50A0A', '#0A0A08', '#FF7900']))
+    teams.append(create_team_node('Falcons', 'NFC', 'South', elo=1474.105, colors=['#A71930', '#000000', '#A5ACAF']))
+    teams.append(create_team_node('Panthers', 'NFC', 'South', elo=1509.894, colors=['#0085CA', '#101820', '#BFC0BF']))
+    teams.append(create_team_node('Saints', 'NFC', 'South', elo=1587.095, colors=['#D3BC8D', '#101820']))
 
-    all_teams.append(create_team_node('49ers', 'NFC', 'West', elo=1469.443))
-    all_teams.append(create_team_node('Cardinals', 'NFC', 'West', elo=1397.315))
-    all_teams.append(create_team_node('Rams', 'NFC', 'West', elo=1571.6))
-    all_teams.append(create_team_node('Seahawks', 'NFC', 'West', elo=1535.948))
+    teams.append(create_team_node('49ers', 'NFC', 'West', elo=1469.443, colors=['#AA0000', '#B3995D']))
+    teams.append(create_team_node('Cardinals', 'NFC', 'West', elo=1397.315, colors=['#97233F', '#000000', '#FFB612']))
+    teams.append(create_team_node('Rams', 'NFC', 'West', elo=1571.6, colors=['#002244', '#866D4B']))
+    teams.append(create_team_node('Seahawks', 'NFC', 'West', elo=1535.948, colors=['#002244', '#69BE28', '#A5ACAF']))
 
-    return all_teams
+    return teams
 
 
 def create_team_node(name,
@@ -81,7 +81,8 @@ def create_team_node(name,
                      pass_attempts=0.0,
                      pass_touchdowns=0.0,
                      interceptions_thrown=0.0,
-                     total_yards=0.0):
+                     total_yards=0.0,
+                     colors=None):
     """
     Creates an individual dict containing the team information.
 
@@ -101,6 +102,7 @@ def create_team_node(name,
     :param pass_touchdowns: The average number of passing touchdowns of the team
     :param interceptions_thrown: The average number of interceptions thrown by the team
     :param total_yards: The average number of total yards of the team
+    :param colors: Array of the hex values of the team's colors
     :return: A tuple with the team name and a dict for the team info
     """
 
@@ -121,6 +123,9 @@ def create_team_node(name,
     team_dict['Passing Touchdowns'] = pass_touchdowns
     team_dict['Interceptions Thrown'] = interceptions_thrown
     team_dict['Total Yards'] = total_yards
+    team_dict['Primary Color'] = colors[0] if colors else '#000000'
+    team_dict['Secondary Color'] = colors[1] if len(colors) > 1 else '#000000'
+    team_dict['Tertiary Color'] = colors[2] if len(colors) > 2 else '#000000'
 
     return name, team_dict
 

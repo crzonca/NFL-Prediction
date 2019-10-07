@@ -437,58 +437,69 @@ def show_graph(nfl):
     """
     Displays a plot of the game graph.
 
+    :param nfl: The NFL graph
     :return: Void
     """
 
-    # Set the layout of the graph to a circular layout
-    pos = nx.circular_layout(nfl)
+    import statistics
+    import warnings
+    warnings.filterwarnings("ignore")
 
-    # Get all of the elos of all the nodes
-    elos = list(nx.get_node_attributes(nfl, 'Elo').values())
+    sns.set(style="ticks")
 
-    def scale_vals(vals, to_update, new_min, new_max):
-        """
-        Scales a value to a new one based on a minimum and maximum and the other values in the list.
+    # Add the inverse of the weight as an edge at
+    weights = nx.get_edge_attributes(nfl, 'weight')
+    inverse_weights = dict()
+    for edge in weights.items():
+        inverse_weight = 1 / edge[1]
+        inverse_weights[edge[0]] = inverse_weight
+    nx.set_edge_attributes(nfl, inverse_weights, 'Inverse Weight')
 
-        :param vals: All the values in the list
-        :param to_update: The value to scale
-        :param new_min: The minimum value to be scaled to
-        :param new_max: The maximum value to be scaled to
-        :return: Void
-        """
+    # Calculate the average inverse weight
+    average_inverse_weight = statistics.mean(list(inverse_weights.values()))
 
-        max_val = max(vals)
-        min_val = min(vals)
-        val_range = max_val - min_val
-        new_range = new_max - new_min
-        intercept = new_max - ((new_range * max_val) / val_range)
+    # Format and title the graph
+    fig, ax = plt.subplots(figsize=(20, 10))
+    ax.set_title('League Graph')
+    ax.set_facecolor('#FAFAFA')
 
-        return ((new_range * to_update) / val_range) + intercept
+    # Set the layout of the graph to a force directed layout
+    pos = nx.spring_layout(nfl,
+                           k=1 / average_inverse_weight,
+                           iterations=1000,
+                           weight='Inverse Weight',
+                           scale=3.0)
 
-    # Scale each elo to update node size
-    elos = [scale_vals(elos, elo, 14, 32) ** 2 for elo in elos]
+    # Get the Pagerank of each node
+    ranks = nx.pagerank_numpy(nfl)
+    nx.set_node_attributes(nfl, ranks, 'Pagerank')
 
     # Draw the nodes in the graph
     nx.draw_networkx_nodes(nfl,
                            pos,
-                           node_color='r',
-                           node_size=elos)
+                           node_color=list(nx.get_node_attributes(nfl, 'Primary Color').values()),
+                           node_size=[10000 * rank for rank in nx.get_node_attributes(nfl, 'Pagerank').values()])
 
     # Draw the edges in the graph
     nx.draw_networkx_edges(nfl,
                            pos,
-                           width=2,
-                           edge_color='b')
-
-    # Draw the total margin of victory of the teams
-    edge_weights = nx.get_edge_attributes(nfl, 'weight')
-    nx.draw_networkx_edge_labels(nfl, pos, edge_labels=edge_weights)
+                           width=1,
+                           alpha=0.3,
+                           edge_color='black',
+                           arrowsize=20)
 
     # Draw the team names
-    nx.draw_networkx_labels(nfl,
-                            pos,
-                            font_size=10,
-                            font_family='sans-serif')
+    nodes = nx.get_node_attributes(nfl, 'Secondary Color')
+    for node_name, secondary_color in nodes.items():
+        nx.draw_networkx_labels(nfl,
+                                pos,
+                                labels={node_name: node_name},
+                                font_size=10,
+                                font_color=secondary_color,
+                                font_family='sans-serif')
+
+    # Save the figure
+    plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\LeagueGraph.png', dpi=300)
 
     # Show the graph
     plt.show()
