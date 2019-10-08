@@ -624,9 +624,9 @@ def week_5(teams, week_end_date):
                              'Chiefs', 13, 1, 288, 22, 39, 1, 0, 324,
                              'Colts', 19, 1, 151, 18, 29, 0, 1, 331)
 
-    # teams = set_game_outcome(teams, 0,
-    #                          '49ers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Browns', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, -5,
+                             '49ers', 31, 4, 171, 20, 29, 2, 0, 446,
+                             'Browns', 3, 0, 78, 9, 24, 0, 2, 180)
 
     return teams
 
