@@ -484,7 +484,7 @@ def show_graph(nfl):
     nx.draw_networkx_edges(nfl,
                            pos,
                            width=1,
-                           alpha=0.3,
+                           alpha=0.1,
                            edge_color='black',
                            arrowsize=20)
 
