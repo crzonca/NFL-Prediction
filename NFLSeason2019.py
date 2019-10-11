@@ -636,27 +636,27 @@ def week_6(teams, week_end_date):
         Predictor.get_week_probabilities(teams, Playoffs.get_week6_schedule(week_end_date))
 
     # Results
-    # teams = set_game_outcome(teams,
-    #                          spread=0,
-    #                          home_name='Patriots',
-    #                          home_score=0,
-    #                          home_touchdowns=0,
-    #                          home_net_pass_yards=0,
-    #                          home_pass_completions=0,
-    #                          home_pass_attempts=0,
-    #                          home_pass_tds=0,
-    #                          home_interceptions_thrown=0,
-    #                          home_total_yards=0,
-    #                          away_name='Giants',
-    #                          away_score=0,
-    #                          away_touchdowns=0,
-    #                          away_net_pass_yards=0,
-    #                          away_pass_completions=0,
-    #                          away_pass_attempts=0,
-    #                          away_pass_tds=0,
-    #                          away_interceptions_thrown=0,
-    #                          away_total_yards=0)
-    #
+    teams = set_game_outcome(teams,
+                             spread=-17,
+                             home_name='Patriots',
+                             home_score=35,
+                             home_touchdowns=4,
+                             home_net_pass_yards=313,
+                             home_pass_completions=31,
+                             home_pass_attempts=41,
+                             home_pass_tds=0,
+                             home_interceptions_thrown=1,
+                             home_total_yards=427,
+                             away_name='Giants',
+                             away_score=14,
+                             away_touchdowns=1,
+                             away_net_pass_yards=161,
+                             away_pass_completions=15,
+                             away_pass_attempts=31,
+                             away_pass_tds=1,
+                             away_interceptions_thrown=3,
+                             away_total_yards=213)
+
     # teams = set_game_outcome(teams, 0,
     #                          'Buccaneers', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Panthers', 0, 0, 0, 0, 0, 0, 0, 0)
