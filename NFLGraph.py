@@ -231,12 +231,13 @@ def parity_clock():
         # Get the length of the longest cycles
         longest_cycle_length = len(cycles[0])
 
+        # Get the longest cycles
+        longest_cycles = list(filter(lambda c: len(c) == longest_cycle_length, cycles))
+
         # If all 32 teams are in the cycle, it's a full parity clock
         if longest_cycle_length == 32:
             print('A full parity clock has been completed!')
-
-        # Get the longest cycles
-        longest_cycles = list(filter(lambda c: len(c) == longest_cycle_length, cycles))
+            longest_cycles = longest_cycles[:1]
 
         # Print each cycle
         for cycle in longest_cycles:

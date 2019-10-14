@@ -465,8 +465,8 @@ def show_graph(nfl):
 
     # Set the layout of the graph to a force directed layout
     pos = nx.spring_layout(nfl,
-                           k=1 / average_inverse_weight,
-                           iterations=1000,
+                           k=10 / average_inverse_weight,
+                           iterations=10000,
                            weight='Inverse Weight',
                            scale=3.0)
 

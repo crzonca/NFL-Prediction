@@ -373,11 +373,13 @@ def print_schedule_difficulty(teams, remaining=False, completed=False):
     """
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
     from scipy.stats import norm
+    import statistics
 
     # Get each teams schedule difficulty
     team_tuples = list()
     for team in teams:
         if completed:
+            remaining = False
             schedule_difficulty, deviation = Playoffs.get_completed_schedule_difficulty(team[0])
         else:
             schedule_difficulty, deviation = Playoffs.get_schedule_difficulty(teams, team[0], remaining)
@@ -387,7 +389,15 @@ def print_schedule_difficulty(teams, remaining=False, completed=False):
     sorted_by_difficulty = sorted(team_tuples, key=lambda tup: tup[1], reverse=True)
 
     # Create a normal distribution for schedule difficulties
-    difficulty_norm = norm(1500, 13.615)
+    if remaining:
+        # If not remaining games only, use the mean and standard deviation of the current difficulties
+        all_schedules = list()
+        for team_tuple in sorted_by_difficulty:
+            all_schedules.append(team_tuple[1])
+        difficulty_norm = norm(statistics.mean(all_schedules), statistics.pstdev(all_schedules))
+    else:
+        # If not remaining games only, use a mean of 1500 and a standard deviation of 13.615
+        difficulty_norm = norm(1500, 13.615)
 
     # Standardize each team's difficulty
     schedule_difficulties = list()
