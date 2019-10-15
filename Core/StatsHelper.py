@@ -658,3 +658,7 @@ def average_scoring_margin_diff(row):
 
 def average_turnover_margin_diff(row):
     return row['home_average_turnover_margin'] - row['away_average_turnover_margin']
+
+
+def pagerank_diff(row):
+    return row['home_pagerank'] - row['away_pagerank']

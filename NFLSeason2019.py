@@ -705,9 +705,9 @@ def week_6(teams, week_end_date):
                              'Chargers', 17, 2, 316, 26, 44, 2, 2, 348,
                              'Steelers', 24, 2, 132, 15, 20, 1, 1, 256)
 
-    # teams = set_game_outcome(teams, 0,
-    #                          'Packers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Lions', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, -3.5,
+                             'Packers', 23, 2, 277, 24, 39, 2, 1, 437,
+                             'Lions', 22, 1, 243, 18, 32, 0, 0, 299)
     return teams
 
 

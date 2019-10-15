@@ -4,6 +4,7 @@ import statistics
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
+import networkx as nx
 from sklearn.metrics import brier_score_loss
 from sklearn.utils import check_consistent_length
 
@@ -193,6 +194,34 @@ def add_team_elos(frames, regression_factor=.41, k_factor=42):
             # Update the dictionary
             team_elos[team] = home_elo
             team_elos[opponent] = away_elo
+
+    return frames
+
+
+def add_page_ranks(frames):
+    for df in frames:
+        relevant_features = df.filter(items=['home_team', 'away_team', 'week', 'game_point_diff'])
+        teams = list(df['home_team'].unique())
+
+        graph = nx.MultiDiGraph()
+        graph.add_nodes_from(teams)
+        for week in range(1, 22):
+            week_df = relevant_features.loc[relevant_features['week'] == week]
+            ranks = nx.pagerank_numpy(graph)
+            for team, rank in ranks.items():
+                row_num = df.loc[((df['away_team'] == team) | (df['home_team'] == team)) & (df['week'] == week)].index
+                if len(row_num) > 0:
+                    elem = df.loc[row_num, 'home_team'][0]
+                    if elem == team:
+                        df.loc[row_num, 'home_pagerank'] = 100 * rank
+                    else:
+                        df.loc[row_num, 'away_pagerank'] = 100 * rank
+            for game in week_df.iterrows():
+                game = list(game[1])
+                if game[3] > 0:
+                    graph.add_edge(game[1], game[0], weight=game[3])
+                elif game[3] < 0:
+                    graph.add_edge(game[0], game[1], weight=-game[3])
 
     return frames
 
@@ -875,6 +904,7 @@ def add_stat_differences(frames):
         df['average_yards_per_point_diff'] = df.apply(lambda row: Stats.average_yards_per_point_diff(row), axis=1)
         df['average_scoring_margin_diff'] = df.apply(lambda row: Stats.average_scoring_margin_diff(row), axis=1)
         df['average_turnover_margin_diff'] = df.apply(lambda row: Stats.average_turnover_margin_diff(row), axis=1)
+        df['pagerank_diff'] = df.apply(lambda row: Stats.pagerank_diff(row), axis=1)
 
     return frames
 
