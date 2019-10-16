@@ -1,0 +1,65 @@
+Best parameters set found on development set:
+0.73506 (+/-0.012) for {'C': 10, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True}
+
+Grid scores on development set:
+0.73506 (+/-0.012) for {'C': 10, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True} probability 0.975
+0.73506 (+/-0.012) for {'C': 100, 'gamma': 1e-05, 'kernel': 'sigmoid', 'probability': True} probability 0.975
+0.73482 (+/-0.012) for {'C': 1, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True} probability 0.926
+0.73435 (+/-0.008) for {'C': 1, 'gamma': 0.001, 'kernel': 'rbf', 'probability': True} probability 0.028
+0.73327 (+/-0.008) for {'C': 10, 'gamma': 0.0001, 'kernel': 'rbf', 'probability': True} probability 0.704
+0.73292 (+/-0.010) for {'C': 100, 'gamma': 1e-05, 'kernel': 'rbf', 'probability': True} probability 0.647
+0.73238 (+/-0.010) for {'C': 0.1, 'gamma': 'scale', 'kernel': 'rbf', 'probability': True} probability 0.006
+0.73214 (+/-0.010) for {'C': 0.1, 'gamma': 'auto', 'kernel': 'rbf', 'probability': True} probability 0.002
+0.73079 (+/-0.003) for {'C': 1, 'gamma': 0.0001, 'kernel': 'rbf', 'probability': True} probability 0.837
+0.73079 (+/-0.003) for {'C': 10, 'gamma': 1e-05, 'kernel': 'rbf', 'probability': True} probability 0.789
+0.73079 (+/-0.003) for {'C': 100, 'gamma': 1e-06, 'kernel': 'rbf', 'probability': True} probability 0.789
+0.73061 (+/-0.011) for {'C': 100, 'gamma': 0.001, 'kernel': 'rbf', 'probability': True} probability 0.615
+0.73047 (+/-0.004) for {'C': 0.1, 'gamma': 0.001, 'kernel': 'rbf', 'probability': True} probability 0.819
+0.72940 (+/-0.010) for {'C': 10, 'gamma': 0.001, 'kernel': 'rbf', 'probability': True} probability 0.923
+0.72931 (+/-0.011) for {'C': 100, 'gamma': 0.0001, 'kernel': 'rbf', 'probability': True} probability 0.918
+0.72908 (+/-0.009) for {'C': 1, 'gamma': 'auto', 'kernel': 'rbf', 'probability': True} probability 0.000
+0.72908 (+/-0.009) for {'C': 1, 'gamma': 'scale', 'kernel': 'rbf', 'probability': True} probability 0.000
+0.72906 (+/-0.011) for {'C': 10, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True} probability 0.697
+0.72906 (+/-0.011) for {'C': 100, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True} probability 0.697
+0.72864 (+/-0.010) for {'C': 100, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True} probability 0.823
+0.72864 (+/-0.010) for {'C': 0.1, 'kernel': 'linear', 'probability': True} probability 0.802
+0.72861 (+/-0.000) for {'C': 0.1, 'gamma': 0.001, 'kernel': 'sigmoid', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 0.1, 'gamma': 0.0001, 'kernel': 'rbf', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 0.1, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 0.1, 'gamma': 1e-05, 'kernel': 'rbf', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 0.1, 'gamma': 1e-05, 'kernel': 'sigmoid', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 0.1, 'gamma': 1e-06, 'kernel': 'rbf', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 0.1, 'gamma': 1e-06, 'kernel': 'sigmoid', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 0.1, 'gamma': 1e-07, 'kernel': 'rbf', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 0.1, 'gamma': 1e-07, 'kernel': 'sigmoid', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 1, 'gamma': 0.0001, 'kernel': 'sigmoid', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 1, 'gamma': 1e-05, 'kernel': 'rbf', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 1, 'gamma': 1e-05, 'kernel': 'sigmoid', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 1, 'gamma': 1e-06, 'kernel': 'rbf', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 1, 'gamma': 1e-06, 'kernel': 'sigmoid', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 1, 'gamma': 1e-07, 'kernel': 'rbf', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 1, 'gamma': 1e-07, 'kernel': 'sigmoid', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 10, 'gamma': 1e-05, 'kernel': 'sigmoid', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 10, 'gamma': 1e-06, 'kernel': 'rbf', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 10, 'gamma': 1e-06, 'kernel': 'sigmoid', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 10, 'gamma': 1e-07, 'kernel': 'rbf', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 10, 'gamma': 1e-07, 'kernel': 'sigmoid', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 100, 'gamma': 1e-06, 'kernel': 'sigmoid', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 100, 'gamma': 1e-07, 'kernel': 'rbf', 'probability': True} probability 1.000
+0.72861 (+/-0.000) for {'C': 100, 'gamma': 1e-07, 'kernel': 'sigmoid', 'probability': True} probability 1.000
+0.72854 (+/-0.009) for {'C': 1, 'kernel': 'linear', 'probability': True} probability 0.796
+0.72854 (+/-0.009) for {'C': 10, 'kernel': 'linear', 'probability': True} probability 0.822
+0.72854 (+/-0.009) for {'C': 100, 'kernel': 'linear', 'probability': True} probability 0.822
+0.72217 (+/-0.014) for {'C': 10, 'gamma': 'auto', 'kernel': 'rbf', 'probability': True} probability 0.000
+0.72204 (+/-0.013) for {'C': 10, 'gamma': 'scale', 'kernel': 'rbf', 'probability': True} probability 0.000
+0.70172 (+/-0.025) for {'C': 100, 'gamma': 'auto', 'kernel': 'rbf', 'probability': True} probability 0.000
+0.70118 (+/-0.024) for {'C': 100, 'gamma': 'scale', 'kernel': 'rbf', 'probability': True} probability 0.000
+0.61382 (+/-0.044) for {'C': 0.1, 'gamma': 'scale', 'kernel': 'sigmoid', 'probability': True} probability 0.954
+0.61373 (+/-0.045) for {'C': 0.1, 'gamma': 'auto', 'kernel': 'sigmoid', 'probability': True} probability 0.903
+0.60809 (+/-0.052) for {'C': 100, 'gamma': 'auto', 'kernel': 'sigmoid', 'probability': True} probability 0.618
+0.60806 (+/-0.052) for {'C': 100, 'gamma': 'scale', 'kernel': 'sigmoid', 'probability': True} probability 0.639
+0.60692 (+/-0.048) for {'C': 10, 'gamma': 'auto', 'kernel': 'sigmoid', 'probability': True} probability 0.946
+0.60659 (+/-0.048) for {'C': 1, 'gamma': 'auto', 'kernel': 'sigmoid', 'probability': True} probability 0.772
+0.60642 (+/-0.049) for {'C': 1, 'gamma': 'scale', 'kernel': 'sigmoid', 'probability': True} probability 0.725
+0.60630 (+/-0.048) for {'C': 10, 'gamma': 'scale', 'kernel': 'sigmoid', 'probability': True} probability 0.824
+

@@ -74,20 +74,20 @@ def evaluate_model_parameters(contributing_features, df=None):
     # Tune the parameters to find the best models based on brier loss and accuracy
     scores = ['brier_score_loss', 'f1']
 
-    # Logistic Regression               -0.21185    66.557
+    # Logistic Regression               -.21199     .73085
     tune_logistic_regression(X, y, skf, scores)
 
-    # C Support Vector Classifier       -0.21214    66.424
+    # C Support Vector Classifier       -.21244     .73071
     tune_svc_classifier(X, y, skf, scores)
 
-    # Random Forest                     -0.21281    66.314
-    tune_random_forest(X, y, feature_col_names, skf, scores)
-
-    # K Nearest Neighbors               -0.21657    65.345
+    # K Nearest Neighbors               -0.21621    .72284
     tune_k_nearest_neighbors(X, y, skf, scores)
 
-    # Gaussian Naive Bayes              -0.22866    61.974
+    # Gaussian Naive Bayes              -0.22759    .73788
     tune_gauss_naive_bayes(X, y, skf, scores)
+
+    # Random Forest                     -.21353     .73023
+    tune_random_forest(X, y, feature_col_names, skf, scores)
 
 
 def tune_logistic_regression(X, y, skf, scores):

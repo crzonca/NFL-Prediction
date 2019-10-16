@@ -19,19 +19,29 @@ other_dir = '..\\Projects\\nfl\\NFL_Prediction\\Other\\'
 
 def get_best_features(df=None):
     won_series = plot_corr(df)
-    best_features = pca_feature_selection(df)
+    # best_features = pca_feature_selection(df)
 
-    columns_to_keep = list()
-    columns_to_keep.extend(list(filter(lambda f: 'diff' in f, df.columns.values)))
-    columns_to_keep.extend(list(filter(lambda f: 'home_spread' in f, df.columns.values)))
-    columns_to_keep.remove('game_point_diff')
-    # best_features = recursive_feature_elimination(df, columns_to_keep)
+    best_features = ['home_spread',
+                     'elo_diff',
+                     'average_scoring_margin_diff',
+                     'win_pct_diff',
+                     'average_touchdowns_diff',
+                     'average_passer_rating_diff',
+                     'pagerank_diff']
+                     # 'average_total_yards_diff']
 
-    best_features = ['home_spread', 'elo_diff', 'average_scoring_margin_diff', 'win_pct_diff',
-                     'average_touchdowns_diff', 'average_passer_rating_diff', 'average_total_yards_diff']
+    # recursive_best_features = recursive_feature_elimination(df, best_features)
 
     won_series = won_series.filter(best_features).sort_values(kind='quicksort', ascending=False)
     best_features = list(won_series.index)
+
+    relevant = df.filter(items=best_features)
+    corrmat = relevant.corr().abs()
+    f, ax = plt.subplots(figsize=(9, 9))
+    sns.set(font_scale=0.9)
+    sns.heatmap(corrmat, vmax=.8, square=True, annot=True, fmt='.2f', cmap='winter')
+    plt.show()
+
     return best_features
 
 
@@ -273,6 +283,7 @@ def recursive_feature_elimination(df, feature_list):
     """
 
     num_features = 1
+    verbosity = 0
 
     X = df[feature_list].values
     y = df['home_victory'].values
@@ -285,7 +296,11 @@ def recursive_feature_elimination(df, feature_list):
     skf = StratifiedKFold(n_splits=5)
 
     print('RFECV Brier')
-    rfecv_br = RFECV(estimator=clf, min_features_to_select=num_features, cv=skf, scoring='brier_score_loss')
+    rfecv_br = RFECV(estimator=clf,
+                     min_features_to_select=num_features,
+                     cv=skf,
+                     scoring='brier_score_loss',
+                     verbose=verbosity)
     rfecv_br.fit(X, y.ravel())
     brier_features = print_top_features(rfecv_br, feature_list)
     br_features_to_scores = zip(feature_list, rfecv_br.ranking_)
@@ -295,7 +310,11 @@ def recursive_feature_elimination(df, feature_list):
     print()
 
     print('RFECV F1')
-    rfecv_f1 = RFECV(estimator=clf, min_features_to_select=num_features, cv=skf, scoring='f1')
+    rfecv_f1 = RFECV(estimator=clf,
+                     min_features_to_select=num_features,
+                     cv=skf,
+                     scoring='f1',
+                     verbose=verbosity)
     rfecv_f1.fit(X, y.ravel())
     f1_features = print_top_features(rfecv_f1, feature_list)
     f1_features_to_scores = zip(feature_list, rfecv_f1.ranking_)
