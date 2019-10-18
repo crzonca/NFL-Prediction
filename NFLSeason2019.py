@@ -716,27 +716,27 @@ def week_7(teams, week_end_date):
         Predictor.get_week_probabilities(teams, Playoffs.get_week7_schedule(week_end_date))
 
     # Results
-    # teams = set_game_outcome(teams,
-    #                          spread=0,
-    #                          home_name='Broncos',
-    #                          home_score=0,
-    #                          home_touchdowns=0,
-    #                          home_net_pass_yards=0,
-    #                          home_pass_completions=0,
-    #                          home_pass_attempts=0,
-    #                          home_pass_tds=0,
-    #                          home_interceptions_thrown=0,
-    #                          home_total_yards=0,
-    #                          away_name='Chiefs',
-    #                          away_score=0,
-    #                          away_touchdowns=0,
-    #                          away_net_pass_yards=0,
-    #                          away_pass_completions=0,
-    #                          away_pass_attempts=0,
-    #                          away_pass_tds=0,
-    #                          away_interceptions_thrown=0,
-    #                          away_total_yards=0)
-    #
+    teams = set_game_outcome(teams,
+                             spread=3,
+                             home_name='Broncos',
+                             home_score=6,
+                             home_touchdowns=1,
+                             home_net_pass_yards=134,
+                             home_pass_completions=21,
+                             home_pass_attempts=34,
+                             home_pass_tds=0,
+                             home_interceptions_thrown=0,
+                             home_total_yards=205,
+                             away_name='Chiefs',
+                             away_score=30,
+                             away_touchdowns=2,
+                             away_net_pass_yards=191,
+                             away_pass_completions=20,
+                             away_pass_attempts=30,
+                             away_pass_tds=2,
+                             away_interceptions_thrown=0,
+                             away_total_yards=271)
+
     # teams = set_game_outcome(teams, 0,
     #                          'Bills', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Dolphins', 0, 0, 0, 0, 0, 0, 0, 0)
