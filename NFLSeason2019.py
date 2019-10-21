@@ -163,7 +163,7 @@ def handle_week(teams,
         print(week_name)
 
         # Handle the week
-        teams = week(teams, week_end_date)
+        teams = week(teams, week_end_date, week=2)
 
         # Print the tables
         Standings.print_league_details(teams,
@@ -194,12 +194,10 @@ def handle_week(teams,
     return teams
 
 
-def week_1(teams, week_end_date):
+def week_1(teams, week_end_date, week=1):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week1_schedule(week_end_date))
-
-    week = 1
-
+        
     # Results
     teams = set_game_outcome(teams,
                              week=week,
@@ -286,11 +284,9 @@ def week_1(teams, week_end_date):
     return teams
 
 
-def week_2(teams, week_end_date):
+def week_2(teams, week_end_date, week=2):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week2_schedule(week_end_date))
-
-    week = 2
 
     # Results
     teams = set_game_outcome(teams,
@@ -378,11 +374,9 @@ def week_2(teams, week_end_date):
     return teams
 
 
-def week_3(teams, week_end_date):
+def week_3(teams, week_end_date, week=3):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week3_schedule(week_end_date))
-
-    week = 3
 
     # Results
     teams = set_game_outcome(teams,
@@ -470,11 +464,9 @@ def week_3(teams, week_end_date):
     return teams
 
 
-def week_4(teams, week_end_date):
+def week_4(teams, week_end_date, week=4):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week4_schedule(week_end_date))
-
-    week = 4
 
     # Results
     teams = set_game_outcome(teams,
@@ -558,11 +550,9 @@ def week_4(teams, week_end_date):
     return teams
 
 
-def week_5(teams, week_end_date):
+def week_5(teams, week_end_date, week=5):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week5_schedule(week_end_date))
-
-    week = 5
 
     # Results
     teams = set_game_outcome(teams,
@@ -646,11 +636,9 @@ def week_5(teams, week_end_date):
     return teams
 
 
-def week_6(teams, week_end_date):
+def week_6(teams, week_end_date, week=6):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week6_schedule(week_end_date))
-
-    week = 6
 
     # Results
     teams = set_game_outcome(teams,
@@ -729,11 +717,9 @@ def week_6(teams, week_end_date):
     return teams
 
 
-def week_7(teams, week_end_date):
+def week_7(teams, week_end_date, week=7):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week7_schedule(week_end_date))
-
-    week = 7
 
     # Results
     teams = set_game_outcome(teams,
@@ -790,18 +776,18 @@ def week_7(teams, week_end_date):
                              'Giants', 21, 2, 156, 22, 35, 1, 1, 263,
                              'Cardinals', 27, 3, 89, 14, 21, 0, 0, 245)
 
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Titans', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Chargers', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Bears', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Saints', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Seahawks', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Ravens', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
+    teams = set_game_outcome(teams, week, -3,
+                             'Titans', 23, 3, 306, 24, 30, 2, 1, 403,
+                             'Chargers', 20, 2, 326, 24, 38, 2, 0, 365)
+
+    teams = set_game_outcome(teams, week, -4.5,
+                             'Bears', 25, 2, 251, 34, 54, 2, 0, 252,
+                             'Saints', 36, 4, 273, 23, 38, 2, 0, 424)
+
+    teams = set_game_outcome(teams, week, -3,
+                             'Seahawks', 16, 1, 241, 20, 41, 1, 1, 347,
+                             'Ravens', 30, 1, 141, 9, 20, 0, 0, 340)
+
     # teams = set_game_outcome(teams, week, 0,
     #                          'Cowboys', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Eagles', 0, 0, 0, 0, 0, 0, 0, 0)
@@ -813,14 +799,13 @@ def week_7(teams, week_end_date):
     return teams
 
 
-def week_8(teams, week_end_date):
+def week_8(teams, week_end_date, week=8):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week8_schedule(week_end_date))
 
-    week = 8
-
     # Results
     # teams = set_game_outcome(teams,
+    #                          week=week,
     #                          spread=0,
     #                          home_name='Vikings',
     #                          home_score=0,
@@ -900,14 +885,13 @@ def week_8(teams, week_end_date):
     return teams
 
 
-def week_9(teams, week_end_date):
+def week_9(teams, week_end_date, week=9):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week9_schedule(week_end_date))
 
-    week = 9
-
     # Results
     # teams = set_game_outcome(teams,
+    #                          week=week,
     #                          spread=0,
     #                          home_name='Cardinals',
     #                          home_score=0,
@@ -983,14 +967,13 @@ def week_9(teams, week_end_date):
     return teams
 
 
-def week_10(teams, week_end_date):
+def week_10(teams, week_end_date, week=10):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week10_schedule(week_end_date))
 
-    week = 10
-
     # Results
     # teams = set_game_outcome(teams,
+    #                          week=week,
     #                          spread=0,
     #                          home_name='Raiders',
     #                          home_score=0,
@@ -1062,14 +1045,13 @@ def week_10(teams, week_end_date):
     return teams
 
 
-def week_11(teams, week_end_date):
+def week_11(teams, week_end_date, week=11):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week11_schedule(week_end_date))
 
-    week = 11
-
     # Results
     # teams = set_game_outcome(teams,
+    #                          week=week,
     #                          spread=0,
     #                          home_name='Browns',
     #                          home_score=0,
@@ -1090,7 +1072,7 @@ def week_11(teams, week_end_date):
     #                          away_interceptions_thrown=0,
     #                          away_total_yards=0)
     #
-    # teams = set_game_outcome(teams,
+    # teams = set_game_outcome(teams, week, 0
     #                          'Panthers', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Falcons', 0, 0, 0, 0, 0, 0, 0, 0)
     #
@@ -1145,14 +1127,13 @@ def week_11(teams, week_end_date):
     return teams
 
 
-def week_12(teams, week_end_date):
+def week_12(teams, week_end_date, week=12):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week12_schedule(week_end_date))
 
-    week = 12
-
     # Results
     # teams = set_game_outcome(teams,
+    #                          week=week,
     #                          spread=0,
     #                          home_name='Texans',
     #                          home_score=0,
@@ -1228,14 +1209,13 @@ def week_12(teams, week_end_date):
     return teams
 
 
-def week_13(teams, week_end_date):
+def week_13(teams, week_end_date, week=13):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week13_schedule(week_end_date))
 
-    week = 13
-
     # Results
     # teams = set_game_outcome(teams,
+    #                          week=week,
     #                          spread=0,
     #                          home_name='Lions',
     #                          home_score=0,
@@ -1319,14 +1299,13 @@ def week_13(teams, week_end_date):
     return teams
 
 
-def week_14(teams, week_end_date):
+def week_14(teams, week_end_date, week=14):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week14_schedule(week_end_date))
 
-    week = 14
-
     # Results
     # teams = set_game_outcome(teams,
+    #                          week=week,
     #                          spread=0,
     #                          home_name='Bears',
     #                          home_score=0,
@@ -1410,14 +1389,13 @@ def week_14(teams, week_end_date):
     return teams
 
 
-def week_15(teams, week_end_date):
+def week_15(teams, week_end_date, week=15):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week15_schedule(week_end_date))
 
-    week = 15
-
     # Results
     # teams = set_game_outcome(teams,
+    #                          week=week,
     #                          spread=0,
     #                          home_name='Ravens',
     #                          home_score=0,
@@ -1501,14 +1479,13 @@ def week_15(teams, week_end_date):
     return teams
 
 
-def week_16(teams, week_end_date):
+def week_16(teams, week_end_date, week=16):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week16_schedule(week_end_date))
 
-    week = 16
-
     # Results
     # teams = set_game_outcome(teams,
+    #                          week=week,
     #                          spread=0,
     #                          home_name='Broncos',
     #                          home_score=0,
@@ -1592,14 +1569,13 @@ def week_16(teams, week_end_date):
     return teams
 
 
-def week_17(teams, week_end_date):
+def week_17(teams, week_end_date, week=17):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_week17_schedule(week_end_date))
 
-    week = 17
-
     # Results
     # teams = set_game_outcome(teams,
+    #                          week=week,
     #                          spread=0,
     #                          home_name='Ravens',
     #                          home_score=0,
@@ -1683,14 +1659,13 @@ def week_17(teams, week_end_date):
     return teams
 
 
-def wildcard(teams, week_end_date):
+def wildcard(teams, week_end_date, week=18):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_wildcard_schedule(week_end_date))
 
-    week = 18
-
     # Results
     # teams = set_game_outcome(teams,
+    #                          week=week,
     #                          spread=0,
     #                          home_name='Bears',
     #                          home_score=0,
@@ -1726,14 +1701,13 @@ def wildcard(teams, week_end_date):
     return teams
 
 
-def divisional(teams, week_end_date):
+def divisional(teams, week_end_date, week=19):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_divisional_schedule(week_end_date))
 
-    week = 19
-
     # Results
     # teams = set_game_outcome(teams,
+    #                          week=week,
     #                          spread=0,
     #                          home_name='Bears',
     #                          home_score=0,
@@ -1769,14 +1743,13 @@ def divisional(teams, week_end_date):
     return teams
 
 
-def conference(teams, week_end_date):
+def conference(teams, week_end_date, week=20):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_conference_schedule(week_end_date))
 
-    week = 20
-
     # Results
     # teams = set_game_outcome(teams,
+    #                          week=week,
     #                          spread=0,
     #                          home_name='Bears',
     #                          home_score=0,
@@ -1804,14 +1777,13 @@ def conference(teams, week_end_date):
     return teams
 
 
-def superbowl(teams, week_end_date):
+def superbowl(teams, week_end_date, week=21):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_superbowl_schedule(week_end_date))
 
-    week = 21
-
     # Results
     # teams = set_game_outcome(teams,
+    #                          week=week,
     #                          spread=0,
     #                          home_name='Bears',
     #                          home_score=0,
