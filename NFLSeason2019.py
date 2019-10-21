@@ -163,7 +163,7 @@ def handle_week(teams,
         print(week_name)
 
         # Handle the week
-        teams = week(teams, week_end_date, week=2)
+        teams = week(teams, week_end_date)
 
         # Print the tables
         Standings.print_league_details(teams,
