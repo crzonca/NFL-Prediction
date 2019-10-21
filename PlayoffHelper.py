@@ -8,7 +8,7 @@ import Projects.nfl.NFL_Prediction.Core.NFLDataGroomer as NFL
 import Projects.nfl.NFL_Prediction.OddsHelper as Odds
 import Projects.nfl.NFL_Prediction.StandingsHelper as Standings
 
-completed_games = pd.DataFrame(columns=['home_team', 'away_team', 'home_score', 'away_score', 'home_spread',
+completed_games = pd.DataFrame(columns=['home_team', 'away_team', 'home_score', 'away_score', 'week', 'home_spread',
                                         'home_pass_completions', 'home_pass_attempts', 'home_passing_touchdowns',
                                         'home_interceptions_thrown', 'home_net_passing_yards', 'home_total_yards',
                                         'home_elo',

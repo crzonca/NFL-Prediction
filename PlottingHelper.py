@@ -349,18 +349,8 @@ def plot_team_elo_over_season(title, team_names, show_plot=True):
     # Get all the teams in the league
     teams = Season.nfl_teams
 
-    # For each team in the list of teams
-    all_teams_games = list()
-    for team_name in team_names:
-        # Get all the games each team has completed
-        team_games = Playoffs.completed_games.loc[(Playoffs.completed_games['home_team'] == team_name) |
-                                                  (Playoffs.completed_games['away_team'] == team_name)]
-
-        # Add each completed game to a list
-        all_teams_games.append(team_games)
-
     # Get the maximum number of games any team has played in
-    max_len = max([len(team_games) for team_games in all_teams_games])
+    max_len = max(Playoffs.completed_games['week'])
 
     # Fill out data rows
     teams_elos = pd.DataFrame(index=range(max_len + 1), columns=team_names)
@@ -368,8 +358,25 @@ def plot_team_elo_over_season(title, team_names, show_plot=True):
     # For each team in the list of teams
     for team_name in team_names:
         # Get all the games each team has completed
-        team_games = Playoffs.completed_games.loc[(Playoffs.completed_games['home_team'] == team_name) |
-                                                  (Playoffs.completed_games['away_team'] == team_name)]
+        team_games = pd.Series()
+
+        # For each week
+        for week in range(1, max_len + 1):
+            # Get the game the team played in
+            team_game = Playoffs.completed_games.loc[((Playoffs.completed_games['home_team'] == team_name) |
+                                                      (Playoffs.completed_games['away_team'] == team_name)) &
+                                                     (Playoffs.completed_games['week'] == week)]
+            if not team_game.empty:
+                # Add the game if the team played that week
+                team_games = team_games.append(team_game, ignore_index=True)
+            else:
+                # If the team did not play that week
+                next_week = Playoffs.completed_games.loc[((Playoffs.completed_games['home_team'] == team_name) |
+                                                          (Playoffs.completed_games['away_team'] == team_name)) &
+                                                         (Playoffs.completed_games['week'] == week + 1)]
+                if not next_week.empty:
+                    # Add the game the team played in the week after
+                    team_games = team_games.append(next_week, ignore_index=True)
 
         # Get the elo for the team for each game
         home = pd.Series(team_games['home_team'] == team_name)
