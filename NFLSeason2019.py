@@ -788,13 +788,13 @@ def week_7(teams, week_end_date, week=7):
                              'Seahawks', 16, 1, 241, 20, 41, 1, 1, 347,
                              'Ravens', 30, 1, 141, 9, 20, 0, 0, 340)
 
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Cowboys', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Eagles', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Jets', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Patriots', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, week, -3,
+                             'Cowboys', 37, 4, 213, 21, 27, 1, 1, 402,
+                             'Eagles', 10, 1, 168, 16, 26, 1, 1, 283)
+
+    teams = set_game_outcome(teams, week, 9.5,
+                             'Jets', 0, 0, 73, 11, 32, 0, 4, 154,
+                             'Patriots', 33, 4, 249, 31, 45, 1, 1, 323)
 
     return teams
 
