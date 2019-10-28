@@ -228,33 +228,30 @@ def parity_clock():
         # Sort the cycles based on their length
         cycles = sorted(cycles, key=lambda c: len(c), reverse=True)
 
-        # Get the length of the longest cycles
-        longest_cycle_length = len(cycles[0])
+        # Get the longest cycle
+        cycle = cycles[0]
 
-        # Get the longest cycles
-        longest_cycles = list(filter(lambda c: len(c) == longest_cycle_length, cycles))
+        # Get the length of the longest cycles
+        longest_cycle_length = len(cycles)
 
         # If all 32 teams are in the cycle, it's a full parity clock
         if longest_cycle_length == 32:
             print('A full parity clock has been completed!')
-            longest_cycles = longest_cycles[:1]
 
-        # Print each cycle
-        for cycle in longest_cycles:
-            # Reverse the cycle direction
-            cycle = list(reversed(cycle))
+        # Reverse the cycle direction
+        cycle = list(reversed(cycle))
 
-            # Add the starting team to the end to complete the loop
-            cycle.append(cycle[0])
+        # Add the starting team to the end to complete the loop
+        cycle.append(cycle[0])
 
-            # Format new lines if the length of the cycle is too long to print in one line
-            if len(cycle) > 8:
-                cycle[8] = '\n' + cycle[8]
-            if len(cycle) > 16:
-                cycle[16] = '\n' + cycle[16]
-            if len(cycle) > 24:
-                cycle[24] = '\n' + cycle[24]
+        # Format new lines if the length of the cycle is too long to print in one line
+        if len(cycle) > 8:
+            cycle[8] = '\n' + cycle[8]
+        if len(cycle) > 16:
+            cycle[16] = '\n' + cycle[16]
+        if len(cycle) > 24:
+            cycle[24] = '\n' + cycle[24]
 
-            # Print the cycle
-            print(' -> '.join(cycle))
-            print()
+        # Print the cycle
+        print(' -> '.join(cycle))
+        print()
