@@ -123,9 +123,9 @@ def create_team_node(name,
     team_dict['Passing Touchdowns'] = pass_touchdowns
     team_dict['Interceptions Thrown'] = interceptions_thrown
     team_dict['Total Yards'] = total_yards
-    team_dict['Primary Color'] = colors[0] if colors else '#000000'
-    team_dict['Secondary Color'] = colors[1] if len(colors) > 1 else '#000000'
-    team_dict['Tertiary Color'] = colors[2] if len(colors) > 2 else '#000000'
+    team_dict['Primary'] = colors[0] if colors else '#000000'
+    team_dict['Secondary'] = colors[1] if len(colors) > 1 else '#000000'
+    team_dict['Tertiary'] = colors[2] if len(colors) > 2 else '#000000'
 
     return name, team_dict
 
@@ -165,6 +165,8 @@ def set_game_outcome(teams, home_name, home_score, away_name, away_score):
     home_team_dict['Passing Touchdowns'] = home_team[11]
     home_team_dict['Interceptions Thrown'] = home_team[12]
     home_team_dict['Total Yards'] = home_team[13]
+    for key, val in home_team_dict.items():
+        nx.set_node_attributes(nfl, {home_team[0]: val}, key)
 
     away_team_dict = dict()
     away_team_dict['Wins'] = away_team[1]
@@ -180,6 +182,8 @@ def set_game_outcome(teams, home_name, home_score, away_name, away_score):
     away_team_dict['Passing Touchdowns'] = away_team[11]
     away_team_dict['Interceptions Thrown'] = away_team[12]
     away_team_dict['Total Yards'] = away_team[13]
+    for key, val in away_team_dict.items():
+        nx.set_node_attributes(nfl, {away_team[0]: val}, key)
 
     # Add or update the edges based on the game outcome
     if home_score > away_score:
@@ -255,3 +259,13 @@ def parity_clock():
         # Print the cycle
         print(' -> '.join(cycle))
         print()
+
+
+def persist_graph():
+    import json
+
+    global nfl
+
+    data = nx.node_link_data(nfl)
+    with open('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\LeagueGraph.json', 'w') as file:
+        json.dump(data, file, indent=4, sort_keys=True)

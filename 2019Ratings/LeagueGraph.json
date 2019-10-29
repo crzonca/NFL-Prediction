@@ -1,0 +1,1553 @@
+{
+    "directed": true,
+    "graph": {},
+    "links": [
+        {
+            "Inverse Weight": 1.0,
+            "key": 0,
+            "source": "Bengals",
+            "target": "Seahawks",
+            "weight": 1
+        },
+        {
+            "Inverse Weight": 0.041666666666666664,
+            "key": 0,
+            "source": "Bengals",
+            "target": "49ers",
+            "weight": 24
+        },
+        {
+            "Inverse Weight": 0.25,
+            "key": 0,
+            "source": "Bengals",
+            "target": "Bills",
+            "weight": 4
+        },
+        {
+            "Inverse Weight": 0.041666666666666664,
+            "key": 0,
+            "source": "Bengals",
+            "target": "Steelers",
+            "weight": 24
+        },
+        {
+            "Inverse Weight": 0.3333333333333333,
+            "key": 0,
+            "source": "Bengals",
+            "target": "Cardinals",
+            "weight": 3
+        },
+        {
+            "Inverse Weight": 0.16666666666666666,
+            "key": 0,
+            "source": "Bengals",
+            "target": "Ravens",
+            "weight": 6
+        },
+        {
+            "Inverse Weight": 0.1,
+            "key": 0,
+            "source": "Bengals",
+            "target": "Jaguars",
+            "weight": 10
+        },
+        {
+            "Inverse Weight": 0.07142857142857142,
+            "key": 0,
+            "source": "Bengals",
+            "target": "Rams",
+            "weight": 14
+        },
+        {
+            "Inverse Weight": 0.03333333333333333,
+            "key": 0,
+            "source": "Browns",
+            "target": "Titans",
+            "weight": 30
+        },
+        {
+            "Inverse Weight": 0.14285714285714285,
+            "key": 0,
+            "source": "Browns",
+            "target": "Rams",
+            "weight": 7
+        },
+        {
+            "Inverse Weight": 0.03571428571428571,
+            "key": 0,
+            "source": "Browns",
+            "target": "49ers",
+            "weight": 28
+        },
+        {
+            "Inverse Weight": 0.25,
+            "key": 0,
+            "source": "Browns",
+            "target": "Seahawks",
+            "weight": 4
+        },
+        {
+            "Inverse Weight": 0.07142857142857142,
+            "key": 0,
+            "source": "Browns",
+            "target": "Patriots",
+            "weight": 14
+        },
+        {
+            "Inverse Weight": 0.2,
+            "key": 0,
+            "source": "Ravens",
+            "target": "Chiefs",
+            "weight": 5
+        },
+        {
+            "Inverse Weight": 0.06666666666666667,
+            "key": 0,
+            "source": "Ravens",
+            "target": "Browns",
+            "weight": 15
+        },
+        {
+            "Inverse Weight": 0.03333333333333333,
+            "key": 0,
+            "source": "Steelers",
+            "target": "Patriots",
+            "weight": 30
+        },
+        {
+            "Inverse Weight": 0.5,
+            "key": 0,
+            "source": "Steelers",
+            "target": "Seahawks",
+            "weight": 2
+        },
+        {
+            "Inverse Weight": 0.25,
+            "key": 0,
+            "source": "Steelers",
+            "target": "49ers",
+            "weight": 4
+        },
+        {
+            "Inverse Weight": 0.3333333333333333,
+            "key": 0,
+            "source": "Steelers",
+            "target": "Ravens",
+            "weight": 3
+        },
+        {
+            "Inverse Weight": 0.16666666666666666,
+            "key": 0,
+            "source": "Bills",
+            "target": "Patriots",
+            "weight": 6
+        },
+        {
+            "Inverse Weight": 0.05555555555555555,
+            "key": 0,
+            "source": "Bills",
+            "target": "Eagles",
+            "weight": 18
+        },
+        {
+            "Inverse Weight": 0.02040816326530612,
+            "key": 0,
+            "source": "Dolphins",
+            "target": "Ravens",
+            "weight": 49
+        },
+        {
+            "Inverse Weight": 0.023255813953488372,
+            "key": 0,
+            "source": "Dolphins",
+            "target": "Patriots",
+            "weight": 43
+        },
+        {
+            "Inverse Weight": 0.04,
+            "key": 0,
+            "source": "Dolphins",
+            "target": "Cowboys",
+            "weight": 25
+        },
+        {
+            "Inverse Weight": 0.05,
+            "key": 0,
+            "source": "Dolphins",
+            "target": "Chargers",
+            "weight": 20
+        },
+        {
+            "Inverse Weight": 1.0,
+            "key": 0,
+            "source": "Dolphins",
+            "target": "Redskins",
+            "weight": 1
+        },
+        {
+            "Inverse Weight": 0.1,
+            "key": 0,
+            "source": "Dolphins",
+            "target": "Bills",
+            "weight": 10
+        },
+        {
+            "Inverse Weight": 0.07692307692307693,
+            "key": 0,
+            "source": "Dolphins",
+            "target": "Steelers",
+            "weight": 13
+        },
+        {
+            "Inverse Weight": 1.0,
+            "key": 0,
+            "source": "Jets",
+            "target": "Bills",
+            "weight": 1
+        },
+        {
+            "Inverse Weight": 0.05,
+            "key": 0,
+            "source": "Jets",
+            "target": "Browns",
+            "weight": 20
+        },
+        {
+            "Inverse Weight": 0.0625,
+            "key": 0,
+            "source": "Jets",
+            "target": "Patriots",
+            "weight": 16
+        },
+        {
+            "Inverse Weight": 0.030303030303030304,
+            "key": 1,
+            "source": "Jets",
+            "target": "Patriots",
+            "weight": 33
+        },
+        {
+            "Inverse Weight": 0.04,
+            "key": 0,
+            "source": "Jets",
+            "target": "Eagles",
+            "weight": 25
+        },
+        {
+            "Inverse Weight": 0.07142857142857142,
+            "key": 0,
+            "source": "Jets",
+            "target": "Jaguars",
+            "weight": 14
+        },
+        {
+            "Inverse Weight": 0.16666666666666666,
+            "key": 0,
+            "source": "Colts",
+            "target": "Chargers",
+            "weight": 6
+        },
+        {
+            "Inverse Weight": 0.14285714285714285,
+            "key": 0,
+            "source": "Colts",
+            "target": "Raiders",
+            "weight": 7
+        },
+        {
+            "Inverse Weight": 0.07142857142857142,
+            "key": 0,
+            "source": "Jaguars",
+            "target": "Chiefs",
+            "weight": 14
+        },
+        {
+            "Inverse Weight": 1.0,
+            "key": 0,
+            "source": "Jaguars",
+            "target": "Texans",
+            "weight": 1
+        },
+        {
+            "Inverse Weight": 0.14285714285714285,
+            "key": 0,
+            "source": "Jaguars",
+            "target": "Panthers",
+            "weight": 7
+        },
+        {
+            "Inverse Weight": 0.14285714285714285,
+            "key": 0,
+            "source": "Jaguars",
+            "target": "Saints",
+            "weight": 7
+        },
+        {
+            "Inverse Weight": 0.5,
+            "key": 0,
+            "source": "Texans",
+            "target": "Saints",
+            "weight": 2
+        },
+        {
+            "Inverse Weight": 0.16666666666666666,
+            "key": 0,
+            "source": "Texans",
+            "target": "Panthers",
+            "weight": 6
+        },
+        {
+            "Inverse Weight": 0.14285714285714285,
+            "key": 0,
+            "source": "Texans",
+            "target": "Colts",
+            "weight": 7
+        },
+        {
+            "Inverse Weight": 0.5,
+            "key": 0,
+            "source": "Titans",
+            "target": "Colts",
+            "weight": 2
+        },
+        {
+            "Inverse Weight": 0.07692307692307693,
+            "key": 0,
+            "source": "Titans",
+            "target": "Jaguars",
+            "weight": 13
+        },
+        {
+            "Inverse Weight": 0.14285714285714285,
+            "key": 0,
+            "source": "Titans",
+            "target": "Bills",
+            "weight": 7
+        },
+        {
+            "Inverse Weight": 0.0625,
+            "key": 0,
+            "source": "Titans",
+            "target": "Broncos",
+            "weight": 16
+        },
+        {
+            "Inverse Weight": 0.125,
+            "key": 0,
+            "source": "Broncos",
+            "target": "Raiders",
+            "weight": 8
+        },
+        {
+            "Inverse Weight": 0.5,
+            "key": 0,
+            "source": "Broncos",
+            "target": "Bears",
+            "weight": 2
+        },
+        {
+            "Inverse Weight": 0.09090909090909091,
+            "key": 0,
+            "source": "Broncos",
+            "target": "Packers",
+            "weight": 11
+        },
+        {
+            "Inverse Weight": 0.5,
+            "key": 0,
+            "source": "Broncos",
+            "target": "Jaguars",
+            "weight": 2
+        },
+        {
+            "Inverse Weight": 0.041666666666666664,
+            "key": 0,
+            "source": "Broncos",
+            "target": "Chiefs",
+            "weight": 24
+        },
+        {
+            "Inverse Weight": 0.5,
+            "key": 0,
+            "source": "Broncos",
+            "target": "Colts",
+            "weight": 2
+        },
+        {
+            "Inverse Weight": 0.3333333333333333,
+            "key": 0,
+            "source": "Chargers",
+            "target": "Lions",
+            "weight": 3
+        },
+        {
+            "Inverse Weight": 0.14285714285714285,
+            "key": 0,
+            "source": "Chargers",
+            "target": "Texans",
+            "weight": 7
+        },
+        {
+            "Inverse Weight": 0.14285714285714285,
+            "key": 0,
+            "source": "Chargers",
+            "target": "Broncos",
+            "weight": 7
+        },
+        {
+            "Inverse Weight": 0.14285714285714285,
+            "key": 0,
+            "source": "Chargers",
+            "target": "Steelers",
+            "weight": 7
+        },
+        {
+            "Inverse Weight": 0.3333333333333333,
+            "key": 0,
+            "source": "Chargers",
+            "target": "Titans",
+            "weight": 3
+        },
+        {
+            "Inverse Weight": 0.16666666666666666,
+            "key": 0,
+            "source": "Chiefs",
+            "target": "Colts",
+            "weight": 6
+        },
+        {
+            "Inverse Weight": 0.14285714285714285,
+            "key": 0,
+            "source": "Chiefs",
+            "target": "Texans",
+            "weight": 7
+        },
+        {
+            "Inverse Weight": 0.14285714285714285,
+            "key": 0,
+            "source": "Chiefs",
+            "target": "Packers",
+            "weight": 7
+        },
+        {
+            "Inverse Weight": 0.05555555555555555,
+            "key": 0,
+            "source": "Raiders",
+            "target": "Chiefs",
+            "weight": 18
+        },
+        {
+            "Inverse Weight": 0.05,
+            "key": 0,
+            "source": "Raiders",
+            "target": "Vikings",
+            "weight": 20
+        },
+        {
+            "Inverse Weight": 0.05555555555555555,
+            "key": 0,
+            "source": "Raiders",
+            "target": "Packers",
+            "weight": 18
+        },
+        {
+            "Inverse Weight": 0.3333333333333333,
+            "key": 0,
+            "source": "Raiders",
+            "target": "Texans",
+            "weight": 3
+        },
+        {
+            "Inverse Weight": 0.14285714285714285,
+            "key": 0,
+            "source": "Bears",
+            "target": "Packers",
+            "weight": 7
+        },
+        {
+            "Inverse Weight": 0.3333333333333333,
+            "key": 0,
+            "source": "Bears",
+            "target": "Raiders",
+            "weight": 3
+        },
+        {
+            "Inverse Weight": 0.09090909090909091,
+            "key": 0,
+            "source": "Bears",
+            "target": "Saints",
+            "weight": 11
+        },
+        {
+            "Inverse Weight": 1.0,
+            "key": 0,
+            "source": "Bears",
+            "target": "Chargers",
+            "weight": 1
+        },
+        {
+            "Inverse Weight": 0.25,
+            "key": 0,
+            "source": "Lions",
+            "target": "Chiefs",
+            "weight": 4
+        },
+        {
+            "Inverse Weight": 1.0,
+            "key": 0,
+            "source": "Lions",
+            "target": "Packers",
+            "weight": 1
+        },
+        {
+            "Inverse Weight": 0.08333333333333333,
+            "key": 0,
+            "source": "Lions",
+            "target": "Vikings",
+            "weight": 12
+        },
+        {
+            "Inverse Weight": 0.14285714285714285,
+            "key": 0,
+            "source": "Packers",
+            "target": "Eagles",
+            "weight": 7
+        },
+        {
+            "Inverse Weight": 0.2,
+            "key": 0,
+            "source": "Vikings",
+            "target": "Packers",
+            "weight": 5
+        },
+        {
+            "Inverse Weight": 0.1,
+            "key": 0,
+            "source": "Vikings",
+            "target": "Bears",
+            "weight": 10
+        },
+        {
+            "Inverse Weight": 0.5,
+            "key": 0,
+            "source": "Cowboys",
+            "target": "Saints",
+            "weight": 2
+        },
+        {
+            "Inverse Weight": 0.1,
+            "key": 0,
+            "source": "Cowboys",
+            "target": "Packers",
+            "weight": 10
+        },
+        {
+            "Inverse Weight": 0.5,
+            "key": 0,
+            "source": "Cowboys",
+            "target": "Jets",
+            "weight": 2
+        },
+        {
+            "Inverse Weight": 0.25,
+            "key": 0,
+            "source": "Eagles",
+            "target": "Falcons",
+            "weight": 4
+        },
+        {
+            "Inverse Weight": 0.3333333333333333,
+            "key": 0,
+            "source": "Eagles",
+            "target": "Lions",
+            "weight": 3
+        },
+        {
+            "Inverse Weight": 0.05555555555555555,
+            "key": 0,
+            "source": "Eagles",
+            "target": "Vikings",
+            "weight": 18
+        },
+        {
+            "Inverse Weight": 0.037037037037037035,
+            "key": 0,
+            "source": "Eagles",
+            "target": "Cowboys",
+            "weight": 27
+        },
+        {
+            "Inverse Weight": 0.05555555555555555,
+            "key": 0,
+            "source": "Giants",
+            "target": "Cowboys",
+            "weight": 18
+        },
+        {
+            "Inverse Weight": 0.07142857142857142,
+            "key": 0,
+            "source": "Giants",
+            "target": "Bills",
+            "weight": 14
+        },
+        {
+            "Inverse Weight": 0.05555555555555555,
+            "key": 0,
+            "source": "Giants",
+            "target": "Vikings",
+            "weight": 18
+        },
+        {
+            "Inverse Weight": 0.047619047619047616,
+            "key": 0,
+            "source": "Giants",
+            "target": "Patriots",
+            "weight": 21
+        },
+        {
+            "Inverse Weight": 0.16666666666666666,
+            "key": 0,
+            "source": "Giants",
+            "target": "Cardinals",
+            "weight": 6
+        },
+        {
+            "Inverse Weight": 0.2,
+            "key": 0,
+            "source": "Giants",
+            "target": "Lions",
+            "weight": 5
+        },
+        {
+            "Inverse Weight": 0.2,
+            "key": 0,
+            "source": "Redskins",
+            "target": "Eagles",
+            "weight": 5
+        },
+        {
+            "Inverse Weight": 0.1,
+            "key": 0,
+            "source": "Redskins",
+            "target": "Cowboys",
+            "weight": 10
+        },
+        {
+            "Inverse Weight": 0.0625,
+            "key": 0,
+            "source": "Redskins",
+            "target": "Bears",
+            "weight": 16
+        },
+        {
+            "Inverse Weight": 0.047619047619047616,
+            "key": 0,
+            "source": "Redskins",
+            "target": "Giants",
+            "weight": 21
+        },
+        {
+            "Inverse Weight": 0.038461538461538464,
+            "key": 0,
+            "source": "Redskins",
+            "target": "Patriots",
+            "weight": 26
+        },
+        {
+            "Inverse Weight": 0.1111111111111111,
+            "key": 0,
+            "source": "Redskins",
+            "target": "49ers",
+            "weight": 9
+        },
+        {
+            "Inverse Weight": 0.1,
+            "key": 0,
+            "source": "Redskins",
+            "target": "Vikings",
+            "weight": 10
+        },
+        {
+            "Inverse Weight": 0.07142857142857142,
+            "key": 0,
+            "source": "Buccaneers",
+            "target": "49ers",
+            "weight": 14
+        },
+        {
+            "Inverse Weight": 1.0,
+            "key": 0,
+            "source": "Buccaneers",
+            "target": "Giants",
+            "weight": 1
+        },
+        {
+            "Inverse Weight": 0.14285714285714285,
+            "key": 0,
+            "source": "Buccaneers",
+            "target": "Saints",
+            "weight": 7
+        },
+        {
+            "Inverse Weight": 0.09090909090909091,
+            "key": 0,
+            "source": "Buccaneers",
+            "target": "Panthers",
+            "weight": 11
+        },
+        {
+            "Inverse Weight": 0.25,
+            "key": 0,
+            "source": "Buccaneers",
+            "target": "Titans",
+            "weight": 4
+        },
+        {
+            "Inverse Weight": 0.0625,
+            "key": 0,
+            "source": "Falcons",
+            "target": "Vikings",
+            "weight": 16
+        },
+        {
+            "Inverse Weight": 0.3333333333333333,
+            "key": 0,
+            "source": "Falcons",
+            "target": "Colts",
+            "weight": 3
+        },
+        {
+            "Inverse Weight": 0.07142857142857142,
+            "key": 0,
+            "source": "Falcons",
+            "target": "Titans",
+            "weight": 14
+        },
+        {
+            "Inverse Weight": 0.047619047619047616,
+            "key": 0,
+            "source": "Falcons",
+            "target": "Texans",
+            "weight": 21
+        },
+        {
+            "Inverse Weight": 1.0,
+            "key": 0,
+            "source": "Falcons",
+            "target": "Cardinals",
+            "weight": 1
+        },
+        {
+            "Inverse Weight": 0.037037037037037035,
+            "key": 0,
+            "source": "Falcons",
+            "target": "Rams",
+            "weight": 27
+        },
+        {
+            "Inverse Weight": 0.14285714285714285,
+            "key": 0,
+            "source": "Falcons",
+            "target": "Seahawks",
+            "weight": 7
+        },
+        {
+            "Inverse Weight": 0.3333333333333333,
+            "key": 0,
+            "source": "Panthers",
+            "target": "Rams",
+            "weight": 3
+        },
+        {
+            "Inverse Weight": 0.16666666666666666,
+            "key": 0,
+            "source": "Panthers",
+            "target": "Buccaneers",
+            "weight": 6
+        },
+        {
+            "Inverse Weight": 0.02631578947368421,
+            "key": 0,
+            "source": "Panthers",
+            "target": "49ers",
+            "weight": 38
+        },
+        {
+            "Inverse Weight": 0.05555555555555555,
+            "key": 0,
+            "source": "Saints",
+            "target": "Rams",
+            "weight": 18
+        },
+        {
+            "Inverse Weight": 0.16666666666666666,
+            "key": 0,
+            "source": "Cardinals",
+            "target": "Ravens",
+            "weight": 6
+        },
+        {
+            "Inverse Weight": 0.05555555555555555,
+            "key": 0,
+            "source": "Cardinals",
+            "target": "Panthers",
+            "weight": 18
+        },
+        {
+            "Inverse Weight": 0.058823529411764705,
+            "key": 0,
+            "source": "Cardinals",
+            "target": "Seahawks",
+            "weight": 17
+        },
+        {
+            "Inverse Weight": 0.045454545454545456,
+            "key": 0,
+            "source": "Cardinals",
+            "target": "Saints",
+            "weight": 22
+        },
+        {
+            "Inverse Weight": 0.06666666666666667,
+            "key": 0,
+            "source": "Rams",
+            "target": "Buccaneers",
+            "weight": 15
+        },
+        {
+            "Inverse Weight": 1.0,
+            "key": 0,
+            "source": "Rams",
+            "target": "Seahawks",
+            "weight": 1
+        },
+        {
+            "Inverse Weight": 0.07692307692307693,
+            "key": 0,
+            "source": "Rams",
+            "target": "49ers",
+            "weight": 13
+        },
+        {
+            "Inverse Weight": 0.16666666666666666,
+            "key": 0,
+            "source": "Seahawks",
+            "target": "Saints",
+            "weight": 6
+        },
+        {
+            "Inverse Weight": 0.07142857142857142,
+            "key": 0,
+            "source": "Seahawks",
+            "target": "Ravens",
+            "weight": 14
+        }
+    ],
+    "multigraph": true,
+    "nodes": [
+        {
+            "Conference": "AFC",
+            "Division": "North",
+            "Elo": 1332.91548197307,
+            "Interceptions Thrown": 9,
+            "Losses": 8,
+            "Net Passing Yards": 2061,
+            "Pagerank": 0.007549243176327468,
+            "Pass Attempts": 337,
+            "Pass Completions": 204,
+            "Passing Touchdowns": 9,
+            "Points Against": 26.25,
+            "Points For": 15.5,
+            "Primary": "#FB4F14",
+            "Secondary": "#000000",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 317.25,
+            "Touchdowns": 1.5,
+            "Wins": 0,
+            "id": "Bengals"
+        },
+        {
+            "Conference": "AFC",
+            "Division": "North",
+            "Elo": 1469.9800890661943,
+            "Interceptions Thrown": 12,
+            "Losses": 5,
+            "Net Passing Yards": 1539,
+            "Pagerank": 0.022361332199427694,
+            "Pass Attempts": 233,
+            "Pass Completions": 133,
+            "Passing Touchdowns": 6,
+            "Points Against": 25.857142857142858,
+            "Points For": 19.0,
+            "Primary": "#311D00",
+            "Secondary": "#FF3C00",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 345.2857142857143,
+            "Touchdowns": 2.142857142857143,
+            "Wins": 2,
+            "id": "Browns"
+        },
+        {
+            "Conference": "AFC",
+            "Division": "North",
+            "Elo": 1572.8493918994247,
+            "Interceptions Thrown": 5,
+            "Losses": 2,
+            "Net Passing Yards": 1615,
+            "Pagerank": 0.019793791709230266,
+            "Pass Attempts": 221,
+            "Pass Completions": 142,
+            "Passing Touchdowns": 12,
+            "Points Against": 22.285714285714285,
+            "Points For": 30.571428571428573,
+            "Primary": "#241773",
+            "Secondary": "#9E7C0C",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 434.85714285714283,
+            "Touchdowns": 3.142857142857143,
+            "Wins": 5,
+            "id": "Ravens"
+        },
+        {
+            "Conference": "AFC",
+            "Division": "North",
+            "Elo": 1514.729098366291,
+            "Interceptions Thrown": 6,
+            "Losses": 4,
+            "Net Passing Yards": 1436,
+            "Pagerank": 0.014678540117405662,
+            "Pass Attempts": 226,
+            "Pass Completions": 144,
+            "Passing Touchdowns": 10,
+            "Points Against": 20.714285714285715,
+            "Points For": 21.428571428571427,
+            "Primary": "#FFB612",
+            "Secondary": "#101820",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 293.57142857142856,
+            "Touchdowns": 2.142857142857143,
+            "Wins": 3,
+            "id": "Steelers"
+        },
+        {
+            "Conference": "AFC",
+            "Division": "East",
+            "Elo": 1509.4005789813912,
+            "Interceptions Thrown": 8,
+            "Losses": 2,
+            "Net Passing Yards": 1507,
+            "Pagerank": 0.013176288606685384,
+            "Pass Attempts": 239,
+            "Pass Completions": 143,
+            "Passing Touchdowns": 9,
+            "Points Against": 17.428571428571427,
+            "Points For": 19.142857142857142,
+            "Primary": "#00338D",
+            "Secondary": "#C60C30",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 345.7142857142857,
+            "Touchdowns": 2.142857142857143,
+            "Wins": 5,
+            "id": "Bills"
+        },
+        {
+            "Conference": "AFC",
+            "Division": "East",
+            "Elo": 1299.2634259298604,
+            "Interceptions Thrown": 12,
+            "Losses": 7,
+            "Net Passing Yards": 1322,
+            "Pagerank": 0.0075492431763274515,
+            "Pass Attempts": 248,
+            "Pass Completions": 141,
+            "Passing Touchdowns": 6,
+            "Points Against": 34.0,
+            "Points For": 11.0,
+            "Primary": "#008E97",
+            "Secondary": "#FC4C02",
+            "Tertiary": "#005778",
+            "Ties": 0,
+            "Total Yards": 254.57142857142858,
+            "Touchdowns": 1.2857142857142858,
+            "Wins": 0,
+            "id": "Dolphins"
+        },
+        {
+            "Conference": "AFC",
+            "Division": "East",
+            "Elo": 1372.3885612572062,
+            "Interceptions Thrown": 11,
+            "Losses": 6,
+            "Net Passing Yards": 1020,
+            "Pagerank": 0.014064506007222507,
+            "Pass Attempts": 214,
+            "Pass Completions": 133,
+            "Passing Touchdowns": 5,
+            "Points Against": 26.428571428571427,
+            "Points For": 11.142857142857142,
+            "Primary": "#125740",
+            "Secondary": "#000000",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 208.14285714285714,
+            "Touchdowns": 1.0,
+            "Wins": 1,
+            "id": "Jets"
+        },
+        {
+            "Conference": "AFC",
+            "Division": "East",
+            "Elo": 1678.237311157671,
+            "Interceptions Thrown": 5,
+            "Losses": 0,
+            "Net Passing Yards": 2197,
+            "Pagerank": 0.03410075104170566,
+            "Pass Attempts": 313,
+            "Pass Completions": 203,
+            "Passing Touchdowns": 13,
+            "Points Against": 7.625,
+            "Points For": 31.25,
+            "Primary": "#002244",
+            "Secondary": "#C60C30",
+            "Tertiary": "#B0B7BC",
+            "Ties": 0,
+            "Total Yards": 368.875,
+            "Touchdowns": 3.25,
+            "Wins": 8,
+            "id": "Patriots"
+        },
+        {
+            "Conference": "AFC",
+            "Division": "South",
+            "Elo": 1546.7432967053537,
+            "Interceptions Thrown": 3,
+            "Losses": 2,
+            "Net Passing Yards": 1522,
+            "Pagerank": 0.030335698216290567,
+            "Pass Attempts": 232,
+            "Pass Completions": 149,
+            "Passing Touchdowns": 14,
+            "Points Against": 21.571428571428573,
+            "Points For": 22.571428571428573,
+            "Primary": "#002C5F",
+            "Secondary": "#A2AAAD",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 346.57142857142856,
+            "Touchdowns": 2.5714285714285716,
+            "Wins": 5,
+            "id": "Colts"
+        },
+        {
+            "Conference": "AFC",
+            "Division": "South",
+            "Elo": 1483.8716994832587,
+            "Interceptions Thrown": 3,
+            "Losses": 4,
+            "Net Passing Yards": 1946,
+            "Pagerank": 0.0168433813501054,
+            "Pass Attempts": 269,
+            "Pass Completions": 166,
+            "Passing Touchdowns": 14,
+            "Points Against": 20.375,
+            "Points For": 21.625,
+            "Primary": "#D7A22A",
+            "Secondary": "#006778",
+            "Tertiary": "#101820",
+            "Ties": 0,
+            "Total Yards": 379.75,
+            "Touchdowns": 1.875,
+            "Wins": 4,
+            "id": "Jaguars"
+        },
+        {
+            "Conference": "AFC",
+            "Division": "South",
+            "Elo": 1558.2435380122372,
+            "Interceptions Thrown": 6,
+            "Losses": 3,
+            "Net Passing Yards": 2091,
+            "Pagerank": 0.02807958700392581,
+            "Pass Attempts": 275,
+            "Pass Completions": 190,
+            "Passing Touchdowns": 16,
+            "Points Against": 23.5,
+            "Points For": 26.5,
+            "Primary": "#03202F",
+            "Secondary": "#A71930",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 395.0,
+            "Touchdowns": 3.125,
+            "Wins": 5,
+            "id": "Texans"
+        },
+        {
+            "Conference": "AFC",
+            "Division": "South",
+            "Elo": 1487.4554335062915,
+            "Interceptions Thrown": 4,
+            "Losses": 4,
+            "Net Passing Yards": 1606,
+            "Pagerank": 0.021712475626519935,
+            "Pass Attempts": 238,
+            "Pass Completions": 152,
+            "Passing Touchdowns": 12,
+            "Points Against": 16.875,
+            "Points For": 18.5,
+            "Primary": "#0C2340",
+            "Secondary": "#418FDE",
+            "Tertiary": "#C8102E",
+            "Ties": 0,
+            "Total Yards": 298.875,
+            "Touchdowns": 2.125,
+            "Wins": 4,
+            "id": "Titans"
+        },
+        {
+            "Conference": "AFC",
+            "Division": "West",
+            "Elo": 1445.1754817481992,
+            "Interceptions Thrown": 5,
+            "Losses": 6,
+            "Net Passing Yards": 1622,
+            "Pagerank": 0.02014043887468121,
+            "Pass Attempts": 262,
+            "Pass Completions": 171,
+            "Passing Touchdowns": 6,
+            "Points Against": 18.875,
+            "Points For": 15.625,
+            "Primary": "#FB4F14",
+            "Secondary": "#002244",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 312.75,
+            "Touchdowns": 1.5,
+            "Wins": 2,
+            "id": "Broncos"
+        },
+        {
+            "Conference": "AFC",
+            "Division": "West",
+            "Elo": 1495.4387790559774,
+            "Interceptions Thrown": 7,
+            "Losses": 5,
+            "Net Passing Yards": 2249,
+            "Pagerank": 0.021874151864010954,
+            "Pass Attempts": 306,
+            "Pass Completions": 203,
+            "Passing Touchdowns": 12,
+            "Points Against": 19.625,
+            "Points For": 19.625,
+            "Primary": "#FFC20E",
+            "Secondary": "#002A5E",
+            "Tertiary": "#0080C6",
+            "Ties": 0,
+            "Total Yards": 350.625,
+            "Touchdowns": 2.0,
+            "Wins": 3,
+            "id": "Chargers"
+        },
+        {
+            "Conference": "AFC",
+            "Division": "West",
+            "Elo": 1577.1328709908905,
+            "Interceptions Thrown": 1,
+            "Losses": 3,
+            "Net Passing Yards": 2473,
+            "Pagerank": 0.03757224638220169,
+            "Pass Attempts": 297,
+            "Pass Completions": 191,
+            "Passing Touchdowns": 18,
+            "Points Against": 22.625,
+            "Points For": 28.25,
+            "Primary": "#E31837",
+            "Secondary": "#FFB81C",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 392.125,
+            "Touchdowns": 3.0,
+            "Wins": 5,
+            "id": "Chiefs"
+        },
+        {
+            "Conference": "AFC",
+            "Division": "West",
+            "Elo": 1436.813567612651,
+            "Interceptions Thrown": 4,
+            "Losses": 4,
+            "Net Passing Yards": 1683,
+            "Pagerank": 0.029109226189034276,
+            "Pass Attempts": 222,
+            "Pass Completions": 160,
+            "Passing Touchdowns": 12,
+            "Points Against": 27.428571428571427,
+            "Points For": 21.571428571428573,
+            "Primary": "#A5ACAF",
+            "Secondary": "#000000",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 371.85714285714283,
+            "Touchdowns": 2.5714285714285716,
+            "Wins": 3,
+            "id": "Raiders"
+        },
+        {
+            "Conference": "NFC",
+            "Division": "North",
+            "Elo": 1514.547642559296,
+            "Interceptions Thrown": 5,
+            "Losses": 4,
+            "Net Passing Yards": 1401,
+            "Pagerank": 0.04210685781234563,
+            "Pass Attempts": 255,
+            "Pass Completions": 170,
+            "Passing Touchdowns": 8,
+            "Points Against": 17.428571428571427,
+            "Points For": 18.285714285714285,
+            "Primary": "#0B162A",
+            "Secondary": "#C83803",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 281.42857142857144,
+            "Touchdowns": 1.5714285714285714,
+            "Wins": 3,
+            "id": "Bears"
+        },
+        {
+            "Conference": "NFC",
+            "Division": "North",
+            "Elo": 1480.4212671610023,
+            "Interceptions Thrown": 4,
+            "Losses": 3,
+            "Net Passing Yards": 1979,
+            "Pagerank": 0.014857826346674357,
+            "Pass Attempts": 250,
+            "Pass Completions": 161,
+            "Passing Touchdowns": 16,
+            "Points Against": 26.571428571428573,
+            "Points For": 25.714285714285715,
+            "Primary": "#0076B6",
+            "Secondary": "#B0B7BC",
+            "Tertiary": "#000000",
+            "Ties": 1,
+            "Total Yards": 379.7142857142857,
+            "Touchdowns": 2.5714285714285716,
+            "Wins": 3,
+            "id": "Lions"
+        },
+        {
+            "Conference": "NFC",
+            "Division": "North",
+            "Elo": 1633.0697700169433,
+            "Interceptions Thrown": 2,
+            "Losses": 1,
+            "Net Passing Yards": 2175,
+            "Pagerank": 0.09122338435484091,
+            "Pass Attempts": 283,
+            "Pass Completions": 185,
+            "Passing Touchdowns": 16,
+            "Points Against": 20.375,
+            "Points For": 26.875,
+            "Primary": "#203731",
+            "Secondary": "#FFB612",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 372.25,
+            "Touchdowns": 3.25,
+            "Wins": 7,
+            "id": "Packers"
+        },
+        {
+            "Conference": "NFC",
+            "Division": "North",
+            "Elo": 1588.4017768985873,
+            "Interceptions Thrown": 3,
+            "Losses": 2,
+            "Net Passing Yards": 1890,
+            "Pagerank": 0.057873222411229774,
+            "Pass Attempts": 215,
+            "Pass Completions": 155,
+            "Passing Touchdowns": 13,
+            "Points Against": 16.5,
+            "Points For": 26.375,
+            "Primary": "#4F2683",
+            "Secondary": "#FFC62F",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 396.375,
+            "Touchdowns": 3.125,
+            "Wins": 6,
+            "id": "Vikings"
+        },
+        {
+            "Conference": "NFC",
+            "Division": "East",
+            "Elo": 1522.4198089609847,
+            "Interceptions Thrown": 7,
+            "Losses": 3,
+            "Net Passing Yards": 2042,
+            "Pagerank": 0.05365510566619467,
+            "Pass Attempts": 238,
+            "Pass Completions": 168,
+            "Passing Touchdowns": 12,
+            "Points Against": 17.714285714285715,
+            "Points For": 27.142857142857142,
+            "Primary": "#041E42",
+            "Secondary": "#869397",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 437.7142857142857,
+            "Touchdowns": 3.2857142857142856,
+            "Wins": 4,
+            "id": "Cowboys"
+        },
+        {
+            "Conference": "NFC",
+            "Division": "East",
+            "Elo": 1525.9169734048644,
+            "Interceptions Thrown": 5,
+            "Losses": 4,
+            "Net Passing Yards": 1750,
+            "Pagerank": 0.09656344946367576,
+            "Pass Attempts": 270,
+            "Pass Completions": 167,
+            "Passing Touchdowns": 14,
+            "Points Against": 24.875,
+            "Points For": 25.25,
+            "Primary": "#004C54",
+            "Secondary": "#A5ACAF",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 337.0,
+            "Touchdowns": 2.875,
+            "Wins": 4,
+            "id": "Eagles"
+        },
+        {
+            "Conference": "NFC",
+            "Division": "East",
+            "Elo": 1397.6285105191691,
+            "Interceptions Thrown": 9,
+            "Losses": 6,
+            "Net Passing Yards": 1851,
+            "Pagerank": 0.009789218795183586,
+            "Pass Attempts": 305,
+            "Pass Completions": 191,
+            "Passing Touchdowns": 12,
+            "Points Against": 27.25,
+            "Points For": 19.75,
+            "Primary": "#0B2265",
+            "Secondary": "#A71930",
+            "Tertiary": "#A5ACAF",
+            "Ties": 0,
+            "Total Yards": 333.75,
+            "Touchdowns": 2.25,
+            "Wins": 2,
+            "id": "Giants"
+        },
+        {
+            "Conference": "NFC",
+            "Division": "East",
+            "Elo": 1364.179961835713,
+            "Interceptions Thrown": 9,
+            "Losses": 7,
+            "Net Passing Yards": 1408,
+            "Pagerank": 0.007589099429121727,
+            "Pass Attempts": 238,
+            "Pass Completions": 156,
+            "Passing Touchdowns": 9,
+            "Points Against": 24.375,
+            "Points For": 12.375,
+            "Primary": "#773141",
+            "Secondary": "#FFB612",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 260.75,
+            "Touchdowns": 1.375,
+            "Wins": 1,
+            "id": "Redskins"
+        },
+        {
+            "Conference": "NFC",
+            "Division": "South",
+            "Elo": 1432.3938871797773,
+            "Interceptions Thrown": 12,
+            "Losses": 5,
+            "Net Passing Yards": 1900,
+            "Pagerank": 0.036713787484672376,
+            "Pass Attempts": 263,
+            "Pass Completions": 153,
+            "Passing Touchdowns": 14,
+            "Points Against": 30.285714285714285,
+            "Points For": 28.0,
+            "Primary": "#D50A0A",
+            "Secondary": "#0A0A08",
+            "Tertiary": "#FF7900",
+            "Ties": 0,
+            "Total Yards": 370.7142857142857,
+            "Touchdowns": 2.857142857142857,
+            "Wins": 2,
+            "id": "Buccaneers"
+        },
+        {
+            "Conference": "NFC",
+            "Division": "South",
+            "Elo": 1378.8132116936913,
+            "Interceptions Thrown": 9,
+            "Losses": 7,
+            "Net Passing Yards": 2536,
+            "Pagerank": 0.013863007179721625,
+            "Pass Attempts": 343,
+            "Pass Completions": 247,
+            "Passing Touchdowns": 17,
+            "Points Against": 31.25,
+            "Points For": 20.625,
+            "Primary": "#A71930",
+            "Secondary": "#000000",
+            "Tertiary": "#A5ACAF",
+            "Ties": 0,
+            "Total Yards": 385.5,
+            "Touchdowns": 2.5,
+            "Wins": 1,
+            "id": "Falcons"
+        },
+        {
+            "Conference": "NFC",
+            "Division": "South",
+            "Elo": 1528.2622399503528,
+            "Interceptions Thrown": 4,
+            "Losses": 3,
+            "Net Passing Yards": 1432,
+            "Pagerank": 0.031897538704246296,
+            "Pass Attempts": 248,
+            "Pass Completions": 148,
+            "Passing Touchdowns": 7,
+            "Points Against": 26.285714285714285,
+            "Points For": 25.571428571428573,
+            "Primary": "#0085CA",
+            "Secondary": "#101820",
+            "Tertiary": "#BFC0BF",
+            "Ties": 0,
+            "Total Yards": 334.14285714285717,
+            "Touchdowns": 2.5714285714285716,
+            "Wins": 4,
+            "id": "Panthers"
+        },
+        {
+            "Conference": "NFC",
+            "Division": "South",
+            "Elo": 1670.7485348959938,
+            "Interceptions Thrown": 5,
+            "Losses": 1,
+            "Net Passing Yards": 2088,
+            "Pagerank": 0.05054141316613705,
+            "Pass Attempts": 288,
+            "Pass Completions": 203,
+            "Passing Touchdowns": 14,
+            "Points Against": 19.5,
+            "Points For": 24.375,
+            "Primary": "#D3BC8D",
+            "Secondary": "#101820",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 387.75,
+            "Touchdowns": 2.375,
+            "Wins": 7,
+            "id": "Saints"
+        },
+        {
+            "Conference": "NFC",
+            "Division": "West",
+            "Elo": 1601.726367228834,
+            "Interceptions Thrown": 7,
+            "Losses": 0,
+            "Net Passing Yards": 1444,
+            "Pagerank": 0.07363546265532758,
+            "Pass Attempts": 190,
+            "Pass Completions": 133,
+            "Passing Touchdowns": 9,
+            "Points Against": 11.0,
+            "Points For": 29.571428571428573,
+            "Primary": "#AA0000",
+            "Secondary": "#B3995D",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 378.85714285714283,
+            "Touchdowns": 3.0,
+            "Wins": 7,
+            "id": "49ers"
+        },
+        {
+            "Conference": "NFC",
+            "Division": "West",
+            "Elo": 1421.5968853283225,
+            "Interceptions Thrown": 4,
+            "Losses": 4,
+            "Net Passing Yards": 1811,
+            "Pagerank": 0.008514328178241538,
+            "Pass Attempts": 293,
+            "Pass Completions": 186,
+            "Passing Touchdowns": 7,
+            "Points Against": 27.875,
+            "Points For": 21.25,
+            "Primary": "#97233F",
+            "Secondary": "#000000",
+            "Tertiary": "#FFB612",
+            "Ties": 1,
+            "Total Yards": 342.875,
+            "Touchdowns": 1.875,
+            "Wins": 3,
+            "id": "Cardinals"
+        },
+        {
+            "Conference": "NFC",
+            "Division": "West",
+            "Elo": 1571.584228347672,
+            "Interceptions Thrown": 7,
+            "Losses": 3,
+            "Net Passing Yards": 2307,
+            "Pagerank": 0.05846245793561319,
+            "Pass Attempts": 315,
+            "Pass Completions": 193,
+            "Passing Touchdowns": 11,
+            "Points Against": 21.75,
+            "Points For": 26.75,
+            "Primary": "#002244",
+            "Secondary": "#866D4B",
+            "Tertiary": "#000000",
+            "Ties": 0,
+            "Total Yards": 385.625,
+            "Touchdowns": 2.75,
+            "Wins": 5,
+            "id": "Rams"
+        },
+        {
+            "Conference": "NFC",
+            "Division": "West",
+            "Elo": 1587.6483282728286,
+            "Interceptions Thrown": 1,
+            "Losses": 2,
+            "Net Passing Yards": 2024,
+            "Pagerank": 0.013772938875671993,
+            "Pass Attempts": 250,
+            "Pass Completions": 171,
+            "Passing Touchdowns": 17,
+            "Points Against": 24.5,
+            "Points For": 26.0,
+            "Primary": "#002244",
+            "Secondary": "#69BE28",
+            "Tertiary": "#A5ACAF",
+            "Ties": 0,
+            "Total Yards": 383.25,
+            "Touchdowns": 2.875,
+            "Wins": 6,
+            "id": "Seahawks"
+        }
+    ]
+}

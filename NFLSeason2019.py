@@ -61,6 +61,7 @@ def season():
 
     # Show the graph
     Plotter.show_graph(Graph.nfl)
+    Graph.persist_graph()
 
     # Playoff Info
     print('Current Playoff Picture:')
@@ -878,9 +879,9 @@ def week_8(teams, week_end_date, week=8):
                              'Chiefs', 24, 3, 249, 24, 36, 2, 0, 337,
                              'Packers', 31, 4, 256, 23, 33, 3, 0, 374)
 
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Steelers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Dolphins', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, week, -14,
+                             'Steelers', 27, 3, 236, 20, 36, 2, 1, 394,
+                             'Dolphins', 14, 2, 170, 21, 34, 2, 2, 230)
 
     return teams
 

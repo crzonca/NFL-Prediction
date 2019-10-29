@@ -484,7 +484,7 @@ def show_graph(nfl):
     # Draw the nodes in the graph
     nx.draw_networkx_nodes(nfl,
                            pos,
-                           node_color=list(nx.get_node_attributes(nfl, 'Primary Color').values()),
+                           node_color=list(nx.get_node_attributes(nfl, 'Primary').values()),
                            node_size=[10000 * rank for rank in nx.get_node_attributes(nfl, 'Pagerank').values()])
 
     # Draw the edges in the graph
@@ -496,7 +496,7 @@ def show_graph(nfl):
                            arrowsize=20)
 
     # Draw the team names
-    nodes = nx.get_node_attributes(nfl, 'Secondary Color')
+    nodes = nx.get_node_attributes(nfl, 'Secondary')
     for node_name, secondary_color in nodes.items():
         nx.draw_networkx_labels(nfl,
                                 pos,
