@@ -961,9 +961,9 @@ def week_9(teams, week_end_date, week=9):
                              'Ravens', 37, 4, 162, 17, 23, 1, 0, 372,
                              'Patriots', 20, 2, 268, 30, 46, 1, 1, 342)
 
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Giants', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Cowboys', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, week, 6.5,
+                             'Giants', 18, 1, 171, 26, 41, 1, 1, 271,
+                             'Cowboys', 37, 3, 257, 22, 35, 3, 1, 429)
 
     return teams
 
@@ -973,28 +973,28 @@ def week_10(teams, week_end_date, week=10):
         Predictor.get_week_probabilities(teams, Playoffs.get_week10_schedule(week_end_date))
 
     # Results
-    # teams = set_game_outcome(teams,
-    #                          week=week,
-    #                          spread=0,
-    #                          home_name='Raiders',
-    #                          home_score=0,
-    #                          home_touchdowns=0,
-    #                          home_net_pass_yards=0,
-    #                          home_pass_completions=0,
-    #                          home_pass_attempts=0,
-    #                          home_pass_tds=0,
-    #                          home_interceptions_thrown=0,
-    #                          home_total_yards=0,
-    #                          away_name='Chargers',
-    #                          away_score=0,
-    #                          away_touchdowns=0,
-    #                          away_net_pass_yards=0,
-    #                          away_pass_completions=0,
-    #                          away_pass_attempts=0,
-    #                          away_pass_tds=0,
-    #                          away_interceptions_thrown=0,
-    #                          away_total_yards=0)
-    #
+    teams = set_game_outcome(teams,
+                             week=week,
+                             spread=1,
+                             home_name='Raiders',
+                             home_score=26,
+                             home_touchdowns=2,
+                             home_net_pass_yards=200,
+                             home_pass_completions=21,
+                             home_pass_attempts=31,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=0,
+                             home_total_yards=278,
+                             away_name='Chargers',
+                             away_score=24,
+                             away_touchdowns=3,
+                             away_net_pass_yards=169,
+                             away_pass_completions=17,
+                             away_pass_attempts=31,
+                             away_pass_tds=2,
+                             away_interceptions_thrown=3,
+                             away_total_yards=315)
+
     # teams = set_game_outcome(teams, week, 0,
     #                          'Bengals', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Ravens', 0, 0, 0, 0, 0, 0, 0, 0)

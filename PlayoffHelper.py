@@ -632,7 +632,7 @@ def get_superbowl_schedule(week_end_date, get_odds=True):
     return games
 
 
-def monte_carlo(teams, trials=1e3, verbose=False):
+def monte_carlo(teams, trials=1e4, verbose=False):
     """
     Simulates each game outcome based on every team's elo after every game.  Process is repeated a high number of times
     to determine each teams probable final record and playoff standing.
@@ -738,9 +738,14 @@ def monte_carlo(teams, trials=1e3, verbose=False):
         averaged_teams.append(averaged_team)
 
     # For each trial
+    print('_' * 100)
     for trial_num, trial in enumerate(all_trials):
         if verbose:
             print('Getting playoff picture for trial', trial_num)
+        elif trial_num % int(len(all_trials) / 100) == 0:
+            print('█', end='')
+            if trial_num == len(all_trials) - 1:
+                print()
 
         # Get the teams in the playoffs for each trial
         afc_playoff_teams, nfc_playoff_teams = get_playoff_picture(trial)
