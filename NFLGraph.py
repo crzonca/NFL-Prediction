@@ -222,21 +222,23 @@ def get_team(teams, team_name):
 def parity_clock():
     global nfl
 
-    # Get all the cycles in the graph
-    cycles = list(nx.simple_cycles(nfl))
+    # Create graph copy with no duplicate directed edges
+    nfl_copy = nfl.copy()
+    nfl_copy.remove_edges_from(list(filter(lambda e: e[2] > 0, nfl.edges)))
+
+    # Iterate over all cycles and find the one with the longest length
+    longest_cycle_length = 0
+    cycle = None
+    for simple_cycle in nx.simple_cycles(nfl_copy):
+        if len(simple_cycle) > longest_cycle_length:
+            longest_cycle_length = len(simple_cycle)
+            cycle = simple_cycle
+            if longest_cycle_length == 30:
+                break
 
     # If there are any cycles
-    if cycles:
+    if cycle:
         print('Parity Clock')
-
-        # Sort the cycles based on their length
-        cycles = sorted(cycles, key=lambda c: len(c), reverse=True)
-
-        # Get the longest cycle
-        cycle = cycles[0]
-
-        # Get the length of the longest cycles
-        longest_cycle_length = len(cycles)
 
         # If all 32 teams are in the cycle, it's a full parity clock
         if longest_cycle_length == 32:
