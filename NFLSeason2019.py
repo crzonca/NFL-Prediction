@@ -1039,9 +1039,9 @@ def week_10(teams, week_end_date, week=10):
                              'Cowboys', 24, 3, 393, 28, 46, 3, 1, 443,
                              'Vikings', 28, 3, 211, 23, 32, 2, 0, 364)
 
-    # teams = set_game_outcome(teams, week, 0,
-    #                          '49ers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Seahawks', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, week, -6,
+                             '49ers', 24, 1, 215, 24, 46, 1, 1, 302,
+                             'Seahawks', 27, 2, 189, 24, 34, 1, 1, 336)
 
     return teams
 

@@ -233,7 +233,7 @@ def parity_clock():
         if len(simple_cycle) > longest_cycle_length:
             longest_cycle_length = len(simple_cycle)
             cycle = simple_cycle
-            if longest_cycle_length == 30:
+            if longest_cycle_length == 31:
                 break
 
     # If there are any cycles
