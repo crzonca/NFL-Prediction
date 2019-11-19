@@ -744,7 +744,7 @@ def monte_carlo(teams, trials=1e4, verbose=False):
             print('Getting playoff picture for trial', trial_num)
         elif trial_num % int(len(all_trials) / 100) == 0:
             print('=', end='')
-            if trial_num == len(all_trials) - 1:
+            if trial_num >= len(all_trials) - 1:
                 print()
 
         # Get the teams in the playoffs for each trial

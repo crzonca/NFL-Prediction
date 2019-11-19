@@ -1121,9 +1121,9 @@ def week_11(teams, week_end_date, week=11):
                              'Rams', 17, 2, 173, 11, 18, 0, 1, 283,
                              'Bears', 7, 1, 193, 25, 47, 1, 1, 267)
 
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Chargers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Chiefs', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, week, 5.5,
+                             'Chargers', 17, 1, 345, 28, 52, 1, 4, 438,
+                             'Chiefs', 24, 3, 180, 19, 32, 1, 1, 310)
 
     return teams
 
