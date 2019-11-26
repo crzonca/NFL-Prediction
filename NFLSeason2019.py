@@ -1203,9 +1203,9 @@ def week_12(teams, week_end_date, week=12):
                              '49ers', 37, 4, 227, 14, 20, 2, 0, 339,
                              'Packers', 8, 1, 81, 23, 37, 1, 0, 198)
 
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Rams', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Ravens', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams, week, 3,
+                             'Rams', 6, 0, 199, 26, 37, 0, 2, 221,
+                             'Ravens', 35, 6, 195, 16, 23, 5, 0, 480)
 
     return teams
 
