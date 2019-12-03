@@ -233,16 +233,12 @@ def parity_clock():
         if len(simple_cycle) > longest_cycle_length:
             longest_cycle_length = len(simple_cycle)
             cycle = simple_cycle
-            if longest_cycle_length == 31:
+            if longest_cycle_length == 32:
                 break
 
     # If there are any cycles
     if cycle:
         print('Parity Clock')
-
-        # If all 32 teams are in the cycle, it's a full parity clock
-        if longest_cycle_length == 32:
-            print('A full parity clock has been completed!')
 
         # Reverse the cycle direction
         cycle = list(reversed(cycle))
