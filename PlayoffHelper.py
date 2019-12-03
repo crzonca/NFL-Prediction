@@ -1,3 +1,4 @@
+import json
 import random
 import statistics
 from functools import cmp_to_key
@@ -15,6 +16,8 @@ completed_games = pd.DataFrame(columns=['home_team', 'away_team', 'home_score', 
                                         'away_pass_completions', 'away_pass_attempts', 'away_passing_touchdowns',
                                         'away_interceptions_thrown', 'away_net_passing_yards', 'away_total_yards',
                                         'away_elo'])
+
+completed_games_list = list()
 
 
 def get_team(teams, team_name):
@@ -632,7 +635,7 @@ def get_superbowl_schedule(week_end_date, get_odds=True):
     return games
 
 
-def monte_carlo(teams, trials=1e3, verbose=False):
+def monte_carlo(teams, trials=1e4, verbose=False):
     """
     Simulates each game outcome based on every team's elo after every game.  Process is repeated a high number of times
     to determine each teams probable final record and playoff standing.
@@ -930,6 +933,9 @@ def sort_by_tiebreakers(teams):
     :param teams: The list of all the teams in the league
     :return: The list of all the teams in the league sorted by the tiebreaker rules
     """
+    global completed_games_list
+
+    completed_games_list = json.loads(completed_games.to_json(orient='records'))
 
     # Get a list of teams sorted by the official NFL playoff tiebreakers
     sorted_teams = sorted(teams, key=cmp_to_key(compare_win_pct), reverse=True)
@@ -983,12 +989,14 @@ def compare_head_to_head(team1, team2):
     :param team2: The second team to compare
     :return: A comparison of each team's head to head record
     """
+    global completed_games_list
 
     # Get the games between both teams
-    head_to_head_games = completed_games.loc[((completed_games['home_team'] == team1[0]) |
-                                              (completed_games['away_team'] == team1[0])) &
-                                             ((completed_games['home_team'] == team2[0]) |
-                                              (completed_games['away_team'] == team2[0]))]
+    head_to_head_games = [game for game in completed_games_list
+                          if (game.get('home_team') == team1[0] or
+                              game.get('away_team') == team1[0]) and
+                          (game.get('home_team') == team2[0] or
+                           game.get('away_team') == team2[0])]
 
     # Get the number of victories each team had
     team1_victories = get_team_victories(team1[0], head_to_head_games)
@@ -1003,20 +1011,19 @@ def compare_head_to_head(team1, team2):
     return len(team1_victories) - len(team2_victories)
 
 
-def get_team_victories(team_name, games_df):
+def get_team_victories(team_name, games):
     """
     Gets all of the games where a team was victorious.
 
     :param team_name: The team to get the victorious games
-    :param games_df: A dataframe containing the information of all the completed games
-    :return: A dataframe containing all the games that the team has won
+    :param games: A list containing the information of all the completed games
+    :return: A list containing all the games that the team has won
     """
 
     # Get the games where the team won
-    team_victories = games_df.loc[((games_df['home_team'] == team_name) &
-                                   (games_df['home_score'] > games_df['away_score'])) |
-                                  ((games_df['away_team'] == team_name) &
-                                   (games_df['away_score'] > games_df['home_score']))]
+    team_victories = [game for game in games
+                      if (game.get('home_team') == team_name and game.get('home_score') > game.get('away_score')) or
+                      (game.get('away_team') == team_name and game.get('away_score') > game.get('home_score'))]
     return team_victories
 
 
@@ -1031,10 +1038,11 @@ def compare_divisional_record(team1, team2):
     :param team2: The second team to compare
     :return: A comparison of each team's divisional record
     """
+    global completed_games_list
 
     # Get they games against opponents within each teams division
-    team1_divisional_games = get_divisional_games(team1[0], completed_games)
-    team2_divisional_games = get_divisional_games(team2[0], completed_games)
+    team1_divisional_games = get_divisional_games(team1[0], completed_games_list)
+    team2_divisional_games = get_divisional_games(team2[0], completed_games_list)
 
     # Get the number of victories each team had
     team1_victories = get_team_victories(team1[0], team1_divisional_games)
@@ -1053,13 +1061,13 @@ def compare_divisional_record(team1, team2):
     return team1_divisional_pct - team2_divisional_pct
 
 
-def get_divisional_games(team_name, games_df):
+def get_divisional_games(team_name, games):
     """
     Gets all of the games that a team has competed in where the opponent was in the same division.
 
     :param team_name: The team to get the in division games for
-    :param games_df: A dataframe containing the information of all the completed games
-    :return: A dataframe containing all the games that the team has competed in against an in division opponent
+    :param games: A list containing the information of all the completed games
+    :return: A list containing all the games that the team has competed in against an in division opponent
     """
 
     # Get the division of the team
@@ -1072,10 +1080,9 @@ def get_divisional_games(team_name, games_df):
                 break
 
     # Get the games where the opponent is in the teams division
-    divisional_games = games_df.loc[((games_df['home_team'] == team_name) &
-                                     (games_df['away_team'].isin(teams_division))) |
-                                    ((games_df['away_team'] == team_name) &
-                                     (games_df['home_team'].isin(teams_division)))]
+    divisional_games = [game for game in games
+                        if (game.get('home_team') == team_name and game.get('away_team') in teams_division) or
+                        (game.get('away_team') == team_name and game.get('home_team') in teams_division)]
 
     return divisional_games
 
@@ -1091,10 +1098,11 @@ def compare_common_record(team1, team2):
     :param team2: The second team to compare
     :return: A comparison of each team's common record
     """
+    global completed_games_list
 
     # Get they games against common opponents
-    team1_common_games = get_games_against_common_opponents(team1, team2, completed_games)
-    team2_common_games = get_games_against_common_opponents(team2, team1, completed_games)
+    team1_common_games = get_games_against_common_opponents(team1, team2, completed_games_list)
+    team2_common_games = get_games_against_common_opponents(team2, team1, completed_games_list)
 
     # Get the number of victories each team had
     team1_victories = get_team_victories(team1[0], team1_common_games)
@@ -1113,27 +1121,29 @@ def compare_common_record(team1, team2):
     return team1_common_pct - team2_common_pct
 
 
-def get_games_against_common_opponents(team1, team2, games_df):
+def get_games_against_common_opponents(team1, team2, games):
     """
     Gets all of the games that team1 has competed in where the opponent has also faced team2.
 
     :param team1: The first team to compare
     :param team2: The second team to compare
-    :param games_df: A dataframe containing the information of all the completed games
-    :return: A dataframe containing all games containing both teams and common opponents
+    :param games: A list containing the information of all the completed games
+    :return: A list containing all games containing both teams and common opponents
     """
 
     # Get all of the games each team played in
-    team1_games = games_df.loc[(games_df['home_team'] == team1[0]) | (games_df['away_team'] == team1[0])]
-    team2_games = games_df.loc[(games_df['home_team'] == team2[0]) | (games_df['away_team'] == team2[0])]
+    team1_games = [game for game in games
+                   if game.get('home_team') == team1[0] or game.get('away_team') == team1[0]]
+    team2_games = [game for game in games
+                   if game.get('home_team') == team2[0] or game.get('away_team') == team2[0]]
 
     # Get all of the opponents team 2 faced (excluding team 1)
-    team2_opponents = (set(team2_games['home_team'].unique()) |
-                       set(team2_games['away_team'].unique())) - {team2[0]} - {team1[0]}
+    team2_opponents = (set([game.get('home_team') for game in team2_games]) |
+                       set([game.get('away_team') for game in team2_games])) - {team2[0]} - {team1[0]}
 
     # Get all the games where team 1 faced an opponent that team 2 faced
-    common_opponents = team1_games.loc[(team1_games['home_team'].isin(team2_opponents)) |
-                                       (team1_games['away_team'].isin(team2_opponents))]
+    common_opponents = [game for game in team1_games
+                        if game.get('home_team') in team2_opponents or game.get('away_team') in team2_opponents]
 
     return common_opponents
 
@@ -1149,10 +1159,11 @@ def compare_conference_record(team1, team2):
     :param team2: The second team to compare
     :return: A comparison of each team's conference record
     """
+    global completed_games_list
 
     # Get they games against opponents within each teams conference
-    team1_conference_games = get_conference_games(team1[0], completed_games)
-    team2_conference_games = get_conference_games(team2[0], completed_games)
+    team1_conference_games = get_conference_games(team1[0], completed_games_list)
+    team2_conference_games = get_conference_games(team2[0], completed_games_list)
 
     # Get the number of victories each team had
     team1_victories = get_team_victories(team1[0], team1_conference_games)
@@ -1171,13 +1182,13 @@ def compare_conference_record(team1, team2):
     return team1_conference_pct - team2_conference_pct
 
 
-def get_conference_games(team_name, games_df):
+def get_conference_games(team_name, games):
     """
     Gets all of the games that a team has competed in where the opponent was in the same conference.
 
     :param team_name: The team to get the in conference games for
-    :param games_df: A dataframe containing the information of all the completed games
-    :return: A dataframe containing all the games that the team has competed in against an in conference opponent
+    :param games: A list containing the information of all the completed games
+    :return: A list containing all the games that the team has competed in against an in conference opponent
     """
 
     # Get the conference of the team
@@ -1195,10 +1206,9 @@ def get_conference_games(team_name, games_df):
         conference_teams.extend(division)
 
     # Get the games where the opponent is in the teams conference
-    conference_games = games_df.loc[((games_df['home_team'] == team_name) &
-                                     (games_df['away_team'].isin(conference_teams))) |
-                                    ((games_df['away_team'] == team_name) &
-                                     (games_df['home_team'].isin(conference_teams)))]
+    conference_games = [game for game in games
+                        if (game.get('home_team') == team_name and game.get('away_team') in conference_teams) or
+                        (game.get('away_team') == team_name and game.get('home_team') in conference_teams)]
 
     return conference_games
 
@@ -1217,24 +1227,24 @@ def compare_strength_of_victory(team1, team2):
     """
 
     import Projects.nfl.NFL_Prediction.NFLSeason2019 as Season
+    global completed_games_list
 
     # Get all the games each team competed in
-    team1_games = completed_games.loc[(completed_games['home_team'] == team1[0]) |
-                                      (completed_games['away_team'] == team1[0])]
-
-    team2_games = completed_games.loc[(completed_games['home_team'] == team2[0]) |
-                                      (completed_games['away_team'] == team2[0])]
+    team1_games = [game for game in completed_games_list
+                   if game.get('home_team') == team1[0] or game.get('away_team') == team1[0]]
+    team2_games = [game for game in completed_games_list
+                   if game.get('home_team') == team2[0] or game.get('away_team') == team2[0]]
 
     # Get all of the games where each team was victorious
     team1_victories = get_team_victories(team1[0], team1_games)
     team2_victories = get_team_victories(team2[0], team2_games)
 
     # Get all of the opponents each team defeated
-    team1_opponents = (set(team1_victories['home_team'].unique()) |
-                       set(team1_victories['away_team'].unique())) - {team1[0]}
+    team1_opponents = (set([game.get('home_team') for game in team1_victories]) |
+                       set([game.get('away_team') for game in team1_victories])) - {team1[0]}
 
-    team2_opponents = (set(team2_victories['home_team'].unique()) |
-                       set(team2_victories['away_team'].unique())) - {team2[0]}
+    team2_opponents = (set([game.get('home_team') for game in team2_victories]) |
+                       set([game.get('away_team') for game in team2_victories])) - {team2[0]}
 
     # Total the wins, losses and ties of each teams opponents
     team1_opponent_victories = list()
@@ -1290,19 +1300,20 @@ def compare_strength_of_schedule(team1, team2):
 
     import Projects.nfl.NFL_Prediction.NFLSeason2019 as Season
 
-    # Get all the games each team competed in
-    team1_games = completed_games.loc[(completed_games['home_team'] == team1[0]) |
-                                      (completed_games['away_team'] == team1[0])]
+    global completed_games_list
 
-    team2_games = completed_games.loc[(completed_games['home_team'] == team2[0]) |
-                                      (completed_games['away_team'] == team2[0])]
+    # Get all the games each team competed in
+    team1_games = [game for game in completed_games_list
+                   if game.get('home_team') == team1[0] or game.get('away_team') == team1[0]]
+    team2_games = [game for game in completed_games_list
+                   if game.get('home_team') == team2[0] or game.get('away_team') == team2[0]]
 
     # Get all of the opponents each team faced
-    team1_opponents = (set(team1_games['home_team'].unique()) |
-                       set(team1_games['away_team'].unique())) - {team1[0]}
+    team1_opponents = (set([game.get('home_team') for game in team1_games]) |
+                       set([game.get('away_team') for game in team1_games])) - {team1[0]}
 
-    team2_opponents = (set(team2_games['home_team'].unique()) |
-                       set(team2_games['away_team'].unique())) - {team2[0]}
+    team2_opponents = (set([game.get('home_team') for game in team2_games]) |
+                       set([game.get('away_team') for game in team2_games])) - {team2[0]}
 
     # Total the wins, losses and ties of each teams opponents
     team1_opponent_victories = list()
