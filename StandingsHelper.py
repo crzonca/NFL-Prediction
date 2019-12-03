@@ -337,7 +337,7 @@ def print_monte_carlo_simulation(teams):
 
     # Create the table header
     table = PrettyTable(['Rank', 'Name', 'Wins', 'Losses', 'Ties', 'Elo', 'Playoff Chances'])
-    table.float_format = '0.2'
+    table.float_format = '0.3'
 
     # Add the info to the rows
     for rank, team in enumerate(sorted_by_wins):

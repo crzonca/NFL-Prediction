@@ -70,7 +70,7 @@ def season():
 
         print('*' * 120, '\n')
 
-        Playoffs.monte_carlo(nfl_teams, trials=1e4)
+        Playoffs.monte_carlo(nfl_teams, trials=1e5)
 
     # Playoffs
     print('Playoffs')
