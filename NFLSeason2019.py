@@ -44,7 +44,7 @@ def season():
     nfl_teams = handle_week(nfl_teams, 'Week 13', week_13, eliminated_teams, '26 November 2019')
     # eliminated_teams.extend(['Falcons', 'Lions', 'Dolphins', 'Giants', 'Cardinals'])
     nfl_teams = handle_week(nfl_teams, 'Week 14', week_14, eliminated_teams, '3 December 2019')
-    # eliminated_teams.extend([])
+    # eliminated_teams.extend(['Redskins', 'Jaguars', 'Chargers', 'Jets',  'Panthers', 'Buccaneers'])
     nfl_teams = handle_week(nfl_teams, 'Week 15', week_15, eliminated_teams, '10 December 2019')
     nfl_teams = handle_week(nfl_teams, 'Week 16', week_16, eliminated_teams, '17 December 2019')
     nfl_teams = handle_week(nfl_teams, 'Week 17', week_17, eliminated_teams, '24 December 2019')
@@ -1307,80 +1307,80 @@ def week_14(teams, week_end_date, week=14):
         Predictor.get_week_probabilities(teams, Playoffs.get_week14_schedule(week_end_date))
 
     # Results
-    # teams = set_game_outcome(teams,
-    #                          week=week,
-    #                          spread=0,
-    #                          home_name='Bears',
-    #                          home_score=0,
-    #                          home_touchdowns=0,
-    #                          home_net_pass_yards=0,
-    #                          home_pass_completions=0,
-    #                          home_pass_attempts=0,
-    #                          home_pass_tds=0,
-    #                          home_interceptions_thrown=0,
-    #                          home_total_yards=0,
-    #                          away_name='Cowboys',
-    #                          away_score=0,
-    #                          away_touchdowns=0,
-    #                          away_net_pass_yards=0,
-    #                          away_pass_completions=0,
-    #                          away_pass_attempts=0,
-    #                          away_pass_tds=0,
-    #                          away_interceptions_thrown=0,
-    #                          away_total_yards=0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Falcons', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Panthers', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Buccaneers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Colts', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Jets', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Dolphins', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Saints', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          '49ers', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Vikings', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Lions', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Texans', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Broncos', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Bills', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Ravens', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Browns', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Bengals', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Packers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Redskins', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Jaguars', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Chargers', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Cardinals', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Steelers', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Raiders', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Titans', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Patriots', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Chiefs', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
+    teams = set_game_outcome(teams,
+                             week=week,
+                             spread=3,
+                             home_name='Bears',
+                             home_score=31,
+                             home_touchdowns=0,
+                             home_net_pass_yards=0,
+                             home_pass_completions=0,
+                             home_pass_attempts=0,
+                             home_pass_tds=0,
+                             home_interceptions_thrown=0,
+                             home_total_yards=0,
+                             away_name='Cowboys',
+                             away_score=21,
+                             away_touchdowns=0,
+                             away_net_pass_yards=0,
+                             away_pass_completions=0,
+                             away_pass_attempts=0,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=0,
+                             away_total_yards=0)
+
+    teams = set_game_outcome(teams, week, -3.5,
+                             'Falcons', 40, 4, 302, 20, 34, 2, 0, 461,
+                             'Panthers', 20, 2, 245, 28, 41, 1, 2, 345)
+
+    teams = set_game_outcome(teams, week, -3,
+                             'Buccaneers', 38, 5, 467, 35, 49, 4, 3, 542,
+                             'Colts', 35, 3, 243, 19, 36, 2, 0, 309)
+
+    teams = set_game_outcome(teams, week, -5,
+                             'Jets', 22, 2, 262, 20, 36, 2, 1, 374,
+                             'Dolphins', 21, 0, 240, 21, 37, 0, 1, 362)
+
+    teams = set_game_outcome(teams, week, -1.5,
+                             'Saints', 46, 6, 349, 29, 41, 5, 0, 465,
+                             '49ers', 48, 6, 354, 27, 36, 5, 1, 516)
+
+    teams = set_game_outcome(teams, week, -12,
+                             'Vikings', 20, 2, 234, 24, 30, 1, 0, 354,
+                             'Lions', 7, 1, 161, 24, 40, 1, 2, 231)
+
+    teams = set_game_outcome(teams, week, -7.5,
+                             'Texans', 24, 3, 280, 28, 50, 1, 2, 414,
+                             'Broncos', 38, 4, 301, 22, 27, 3, 1, 391)
+
+    teams = set_game_outcome(teams, week, 6,
+                             'Bills', 17, 1, 105, 17, 39, 1, 0, 209,
+                             'Ravens', 24, 3, 139, 16, 25, 3, 1, 257)
+
+    teams = set_game_outcome(teams, week, -6.5,
+                             'Browns', 27, 2, 187, 11, 24, 0, 2, 333,
+                             'Bengals', 19, 1, 272, 23, 39, 0, 1, 451)
+
+    teams = set_game_outcome(teams, week, -13.5,
+                             'Packers', 20, 2, 167, 18, 28, 1, 0, 341,
+                             'Redskins', 15, 2, 141, 16, 27, 1, 1, 262)
+
+    teams = set_game_outcome(teams, week, 3.5,
+                             'Jaguars', 10, 1, 164, 25, 38, 1, 0, 252,
+                             'Chargers', 45, 6, 330, 19, 27, 4, 0, 525)
+
+    teams = set_game_outcome(teams, week, 2,
+                             'Cardinals', 17, 2, 165, 20, 30, 2, 3, 236,
+                             'Steelers', 23, 1, 135, 16, 19, 1, 0, 275)
+
+    teams = set_game_outcome(teams, week, 3,
+                             'Raiders', 21, 3, 259, 25, 34, 2, 0, 356,
+                             'Titans', 42, 5, 391, 21, 27, 3, 1, 552)
+
+    teams = set_game_outcome(teams, week, -3,
+                             'Patriots', 16, 2, 184, 20, 37, 1, 1, 278,
+                             'Chiefs', 23, 2, 271, 26, 40, 1, 1, 346)
+
     # teams = set_game_outcome(teams, week, 0,
     #                          'Rams', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Seahawks', 0, 0, 0, 0, 0, 0, 0, 0)
