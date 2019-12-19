@@ -44,11 +44,14 @@ def print_elo_rankings(teams, eliminated_teams, include_title=True):
     table.float_format = '0.3'
 
     # Add the info to the rows for each team that isnt eliminated
-    for rank, team in enumerate(remaining_teams):
+    for rank, team in enumerate(sorted_by_elo):
         row = list()
         row.append(rank + 1)
         team_info = list()
-        team_info.append(team[0])
+        if team not in remaining_teams:
+            team_info.append(team[0] + '*')
+        else:
+            team_info.append(team[0])
         team_info.append(round(team[1]))
         team_info.append(round(team[2]))
         team_info.append(round(team[3]))
@@ -80,7 +83,7 @@ def print_standings(teams, eliminated_teams, include_title=True):
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
 
     # Remove the eliminated teams
-    teams = list(filter(lambda t: t[0] not in eliminated_teams, teams))
+    remaining_teams = list(filter(lambda t: t[0] not in eliminated_teams, teams))
 
     # Sort the teams by playoff tiebreakers
     teams = Playoffs.sort_by_tiebreakers(teams)
@@ -94,7 +97,10 @@ def print_standings(teams, eliminated_teams, include_title=True):
         row = list()
         row.append(rank + 1)
         team_info = list()
-        team_info.append(team[0])
+        if team not in remaining_teams:
+            team_info.append(team[0] + '*')
+        else:
+            team_info.append(team[0])
         team_info.append(round(team[1]))
         team_info.append(round(team[2]))
         team_info.append(round(team[3]))
@@ -145,7 +151,7 @@ def print_full_standings(teams, eliminated_teams, include_title=True):
     import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
 
     # Remove the eliminated teams
-    teams = list(filter(lambda t: t[0] not in eliminated_teams, teams))
+    remaining_teams = list(filter(lambda t: t[0] not in eliminated_teams, teams))
 
     # Sort the teams by playoff tiebreakers
     teams = Playoffs.sort_by_tiebreakers(teams)
@@ -160,7 +166,10 @@ def print_full_standings(teams, eliminated_teams, include_title=True):
         row = list()
         row.append(rank + 1)
         team_info = list()
-        team_info.append(team[0])
+        if team not in remaining_teams:
+            team_info.append(team[0] + '*')
+        else:
+            team_info.append(team[0])
         team_info.append(round(team[1]))
         team_info.append(round(team[2]))
         team_info.append(round(team[3]))
@@ -302,11 +311,14 @@ def print_model_rankings(teams, eliminated_teams):
     table.float_format = '0.3'
 
     # Add the info to the rows for each team that isnt eliminated
-    for rank, team in enumerate(remaining_teams):
+    for rank, team in enumerate(teams):
         row = list()
         row.append(rank + 1)
         team_info = list()
-        team_info.append(team[0])
+        if team not in remaining_teams:
+            team_info.append(team[0] + '*')
+        else:
+            team_info.append(team[0])
         team_info.append(round(team[1]))
         team_info.append(round(team[2]))
         team_info.append(round(team[3]))
