@@ -1488,28 +1488,28 @@ def week_16(teams, week_end_date, week=16):
         Predictor.get_week_probabilities(teams, Playoffs.get_week16_schedule(week_end_date))
 
     # Results
-    # teams = set_game_outcome(teams,
-    #                          week=week,
-    #                          spread=0,
-    #                          home_name='Broncos',
-    #                          home_score=0,
-    #                          home_touchdowns=0,
-    #                          home_net_pass_yards=0,
-    #                          home_pass_completions=0,
-    #                          home_pass_attempts=0,
-    #                          home_pass_tds=0,
-    #                          home_interceptions_thrown=0,
-    #                          home_total_yards=0,
-    #                          away_name='Lions',
-    #                          away_score=0,
-    #                          away_touchdowns=0,
-    #                          away_net_pass_yards=0,
-    #                          away_pass_completions=0,
-    #                          away_pass_attempts=0,
-    #                          away_pass_tds=0,
-    #                          away_interceptions_thrown=0,
-    #                          away_total_yards=0)
-    #
+    teams = set_game_outcome(teams,
+                             week=week,
+                             spread=3,
+                             home_name='Buccaneers',
+                             home_score=20,
+                             home_touchdowns=2,
+                             home_net_pass_yards=329,
+                             home_pass_completions=25,
+                             home_pass_attempts=48,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=4,
+                             home_total_yards=435,
+                             away_name='Texans',
+                             away_score=23,
+                             away_touchdowns=1,
+                             away_net_pass_yards=161,
+                             away_pass_completions=19,
+                             away_pass_attempts=32,
+                             away_pass_tds=0,
+                             away_interceptions_thrown=1,
+                             away_total_yards=229)
+
     # teams = set_game_outcome(teams, week, 0,
     #                          'Chargers', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Raiders', 0, 0, 0, 0, 0, 0, 0, 0)
@@ -1535,8 +1535,8 @@ def week_16(teams, week_end_date, week=16):
     #                          'Rams', 0, 0, 0, 0, 0, 0, 0, 0)
     #
     # teams = set_game_outcome(teams, week, 0,
-    #                          'Buccaneers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Texans', 0, 0, 0, 0, 0, 0, 0, 0)
+    #                          'Broncos', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Lions', 0, 0, 0, 0, 0, 0, 0, 0)
     #
     # teams = set_game_outcome(teams, week, 0,
     #                          'Falcons', 0, 0, 0, 0, 0, 0, 0, 0,

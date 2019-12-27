@@ -152,6 +152,10 @@ def home_average_sack_yards_forced(row):
     return row['home_total_sack_yards_forced'] / row['home_games_played'] if row['home_games_played'] > 0 else 0
 
 
+def home_total_average_win_probability(row):
+    return row['home_total_game_control'] / row['home_games_played'] if row['home_games_played'] > 0 else 0
+
+
 def away_win_pct(row):
     return row['away_wins'] / row['away_games_played'] if row['away_games_played'] > 0 else 0
 
@@ -292,6 +296,10 @@ def away_average_sacks(row):
 
 def away_average_sack_yards_forced(row):
     return row['away_total_sack_yards_forced'] / row['away_games_played'] if row['away_games_played'] > 0 else 0
+
+
+def away_total_average_win_probability(row):
+    return row['away_total_game_control'] / row['away_games_played'] if row['away_games_played'] > 0 else 0
 
 
 def home_average_yards_per_rush_attempt(row):
@@ -662,3 +670,7 @@ def average_turnover_margin_diff(row):
 
 def pagerank_diff(row):
     return row['home_pagerank'] - row['away_pagerank']
+
+
+def total_average_win_probability_diff(row):
+    return row['home_total_average_win_probability'] - row['away_total_average_win_probability']

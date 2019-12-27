@@ -1,10 +1,10 @@
 import os
 import statistics
 
+import networkx as nx
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
-import networkx as nx
 from sklearn.metrics import brier_score_loss
 from sklearn.utils import check_consistent_length
 
@@ -16,6 +16,7 @@ other_dir = '..\\Projects\\nfl\\NFL_Prediction\\Other\\'
 
 def groom_data():
     frames = get_all_data_frames()
+    frames = fill_missing_values(frames)
     frames = add_point_diff_and_results(frames)
     frames = add_team_records(frames)
     frames = add_page_ranks(frames)
@@ -44,11 +45,30 @@ def get_all_data_frames():
         if (os.path.splitext(file)[1] == '.csv'
                 and os.path.splitext(file)[0] != '20022018'
                 and os.path.splitext(file)[0] != '19952018'
-                and os.path.splitext(file)[0] != '20022017'):
+                and os.path.splitext(file)[0] != '20022017'
+                and '_json' not in os.path.splitext(file)[0]):
             with open(game_data_dir + file, 'r') as season_csv:
                 df = pd.read_csv(season_csv, encoding='utf-8')
                 df = df.rename(index=str, columns={'ï»¿home_team': 'home_team'})
                 frames.append(df)
+
+    return frames
+
+
+def fill_missing_values(frames, method='impute'):
+    """
+    Fills all missing values for the data sets.
+
+    :param frames: The frames to fill data for
+    :param method: The way to determine the value to fill with
+    :return: The filled list of data frames
+    """
+
+    for df in frames:
+        for missing_column in [column for column, is_missing in df.isna().any().iteritems() if is_missing]:
+            if method == 'impute':
+                if np.issubdtype(df[missing_column].dtype, np.number):
+                    df[missing_column].fillna(df[missing_column].mean(), inplace=True)
 
     return frames
 
@@ -567,6 +587,12 @@ def add_season_totals(frames):
             total_sack_yards_forced = pd.Series(pd.Series([0]).append(sack_yards_forced.cumsum(),
                                                                       ignore_index=True).head(-1))
 
+            game_control = pd.Series(relevant_games.lookup(relevant_games.index,
+                                                           home.map({True: 'home_average_win_probability',
+                                                                     False: 'away_average_win_probability'})))
+            total_game_control = pd.Series(pd.Series([0]).append(game_control.cumsum(),
+                                                                 ignore_index=True).head(-1))
+
             # For each game the team played in
             for index in range(len(home)):
                 # Add the teams running total prior to each game
@@ -604,6 +630,7 @@ def add_season_totals(frames):
                     df.loc[row_num, 'home_total_turnovers_forced'] = total_turnovers_forced.iloc[index]
                     df.loc[row_num, 'home_total_sacks'] = total_sacks.iloc[index]
                     df.loc[row_num, 'home_total_sack_yards_forced'] = total_sack_yards_forced.iloc[index]
+                    df.loc[row_num, 'home_total_game_control'] = total_game_control.iloc[index]
                 else:
                     row_num = df.loc[(df['away_team'] == team) & (df['away_games_played'] == index)].index
                     df.loc[row_num, 'away_total_points_for'] = total_points_for.iloc[index]
@@ -638,6 +665,7 @@ def add_season_totals(frames):
                     df.loc[row_num, 'away_total_turnovers_forced'] = total_turnovers_forced.iloc[index]
                     df.loc[row_num, 'away_total_sacks'] = total_sacks.iloc[index]
                     df.loc[row_num, 'away_total_sack_yards_forced'] = total_sack_yards_forced.iloc[index]
+                    df.loc[row_num, 'away_total_game_control'] = total_game_control.iloc[index]
 
         # Change the data types to integers
         df['home_total_points_for'] = df['home_total_points_for'].astype(np.int64)
@@ -672,6 +700,7 @@ def add_season_totals(frames):
         df['home_total_turnovers_forced'] = df['home_total_turnovers_forced'].astype(np.int64)
         df['home_total_sacks'] = df['home_total_sacks'].astype(np.int64)
         df['home_total_sack_yards_forced'] = df['home_total_sack_yards_forced'].astype(np.int64)
+        df['home_total_game_control'] = df['home_total_game_control'].astype(np.float64)
 
         df['away_total_points_for'] = df['away_total_points_for'].astype(np.int64)
         df['away_total_points_against'] = df['away_total_points_against'].astype(np.int64)
@@ -705,6 +734,7 @@ def add_season_totals(frames):
         df['away_total_turnovers_forced'] = df['away_total_turnovers_forced'].astype(np.int64)
         df['away_total_sacks'] = df['away_total_sacks'].astype(np.int64)
         df['away_total_sack_yards_forced'] = df['away_total_sack_yards_forced'].astype(np.int64)
+        df['away_total_game_control'] = df['away_total_game_control'].astype(np.float64)
 
     return frames
 
@@ -749,6 +779,8 @@ def add_season_averages(frames):
         df['home_average_turnovers_forced'] = df.apply(lambda row: Stats.home_average_turnovers_forced(row), axis=1)
         df['home_average_sacks'] = df.apply(lambda row: Stats.home_average_sacks(row), axis=1)
         df['home_average_sack_yards_forced'] = df.apply(lambda row: Stats.home_average_sack_yards_forced(row), axis=1)
+        df['home_total_average_win_probability'] = df.apply(lambda row: Stats.home_total_average_win_probability(row),
+                                                            axis=1)
 
         df['away_average_points_for'] = df.apply(lambda row: Stats.away_average_points_for(row), axis=1)
         df['away_average_points_against'] = df.apply(lambda row: Stats.away_average_points_against(row), axis=1)
@@ -781,6 +813,8 @@ def add_season_averages(frames):
         df['away_average_turnovers_forced'] = df.apply(lambda row: Stats.away_average_turnovers_forced(row), axis=1)
         df['away_average_sacks'] = df.apply(lambda row: Stats.away_average_sacks(row), axis=1)
         df['away_average_sack_yards_forced'] = df.apply(lambda row: Stats.away_average_sack_yards_forced(row), axis=1)
+        df['away_total_average_win_probability'] = df.apply(lambda row: Stats.away_total_average_win_probability(row),
+                                                            axis=1)
 
     return frames
 
@@ -906,6 +940,8 @@ def add_stat_differences(frames):
         df['average_scoring_margin_diff'] = df.apply(lambda row: Stats.average_scoring_margin_diff(row), axis=1)
         df['average_turnover_margin_diff'] = df.apply(lambda row: Stats.average_turnover_margin_diff(row), axis=1)
         df['pagerank_diff'] = df.apply(lambda row: Stats.pagerank_diff(row), axis=1)
+        df['total_average_win_probability_diff'] = df.apply(lambda row: Stats.total_average_win_probability_diff(row),
+                                                            axis=1)
 
     return frames
 

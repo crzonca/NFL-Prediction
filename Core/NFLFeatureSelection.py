@@ -24,13 +24,14 @@ def get_best_features(df=None):
     best_features = ['home_spread',
                      'elo_diff',
                      'average_scoring_margin_diff',
+                     'total_average_win_probability_diff',
                      'win_pct_diff',
                      'average_touchdowns_diff',
                      'average_passer_rating_diff',
-                     'pagerank_diff']
-                     # 'average_total_yards_diff']
+                     'pagerank_diff',
+                     'average_total_yards_diff']
 
-    # recursive_best_features = recursive_feature_elimination(df, best_features)
+    recursive_best_features = recursive_feature_elimination(df, best_features)
 
     won_series = won_series.filter(best_features).sort_values(kind='quicksort', ascending=False)
     best_features = list(won_series.index)
@@ -39,7 +40,7 @@ def get_best_features(df=None):
     corrmat = relevant.corr().abs()
     f, ax = plt.subplots(figsize=(9, 9))
     sns.set(font_scale=0.9)
-    sns.heatmap(corrmat, vmax=.8, square=True, annot=True, fmt='.2f', cmap='winter')
+    sns.heatmap(corrmat, vmax=.9, vmin=.3, square=True, annot=True, fmt='.2f', cmap='winter')
     plt.show()
 
     return best_features
