@@ -104,15 +104,18 @@ def create_match_up(home_name, away_name, home_spread=0.0, odds=None, neutral_lo
     """
 
     if odds:
-        odds = list(filter(lambda g: any(home_name in name for name in g[0]) and
-                                     any(away_name in name for name in g[0]), odds))
-        if len(odds) < 1:
-            print(away_name + ' at ' + home_name + ' not found')
-        elif len(odds) > 1:
-            print('Multiple instances of ' + away_name + ' at ' + home_name + ' found')
+        if isinstance(odds, (int, float)):
+            home_spread = odds
         else:
-            game = odds[0]
-            home_spread = game[2]
+            odds = list(filter(lambda g: any(home_name in name for name in g[0]) and
+                                         any(away_name in name for name in g[0]), odds))
+            if len(odds) < 1:
+                print(away_name + ' at ' + home_name + ' not found')
+            elif len(odds) > 1:
+                print('Multiple instances of ' + away_name + ' at ' + home_name + ' found')
+            else:
+                game = odds[0]
+                home_spread = game[2]
 
     return (home_name, away_name), home_spread, neutral_location
 
@@ -584,10 +587,10 @@ def get_wildcard_schedule(week_end_date, get_odds=True):
 
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('', '', odds=odds))
-    games.append(create_match_up('', '', odds=odds))
-    games.append(create_match_up('', '', odds=odds))
-    games.append(create_match_up('', '', odds=odds))
+    games.append(create_match_up('Patriots', 'Titans', odds=odds))
+    games.append(create_match_up('Texans', 'Bills', odds=odds))
+    games.append(create_match_up('Saints', 'Vikings', odds=odds))
+    games.append(create_match_up('Eagles', 'Seahawks', odds=odds))
 
     return games
 
@@ -600,10 +603,10 @@ def get_divisional_schedule(week_end_date, get_odds=True):
 
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('', '', odds=odds))
-    games.append(create_match_up('', '', odds=odds))
-    games.append(create_match_up('', '', odds=odds))
-    games.append(create_match_up('', '', odds=odds))
+    games.append(create_match_up('Ravens', '', odds=odds))
+    games.append(create_match_up('Chiefs', '', odds=odds))
+    games.append(create_match_up('49ers', '', odds=odds))
+    games.append(create_match_up('Packers', '', odds=odds))
 
     return games
 
@@ -635,7 +638,7 @@ def get_superbowl_schedule(week_end_date, get_odds=True):
     return games
 
 
-def monte_carlo(teams, trials=1e4, verbose=False):
+def monte_carlo(teams, trials=1e5, verbose=False):
     """
     Simulates each game outcome based on every team's elo after every game.  Process is repeated a high number of times
     to determine each teams probable final record and playoff standing.

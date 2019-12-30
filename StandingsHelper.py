@@ -406,7 +406,8 @@ def print_schedule_difficulty(teams, remaining=False, completed=False):
         all_schedules = list()
         for team_tuple in sorted_by_difficulty:
             all_schedules.append(team_tuple[1])
-        difficulty_norm = norm(statistics.mean(all_schedules), statistics.pstdev(all_schedules))
+        difficulty_deviation = statistics.pstdev(all_schedules) if statistics.pstdev(all_schedules) > 0 else 1e-10
+        difficulty_norm = norm(statistics.mean(all_schedules), difficulty_deviation)
     else:
         # If not remaining games only, use a mean of 1500 and a standard deviation of 13.615
         difficulty_norm = norm(1500, 13.615)
