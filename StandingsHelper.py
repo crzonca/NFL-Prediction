@@ -521,6 +521,112 @@ def print_team_pagerank(teams):
     print()
 
 
+def compare_teams(teams, team_name1, team_name2):
+    team1 = get_team(teams, team_name1)
+    team2 = get_team(teams, team_name2)
+
+    # Create the table header
+    table = PrettyTable([team_name1, 'Stat', team_name2])
+    table.float_format = '0.3'
+
+    stats = ['Record',
+             'Elo',
+             'Points For',
+             'Points Against',
+             'Point Diff.',
+             'Total TDs',
+             'Pass Yards',
+             'Completions',
+             'Attempts',
+             'Completion %',
+             'Pass TDs',
+             'Interceptions',
+             'Passer Rating',
+             'Total Yards']
+    
+    team1_games_played = team1[1] + team1[2] + team1[3]
+    team1_info = [str(team1[1]) + '-' + str(team1[2]) + '-' + str(team1[3]),
+                  round(team1[4], 3),
+                  int(team1[5] * team1_games_played),
+                  int(team1[6] * team1_games_played),
+                  int(team1[5] * team1_games_played) - int(team1[6] * team1_games_played),
+                  int(team1[7] * team1_games_played),
+                  team1[8],
+                  team1[9],
+                  team1[10],
+                  round(100 * team1[9] / team1[10], 3),
+                  team1[11],
+                  team1[12],
+                  round(calculate_passer_rating(team1[8], team1[9], team1[10], team1[11], team1[12]), 3),
+                  int(team1[13] * team1_games_played)]
+
+    team2_games_played = team2[1] + team2[2] + team2[3]
+    team2_info = [str(team2[1]) + '-' + str(team2[2]) + '-' + str(team2[3]),
+                  round(team2[4], 3),
+                  int(team2[5] * team2_games_played),
+                  int(team2[6] * team2_games_played),
+                  int(team2[5] * team2_games_played) - int(team2[6] * team2_games_played),
+                  int(team2[7] * team2_games_played),
+                  team2[8],
+                  team2[9],
+                  team2[10],
+                  round(100 * team2[9] / team2[10], 3),
+                  team2[11],
+                  team2[12],
+                  round(calculate_passer_rating(team2[8], team2[9], team2[10], team2[11], team2[12]), 3),
+                  int(team2[13] * team2_games_played)]
+
+    def compare_fields():
+        record_comp = team1[1] / team1_games_played >= team2[1] / team2_games_played
+        elo_comp = team1[4] >= team2[4]
+        pf_comp = team1[5] >= team2[5]
+        pa_comp = team1[6] <= team2[6]
+        pd_comp = team1[5] - team1[6] >= team2[5] - team2[6]
+        tot_tds_comp = team1[7] >= team2[7]
+        pass_yards_comp = team1[8] >= team2[8]
+        pass_completions_comp = team1[9] >= team2[9]
+        pass_attempts_comp = team1[10] <= team2[10]
+        completion_pct_comp = team1[9] / team1[10] >= team2[9] / team2[10]
+        pass_tds_comp = team1[11] >= team2[11]
+        ints_comp = team1[12] <= team2[12]
+        passer_rating_comp = (calculate_passer_rating(team1[8], team1[9], team1[10], team1[11], team1[12]) >=
+                              calculate_passer_rating(team2[8], team2[9], team2[10], team2[11], team2[12]))
+        total_yards_comp = team1[13] >= team2[13]
+        return [record_comp,
+                elo_comp,
+                pf_comp,
+                pa_comp,
+                pd_comp,
+                tot_tds_comp,
+                pass_yards_comp,
+                pass_completions_comp,
+                pass_attempts_comp,
+                completion_pct_comp,
+                pass_tds_comp,
+                ints_comp,
+                passer_rating_comp,
+                total_yards_comp]
+
+    team1_info = [Colors.WHITE + str(field) + Colors.ENDC if better
+                  else Colors.BRIGHT_GRAY + str(field) + Colors.ENDC
+                  for field, better in zip(team1_info, compare_fields())]
+
+    team2_info = [Colors.WHITE + str(field) + Colors.ENDC if not better
+                  else Colors.BRIGHT_GRAY + str(field) + Colors.ENDC
+                  for field, better in zip(team2_info, compare_fields())]
+
+    table_info = [team1_info, stats, team2_info]
+
+    # Add the info to the rows for each team that isnt eliminated
+    for row in list(map(list, zip(*table_info))):
+        table.add_row(row)
+
+    # Print the table
+    print(team_name1 + ' vs ' + team_name2)
+    print(table)
+    print()
+
+
 def get_tier(teams, team):
     """
     "Calculates a team's 'tier' based on the team's elo. Tiers are calculated based on difference from the mean elo,
@@ -720,6 +826,7 @@ def get_chance_against_average(teams, team):
 
 
 class Colors:
+    GRAY_BOX = '\033[100m'
     BLACK = '\033[97m'
     BRIGHT_CYAN = '\033[96m'
     BRIGHT_PURPLE = '\033[95m'
@@ -728,13 +835,23 @@ class Colors:
     BRIGHT_GREEN = '\033[92m'
     BRIGHT_RED = '\033[91m'
     GRAY = '\033[90m'
+    BRIGHT_GRAY_BOX = '\033[47m'
+    CYAN_BOX = '\033[46m'
+    PURPLE_BOX = '\033[45m'
+    BLUE_BOX = '\033[44m'
+    YELLOW_BOX = '\033[43m'
+    GREEN_BOX = '\033[42m'
+    RED_BOX = '\033[41m'
+    WHITE_BOX = '\033[40m'
     BRIGHT_GRAY = '\033[37m'
-    WHITE = '\033[30m'
     CYAN = '\033[36m'
     PURPLE = '\033[35m'
     BLUE = '\033[34m'
     YELLOW = '\033[33m'
     GREEN = '\033[32m'
     RED = '\033[31m'
+    WHITE = '\033[30m'
+    BOX = '\033[7m'
     UNDERLINE = '\033[4m'
+    BOLD = '\033[1m'
     ENDC = '\033[0m'
