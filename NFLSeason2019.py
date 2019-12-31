@@ -1670,6 +1670,9 @@ def wildcard(teams, week_end_date, week=18):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_wildcard_schedule(week_end_date))
 
+        for home_team, away_team in [game[0] for game in Playoffs.get_wildcard_schedule(week_end_date)]:
+            Standings.compare_teams(teams, home_team, away_team)
+
     # Results
     teams = set_game_outcome(teams,
                              week=week,
@@ -1711,6 +1714,9 @@ def wildcard(teams, week_end_date, week=18):
 def divisional(teams, week_end_date, week=19):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_divisional_schedule(week_end_date))
+
+        for home_team, away_team in [game[0] for game in Playoffs.get_wildcard_schedule(week_end_date)]:
+            Standings.compare_teams(teams, home_team, away_team)
 
     # Results
     teams = set_game_outcome(teams,
@@ -1754,6 +1760,9 @@ def conference(teams, week_end_date, week=20):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_conference_schedule(week_end_date))
 
+        for home_team, away_team in [game[0] for game in Playoffs.get_wildcard_schedule(week_end_date)]:
+            Standings.compare_teams(teams, home_team, away_team)
+
     # Results
     teams = set_game_outcome(teams,
                              week=week,
@@ -1787,6 +1796,9 @@ def conference(teams, week_end_date, week=20):
 def superbowl(teams, week_end_date, week=21):
     if maya.now() < week_end_date:
         Predictor.get_week_probabilities(teams, Playoffs.get_superbowl_schedule(week_end_date))
+
+        for home_team, away_team in [game[0] for game in Playoffs.get_wildcard_schedule(week_end_date)]:
+            Standings.compare_teams(teams, home_team, away_team)
 
     # Results
     teams = set_game_outcome(teams,
