@@ -1,4 +1,5 @@
 import maya
+import itertools
 
 import Projects.nfl.NFL_Prediction.NFLGraph as Graph
 import Projects.nfl.NFL_Prediction.NFLPredictor as Predictor
@@ -76,6 +77,16 @@ def season():
 
         Playoffs.monte_carlo(nfl_teams)
 
+        # Get the pagerank of the teams
+        Standings.print_team_pagerank(nfl_teams)
+
+        # Show the graph
+        Plotter.show_graph(Graph.nfl)
+        Graph.persist_graph()
+
+        # Show the parity clock
+        Graph.parity_clock()
+
     # Playoffs
     print('Playoffs')
     nfl_teams = handle_week(nfl_teams, 'Wildcard Weekend', wildcard, eliminated_teams, '31 December 2019')
@@ -87,29 +98,20 @@ def season():
     nfl_teams = handle_week(nfl_teams, 'Superbowl', superbowl, eliminated_teams, '28 January 2020')
     eliminated_teams.extend([''])
 
-    # Get the pagerank of the teams
-    Standings.print_team_pagerank(nfl_teams)
-
-    if not regular_season_complete:
-
-        # Show the graph
-        Plotter.show_graph(Graph.nfl)
-        Graph.persist_graph()
-
-        # Show the parity clock
-        Graph.parity_clock()
-
     # Save the standings csv
     Standings.get_full_standings_csv(nfl_teams)
 
     # Final Outcome
-    league = Playoffs.get_league_structure()
-    for conf_name, conf in league.items():
+    for conf_name, conf in Playoffs.get_league_structure().items():
         for div_name, division in conf.items():
-            Plotter.plot_team_elo_over_season(div_name, division)
+            Plotter.plot_team_elo_over_season(div_name, division, Graph.nfl)
 
     if maya.now() > maya.when('28 January 2020', timezone='US/Central'):
         Playoffs.completed_games.to_csv('..\\Projects\\nfl\\NFL_Prediction\\Game Data\\2019.csv', index=False)
+
+        for conf_name, conf in Playoffs.get_league_structure().items():
+            conf_teams = list(itertools.chain(*[division for div_name, division in conf.items()]))
+            Plotter.plot_team_elo_over_season(conf_name, conf_teams, Graph.nfl)
 
 
 def set_up_teams():

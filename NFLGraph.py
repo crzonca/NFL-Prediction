@@ -14,6 +14,8 @@ def create_games_graph():
 
     nfl.add_nodes_from(create_all_nfl_teams())
 
+    return nfl
+
 
 def create_all_nfl_teams():
     """

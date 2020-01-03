@@ -330,12 +330,13 @@ def plot_division_elo_function(teams, division_name, week_name, absolute=False, 
                       show_plot=False)
 
 
-def plot_team_elo_over_season(title, team_names, show_plot=True):
+def plot_team_elo_over_season(title, team_names, graph, show_plot=True):
     """
     Plots the change in elo over the season for a set of teams.
 
     :param title: The title that the team elos are for
     :param team_names: The names of the teams that are included in the plot
+    :param graph: The graph containing nfl team data
     :param show_plot: If the plot should be shown or just saved
     :return: Void
     """
@@ -411,7 +412,13 @@ def plot_team_elo_over_season(title, team_names, show_plot=True):
         data[team_name] = elos
 
     # Plot the data frame
-    ax = data.plot.line(figsize=(20, 10))
+    fig, ax = plt.subplots(figsize=(20, 10))
+    colors = nx.get_node_attributes(graph, 'Primary')
+    palette = [colors.get(team) for team in team_names]
+    rolling_data = data.rolling(2).mean().dropna()
+    rolling_data = rolling_data.append(data.iloc[0])
+    rolling_data = rolling_data.sort_index()
+    sns.lineplot(ax=ax, data=rolling_data, palette=sns.color_palette(palette), linewidth=2.5, dashes=False)
 
     # Add titles
     ax.set_title('Team Elos: ' + title)
@@ -423,6 +430,9 @@ def plot_team_elo_over_season(title, team_names, show_plot=True):
 
     # Remove the x margins
     plt.margins(x=0)
+
+    # Put the legend in the upper left
+    plt.legend(loc='upper left')
 
     # Get the min an max y values
     min_elo = min([team[4] for team in teams])
