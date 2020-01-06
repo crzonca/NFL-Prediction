@@ -603,10 +603,10 @@ def get_divisional_schedule(week_end_date, get_odds=True):
 
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('Ravens', '', odds=odds))
-    games.append(create_match_up('Chiefs', '', odds=odds))
-    games.append(create_match_up('49ers', '', odds=odds))
-    games.append(create_match_up('Packers', '', odds=odds))
+    games.append(create_match_up('Ravens', 'Titans', odds=odds))
+    games.append(create_match_up('Chiefs', 'Texans', odds=odds))
+    games.append(create_match_up('49ers', 'Vikings', odds=odds))
+    games.append(create_match_up('Packers', 'Seahawks', odds=odds))
 
     return games
 

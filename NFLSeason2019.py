@@ -90,7 +90,7 @@ def season():
     # Playoffs
     print('Playoffs')
     nfl_teams = handle_week(nfl_teams, 'Wildcard Weekend', wildcard, eliminated_teams, '31 December 2019')
-    eliminated_teams.extend(['Patriots', 'Titans', 'Texans', 'Bills', 'Saints', 'Vikings', 'Eagles', 'Seahawks'])
+    eliminated_teams.extend(['Patriots', 'Bills', 'Saints', 'Eagles'])
     nfl_teams = handle_week(nfl_teams, 'Divisional Round', divisional, eliminated_teams, '7 January 2020')
     eliminated_teams.extend(['', '', '', ''])
     nfl_teams = handle_week(nfl_teams, 'Conference Finals', conference, eliminated_teams, '14 January 2020')
@@ -1673,16 +1673,63 @@ def week_17(teams, week_end_date, week=17):
 
 def wildcard(teams, week_end_date, week=18):
     if maya.now() < week_end_date:
-        Predictor.get_week_probabilities(teams, Playoffs.get_wildcard_schedule(week_end_date))
+        schedule = Playoffs.get_wildcard_schedule(week_end_date)
+        Predictor.get_week_probabilities(teams, schedule)
 
-        for home_team, away_team in [game[0] for game in Playoffs.get_wildcard_schedule(week_end_date)]:
+        for home_team, away_team in [game[0] for game in schedule]:
+            Standings.compare_teams(teams, home_team, away_team)
+
+    # Results
+    teams = set_game_outcome(teams,
+                             week=week,
+                             spread=-5,
+                             home_name='Patriots',
+                             home_score=13,
+                             home_touchdowns=1,
+                             home_net_pass_yards=209,
+                             home_pass_completions=20,
+                             home_pass_attempts=37,
+                             home_pass_tds=0,
+                             home_interceptions_thrown=1,
+                             home_total_yards=307,
+                             away_name='Titans',
+                             away_score=20,
+                             away_touchdowns=2,
+                             away_net_pass_yards=71,
+                             away_pass_completions=9,
+                             away_pass_attempts=16,
+                             away_pass_tds=1,
+                             away_interceptions_thrown=1,
+                             away_total_yards=282)
+
+    teams = set_game_outcome(teams, week, -2.5,
+                             'Texans', 22, 2, 219, 20, 25, 1, 0, 360,
+                             'Bills', 19, 1, 253, 25, 48, 1, 0, 425)
+
+    teams = set_game_outcome(teams, week, -7.5,
+                             'Saints', 20, 2, 227, 27, 34, 1, 1, 324,
+                             'Vikings', 26, 3, 226, 19, 31, 1, 0, 362)
+
+    teams = set_game_outcome(teams, week, -1,
+                             'Eagles', 9, 0, 162, 19, 28, 0, 0, 282,
+                             'Seahawks', 17, 2, 318, 18, 30, 1, 0, 382)
+
+    return teams
+
+
+def divisional(teams, week_end_date, week=19):
+    if maya.now() < week_end_date:
+        schedule = Playoffs.get_divisional_schedule(week_end_date)
+        Predictor.get_week_probabilities(teams, schedule)
+
+        for home_team, away_team in [game[0] for game in schedule]:
             Standings.compare_teams(teams, home_team, away_team)
 
     # Results
     # teams = set_game_outcome(teams,
     #                          week=week,
     #                          spread=0,
-    #                          home_name='Patriots',
+    #                          home_name='Ravens',
     #                          home_score=0,
     #                          home_touchdowns=0,
     #                          home_net_pass_yards=0,
@@ -1702,131 +1749,88 @@ def wildcard(teams, week_end_date, week=18):
     #                          away_total_yards=0)
     #
     # teams = set_game_outcome(teams, week, 0,
-    #                          'Texans', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Bills', 0, 0, 0, 0, 0, 0, 0, 0)
+    #                          'Chiefs', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Texans', 0, 0, 0, 0, 0, 0, 0, 0)
     #
     # teams = set_game_outcome(teams, week, 0,
-    #                          'Saints', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          '49ers', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Vikings', 0, 0, 0, 0, 0, 0, 0, 0)
     #
     # teams = set_game_outcome(teams, week, 0,
-    #                          'Eagles', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Packers', 0, 0, 0, 0, 0, 0, 0, 0,
     #                          'Seahawks', 0, 0, 0, 0, 0, 0, 0, 0)
-
-    return teams
-
-
-def divisional(teams, week_end_date, week=19):
-    if maya.now() < week_end_date:
-        Predictor.get_week_probabilities(teams, Playoffs.get_divisional_schedule(week_end_date))
-
-        for home_team, away_team in [game[0] for game in Playoffs.get_wildcard_schedule(week_end_date)]:
-            Standings.compare_teams(teams, home_team, away_team)
-
-    # Results
-    teams = set_game_outcome(teams,
-                             week=week,
-                             spread=0,
-                             home_name='Ravens',
-                             home_score=0,
-                             home_touchdowns=0,
-                             home_net_pass_yards=0,
-                             home_pass_completions=0,
-                             home_pass_attempts=0,
-                             home_pass_tds=0,
-                             home_interceptions_thrown=0,
-                             home_total_yards=0,
-                             away_name='',
-                             away_score=0,
-                             away_touchdowns=0,
-                             away_net_pass_yards=0,
-                             away_pass_completions=0,
-                             away_pass_attempts=0,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=0,
-                             away_total_yards=0)
-
-    teams = set_game_outcome(teams, week, 0,
-                             'Chiefs', 0, 0, 0, 0, 0, 0, 0, 0,
-                             '', 0, 0, 0, 0, 0, 0, 0, 0)
-
-    teams = set_game_outcome(teams, week, 0,
-                             '49ers', 0, 0, 0, 0, 0, 0, 0, 0,
-                             '', 0, 0, 0, 0, 0, 0, 0, 0)
-
-    teams = set_game_outcome(teams, week, 0,
-                             'Packers', 0, 0, 0, 0, 0, 0, 0, 0,
-                             '', 0, 0, 0, 0, 0, 0, 0, 0)
 
     return teams
 
 
 def conference(teams, week_end_date, week=20):
     if maya.now() < week_end_date:
-        Predictor.get_week_probabilities(teams, Playoffs.get_conference_schedule(week_end_date))
+        schedule = Playoffs.get_conference_schedule(week_end_date)
+        Predictor.get_week_probabilities(teams, schedule)
 
-        for home_team, away_team in [game[0] for game in Playoffs.get_wildcard_schedule(week_end_date)]:
+        for home_team, away_team in [game[0] for game in schedule]:
             Standings.compare_teams(teams, home_team, away_team)
 
     # Results
-    teams = set_game_outcome(teams,
-                             week=week,
-                             spread=0,
-                             home_name='',
-                             home_score=0,
-                             home_touchdowns=0,
-                             home_net_pass_yards=0,
-                             home_pass_completions=0,
-                             home_pass_attempts=0,
-                             home_pass_tds=0,
-                             home_interceptions_thrown=0,
-                             home_total_yards=0,
-                             away_name='',
-                             away_score=0,
-                             away_touchdowns=0,
-                             away_net_pass_yards=0,
-                             away_pass_completions=0,
-                             away_pass_attempts=0,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=0,
-                             away_total_yards=0)
-
-    teams = set_game_outcome(teams, week, 0,
-                             '', 0, 0, 0, 0, 0, 0, 0, 0,
-                             '', 0, 0, 0, 0, 0, 0, 0, 0)
+    # teams = set_game_outcome(teams,
+    #                          week=week,
+    #                          spread=0,
+    #                          home_name='',
+    #                          home_score=0,
+    #                          home_touchdowns=0,
+    #                          home_net_pass_yards=0,
+    #                          home_pass_completions=0,
+    #                          home_pass_attempts=0,
+    #                          home_pass_tds=0,
+    #                          home_interceptions_thrown=0,
+    #                          home_total_yards=0,
+    #                          away_name='',
+    #                          away_score=0,
+    #                          away_touchdowns=0,
+    #                          away_net_pass_yards=0,
+    #                          away_pass_completions=0,
+    #                          away_pass_attempts=0,
+    #                          away_pass_tds=0,
+    #                          away_interceptions_thrown=0,
+    #                          away_total_yards=0)
+    #
+    # teams = set_game_outcome(teams, week, 0,
+    #                          '', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          '', 0, 0, 0, 0, 0, 0, 0, 0)
 
     return teams
 
 
 def superbowl(teams, week_end_date, week=21):
     if maya.now() < week_end_date:
-        Predictor.get_week_probabilities(teams, Playoffs.get_superbowl_schedule(week_end_date))
+        schedule = Playoffs.get_superbowl_schedule(week_end_date)
+        Predictor.get_week_probabilities(teams, schedule)
 
-        for home_team, away_team in [game[0] for game in Playoffs.get_wildcard_schedule(week_end_date)]:
+        for home_team, away_team in [game[0] for game in schedule]:
             Standings.compare_teams(teams, home_team, away_team)
 
     # Results
-    teams = set_game_outcome(teams,
-                             week=week,
-                             spread=0,
-                             home_name='',
-                             home_score=0,
-                             home_touchdowns=0,
-                             home_net_pass_yards=0,
-                             home_pass_completions=0,
-                             home_pass_attempts=0,
-                             home_pass_tds=0,
-                             home_interceptions_thrown=0,
-                             home_total_yards=0,
-                             away_name='',
-                             away_score=0,
-                             away_touchdowns=0,
-                             away_net_pass_yards=0,
-                             away_pass_completions=0,
-                             away_pass_attempts=0,
-                             away_pass_tds=0,
-                             away_interceptions_thrown=0,
-                             away_total_yards=0)
+    # teams = set_game_outcome(teams,
+    #                          week=week,
+    #                          spread=0,
+    #                          home_name='',
+    #                          home_score=0,
+    #                          home_touchdowns=0,
+    #                          home_net_pass_yards=0,
+    #                          home_pass_completions=0,
+    #                          home_pass_attempts=0,
+    #                          home_pass_tds=0,
+    #                          home_interceptions_thrown=0,
+    #                          home_total_yards=0,
+    #                          away_name='',
+    #                          away_score=0,
+    #                          away_touchdowns=0,
+    #                          away_net_pass_yards=0,
+    #                          away_pass_completions=0,
+    #                          away_pass_attempts=0,
+    #                          away_pass_tds=0,
+    #                          away_interceptions_thrown=0,
+    #                          away_total_yards=0)
 
     return teams
 
