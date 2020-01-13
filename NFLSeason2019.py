@@ -92,7 +92,7 @@ def season():
     nfl_teams = handle_week(nfl_teams, 'Wildcard Weekend', wildcard, eliminated_teams, '31 December 2019')
     eliminated_teams.extend(['Patriots', 'Bills', 'Saints', 'Eagles'])
     nfl_teams = handle_week(nfl_teams, 'Divisional Round', divisional, eliminated_teams, '7 January 2020')
-    eliminated_teams.extend(['', '', '', ''])
+    eliminated_teams.extend(['Vikings', 'Ravens', 'Texans', 'Seahawks'])
     nfl_teams = handle_week(nfl_teams, 'Conference Finals', conference, eliminated_teams, '14 January 2020')
     eliminated_teams.extend(['', ''])
     nfl_teams = handle_week(nfl_teams, 'Superbowl', superbowl, eliminated_teams, '28 January 2020')
@@ -1726,39 +1726,39 @@ def divisional(teams, week_end_date, week=19):
             Standings.compare_teams(teams, home_team, away_team)
 
     # Results
-    # teams = set_game_outcome(teams,
-    #                          week=week,
-    #                          spread=0,
-    #                          home_name='Ravens',
-    #                          home_score=0,
-    #                          home_touchdowns=0,
-    #                          home_net_pass_yards=0,
-    #                          home_pass_completions=0,
-    #                          home_pass_attempts=0,
-    #                          home_pass_tds=0,
-    #                          home_interceptions_thrown=0,
-    #                          home_total_yards=0,
-    #                          away_name='Titans',
-    #                          away_score=0,
-    #                          away_touchdowns=0,
-    #                          away_net_pass_yards=0,
-    #                          away_pass_completions=0,
-    #                          away_pass_attempts=0,
-    #                          away_pass_tds=0,
-    #                          away_interceptions_thrown=0,
-    #                          away_total_yards=0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Chiefs', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Texans', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          '49ers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Vikings', 0, 0, 0, 0, 0, 0, 0, 0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Packers', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Seahawks', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams,
+                             week=week,
+                             spread=-10,
+                             home_name='Ravens',
+                             home_score=12,
+                             home_touchdowns=1,
+                             home_net_pass_yards=345,
+                             home_pass_completions=31,
+                             home_pass_attempts=59,
+                             home_pass_tds=1,
+                             home_interceptions_thrown=2,
+                             home_total_yards=530,
+                             away_name='Titans',
+                             away_score=28,
+                             away_touchdowns=4,
+                             away_net_pass_yards=83,
+                             away_pass_completions=8,
+                             away_pass_attempts=15,
+                             away_pass_tds=3,
+                             away_interceptions_thrown=0,
+                             away_total_yards=300)
+
+    teams = set_game_outcome(teams, week, -7,
+                             '49ers', 27, 3, 122, 11, 19, 1, 1, 308,
+                             'Vikings', 10, 1, 126, 21, 29, 1, 1, 147)
+
+    teams = set_game_outcome(teams, week, -10,
+                             'Chiefs', 51, 7, 316, 23, 35, 5, 0, 434,
+                             'Texans', 31, 3, 348, 31, 52, 2, 0, 442)
+
+    teams = set_game_outcome(teams, week, -4.5,
+                             'Packers', 28, 4, 235, 16, 27, 2, 0, 344,
+                             'Seahawks', 23, 3, 265, 21, 31, 1, 0, 375)
 
     return teams
 
@@ -1775,7 +1775,7 @@ def conference(teams, week_end_date, week=20):
     # teams = set_game_outcome(teams,
     #                          week=week,
     #                          spread=0,
-    #                          home_name='',
+    #                          home_name='49ers',
     #                          home_score=0,
     #                          home_touchdowns=0,
     #                          home_net_pass_yards=0,
@@ -1784,7 +1784,7 @@ def conference(teams, week_end_date, week=20):
     #                          home_pass_tds=0,
     #                          home_interceptions_thrown=0,
     #                          home_total_yards=0,
-    #                          away_name='',
+    #                          away_name='Packers',
     #                          away_score=0,
     #                          away_touchdowns=0,
     #                          away_net_pass_yards=0,
@@ -1795,8 +1795,8 @@ def conference(teams, week_end_date, week=20):
     #                          away_total_yards=0)
     #
     # teams = set_game_outcome(teams, week, 0,
-    #                          '', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          '', 0, 0, 0, 0, 0, 0, 0, 0)
+    #                          'Chiefs', 0, 0, 0, 0, 0, 0, 0, 0,
+    #                          'Titans', 0, 0, 0, 0, 0, 0, 0, 0)
 
     return teams
 

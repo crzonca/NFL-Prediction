@@ -619,8 +619,8 @@ def get_conference_schedule(week_end_date, get_odds=True):
 
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('', '', odds=odds))
-    games.append(create_match_up('', '', odds=odds))
+    games.append(create_match_up('49ers', 'Packers', odds=odds))
+    games.append(create_match_up('Chiefs', 'Titans', odds=odds))
 
     return games
 
