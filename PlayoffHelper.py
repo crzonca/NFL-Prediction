@@ -84,10 +84,10 @@ def get_schedule():
     games.extend(get_week16_schedule(week_end_date=None, get_odds=False))
 
     games.extend(get_week17_schedule(week_end_date=None, get_odds=False))
-    # games.extend(get_wildcard_schedule(week_end_date=None, get_odds=False))
-    # games.extend(get_divisional_schedule(week_end_date=None, get_odds=False))
-    # games.extend(get_conference_schedule(week_end_date=None, get_odds=False))
-    # games.extend(get_superbowl_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_wildcard_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_divisional_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_conference_schedule(week_end_date=None, get_odds=False))
+    games.extend(get_superbowl_schedule(week_end_date=None, get_odds=False))
     return games
 
 
@@ -633,7 +633,7 @@ def get_superbowl_schedule(week_end_date, get_odds=True):
 
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('', '', odds=odds, neutral_location=True))
+    games.append(create_match_up('49ers', 'Chiefs', odds=odds, neutral_location=True))
 
     return games
 

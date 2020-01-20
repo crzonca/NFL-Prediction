@@ -94,7 +94,7 @@ def season():
     nfl_teams = handle_week(nfl_teams, 'Divisional Round', divisional, eliminated_teams, '6 January 2020')
     eliminated_teams.extend(['Vikings', 'Ravens', 'Texans', 'Seahawks'])
     nfl_teams = handle_week(nfl_teams, 'Conference Finals', conference, eliminated_teams, '13 January 2020')
-    eliminated_teams.extend(['', ''])
+    eliminated_teams.extend(['Titans', 'Packers'])
     nfl_teams = handle_week(nfl_teams, 'Superbowl', superbowl, eliminated_teams, '28 January 2020')
     eliminated_teams.extend([''])
 
@@ -1772,31 +1772,31 @@ def conference(teams, week_end_date, week=20):
             Standings.compare_teams(teams, home_team, away_team)
 
     # Results
-    # teams = set_game_outcome(teams,
-    #                          week=week,
-    #                          spread=0,
-    #                          home_name='49ers',
-    #                          home_score=0,
-    #                          home_touchdowns=0,
-    #                          home_net_pass_yards=0,
-    #                          home_pass_completions=0,
-    #                          home_pass_attempts=0,
-    #                          home_pass_tds=0,
-    #                          home_interceptions_thrown=0,
-    #                          home_total_yards=0,
-    #                          away_name='Packers',
-    #                          away_score=0,
-    #                          away_touchdowns=0,
-    #                          away_net_pass_yards=0,
-    #                          away_pass_completions=0,
-    #                          away_pass_attempts=0,
-    #                          away_pass_tds=0,
-    #                          away_interceptions_thrown=0,
-    #                          away_total_yards=0)
-    #
-    # teams = set_game_outcome(teams, week, 0,
-    #                          'Chiefs', 0, 0, 0, 0, 0, 0, 0, 0,
-    #                          'Titans', 0, 0, 0, 0, 0, 0, 0, 0)
+    teams = set_game_outcome(teams,
+                             week=week,
+                             spread=-7,
+                             home_name='Chiefs',
+                             home_score=35,
+                             home_touchdowns=5,
+                             home_net_pass_yards=292,
+                             home_pass_completions=23,
+                             home_pass_attempts=35,
+                             home_pass_tds=3,
+                             home_interceptions_thrown=0,
+                             home_total_yards=319,
+                             away_name='Titans',
+                             away_score=24,
+                             away_touchdowns=3,
+                             away_net_pass_yards=210,
+                             away_pass_completions=22,
+                             away_pass_attempts=32,
+                             away_pass_tds=2,
+                             away_interceptions_thrown=0,
+                             away_total_yards=295)
+
+    teams = set_game_outcome(teams, week, -8,
+                             '49ers', 37, 4, 69, 6, 8, 0, 0, 354,
+                             'Packers', 20, 3, 296, 31, 39, 2, 2, 358)
 
     return teams
 
@@ -1813,7 +1813,7 @@ def superbowl(teams, week_end_date, week=21):
     # teams = set_game_outcome(teams,
     #                          week=week,
     #                          spread=0,
-    #                          home_name='',
+    #                          home_name='49ers',
     #                          home_score=0,
     #                          home_touchdowns=0,
     #                          home_net_pass_yards=0,
@@ -1822,7 +1822,7 @@ def superbowl(teams, week_end_date, week=21):
     #                          home_pass_tds=0,
     #                          home_interceptions_thrown=0,
     #                          home_total_yards=0,
-    #                          away_name='',
+    #                          away_name='Chiefs',
     #                          away_score=0,
     #                          away_touchdowns=0,
     #                          away_net_pass_yards=0,
