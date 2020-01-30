@@ -633,7 +633,7 @@ def get_superbowl_schedule(week_end_date, get_odds=True):
 
     games = list()
     # Games are listed as: Home Team, Away Team, Spread if Home is favored (-1 * spread otherwise), neutral location
-    games.append(create_match_up('49ers', 'Chiefs', odds=odds, neutral_location=True))
+    games.append(create_match_up('Chiefs', '49ers', odds=odds, neutral_location=True))
 
     return games
 

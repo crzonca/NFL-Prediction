@@ -95,7 +95,7 @@ def season():
     eliminated_teams.extend(['Vikings', 'Ravens', 'Texans', 'Seahawks'])
     nfl_teams = handle_week(nfl_teams, 'Conference Finals', conference, eliminated_teams, '13 January 2020')
     eliminated_teams.extend(['Titans', 'Packers'])
-    nfl_teams = handle_week(nfl_teams, 'Superbowl', superbowl, eliminated_teams, '28 January 2020')
+    nfl_teams = handle_week(nfl_teams, 'Superbowl', superbowl, eliminated_teams, '27 January 2020')
     eliminated_teams.extend([''])
 
     # Save the standings csv
@@ -106,7 +106,7 @@ def season():
         for div_name, division in conf.items():
             Plotter.plot_team_elo_over_season(div_name, division, Graph.nfl)
 
-    if maya.now() > maya.when('28 January 2020', timezone='US/Central'):
+    if maya.now() > maya.when('31 January 2020', timezone='US/Central'):
         Playoffs.completed_games.to_csv('..\\Projects\\nfl\\NFL_Prediction\\Game Data\\2019.csv', index=False)
 
         for conf_name, conf in Playoffs.get_league_structure().items():
@@ -1813,7 +1813,7 @@ def superbowl(teams, week_end_date, week=21):
     # teams = set_game_outcome(teams,
     #                          week=week,
     #                          spread=0,
-    #                          home_name='49ers',
+    #                          home_name='Chiefs',
     #                          home_score=0,
     #                          home_touchdowns=0,
     #                          home_net_pass_yards=0,
@@ -1822,7 +1822,7 @@ def superbowl(teams, week_end_date, week=21):
     #                          home_pass_tds=0,
     #                          home_interceptions_thrown=0,
     #                          home_total_yards=0,
-    #                          away_name='Chiefs',
+    #                          away_name='49ers',
     #                          away_score=0,
     #                          away_touchdowns=0,
     #                          away_net_pass_yards=0,
