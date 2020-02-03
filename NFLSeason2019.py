@@ -1810,27 +1810,27 @@ def superbowl(teams, week_end_date, week=21):
             Standings.compare_teams(teams, home_team, away_team)
 
     # Results
-    # teams = set_game_outcome(teams,
-    #                          week=week,
-    #                          spread=0,
-    #                          home_name='Chiefs',
-    #                          home_score=0,
-    #                          home_touchdowns=0,
-    #                          home_net_pass_yards=0,
-    #                          home_pass_completions=0,
-    #                          home_pass_attempts=0,
-    #                          home_pass_tds=0,
-    #                          home_interceptions_thrown=0,
-    #                          home_total_yards=0,
-    #                          away_name='49ers',
-    #                          away_score=0,
-    #                          away_touchdowns=0,
-    #                          away_net_pass_yards=0,
-    #                          away_pass_completions=0,
-    #                          away_pass_attempts=0,
-    #                          away_pass_tds=0,
-    #                          away_interceptions_thrown=0,
-    #                          away_total_yards=0)
+    teams = set_game_outcome(teams,
+                             week=week,
+                             spread=-1.5,
+                             home_name='Chiefs',
+                             home_score=31,
+                             home_touchdowns=4,
+                             home_net_pass_yards=268,
+                             home_pass_completions=26,
+                             home_pass_attempts=42,
+                             home_pass_tds=2,
+                             home_interceptions_thrown=2,
+                             home_total_yards=397,
+                             away_name='49ers',
+                             away_score=20,
+                             away_touchdowns=2,
+                             away_net_pass_yards=210,
+                             away_pass_completions=20,
+                             away_pass_attempts=31,
+                             away_pass_tds=1,
+                             away_interceptions_thrown=2,
+                             away_total_yards=351)
 
     return teams
 
