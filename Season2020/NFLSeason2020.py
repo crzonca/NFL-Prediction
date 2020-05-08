@@ -34,7 +34,7 @@ def season():
     nfl_teams = handle_week(nfl_teams, 'Week 3', week_3, eliminated_teams, '24 September 2020')
     nfl_teams = handle_week(nfl_teams, 'Week 4', week_4, eliminated_teams, '1 October 2020')
     nfl_teams = handle_week(nfl_teams, 'Week 5', week_5, eliminated_teams, '8 October 2020')
-    nfl_teams = handle_week(nfl_teams, 'Week 6', week_6, eliminated_teams, '`5 October 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 6', week_6, eliminated_teams, '15 October 2020')
     nfl_teams = handle_week(nfl_teams, 'Week 7', week_7, eliminated_teams, '22 October 2020')
     nfl_teams = handle_week(nfl_teams, 'Week 8', week_8, eliminated_teams, '29 October 2020')
     nfl_teams = handle_week(nfl_teams, 'Week 9', week_9, eliminated_teams, '5 November 2020')
@@ -83,13 +83,13 @@ def season():
 
     # Playoffs
     print('Playoffs')
-    nfl_teams = handle_week(nfl_teams, 'Wildcard Weekend', wildcard, eliminated_teams, '6 January 2020')
+    nfl_teams = handle_week(nfl_teams, 'Wildcard Weekend', wildcard, eliminated_teams, '6 January 2021')
     eliminated_teams.extend(['Patriots', 'Bills', 'Saints', 'Eagles'])
-    nfl_teams = handle_week(nfl_teams, 'Divisional Round', divisional, eliminated_teams, '13 January 2020')
+    nfl_teams = handle_week(nfl_teams, 'Divisional Round', divisional, eliminated_teams, '13 January 2021')
     eliminated_teams.extend(['Vikings', 'Ravens', 'Texans', 'Seahawks'])
-    nfl_teams = handle_week(nfl_teams, 'Conference Finals', conference, eliminated_teams, '20 January 2020')
+    nfl_teams = handle_week(nfl_teams, 'Conference Finals', conference, eliminated_teams, '20 January 2021')
     eliminated_teams.extend(['Titans', 'Packers'])
-    nfl_teams = handle_week(nfl_teams, 'Superbowl', superbowl, eliminated_teams, '1 February 2020')
+    nfl_teams = handle_week(nfl_teams, 'Superbowl', superbowl, eliminated_teams, '1 February 2021')
     eliminated_teams.extend([''])
 
     # Save the standings csv
@@ -100,7 +100,7 @@ def season():
         for div_name, division in conf.items():
             Plotter.plot_team_elo_over_season(div_name, division, Graph.nfl)
 
-    if maya.now() > maya.when('31 January 2020', timezone='US/Central'):
+    if maya.now() > maya.when('31 January 2021', timezone='US/Central'):
         Playoffs.completed_games.to_csv('..\\Projects\\nfl\\NFL_Prediction\\Game Data\\2020.csv', index=False)
 
         for conf_name, conf in Playoffs.get_league_structure().items():

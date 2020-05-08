@@ -351,7 +351,10 @@ def plot_team_elo_over_season(title, team_names, graph, show_plot=True):
     teams = Season.nfl_teams
 
     # Get the maximum number of games any team has played in
-    max_len = max(Playoffs.completed_games['week'])
+    if Playoffs.completed_games['week']:
+        max_len = max(Playoffs.completed_games['week'])
+    else:
+        max_len = 1
 
     # Fill out data rows
     teams_elos = pd.DataFrame(index=range(max_len + 1), columns=team_names)
@@ -473,7 +476,10 @@ def show_graph(nfl):
     nx.set_edge_attributes(nfl, inverse_weights, 'Inverse Weight')
 
     # Calculate the average inverse weight
-    average_inverse_weight = statistics.mean(list(inverse_weights.values()))
+    if list(inverse_weights.values()):
+        average_inverse_weight = statistics.mean(list(inverse_weights.values()))
+    else:
+        average_inverse_weight = 1
 
     # Format and title the graph
     fig, ax = plt.subplots(figsize=(20, 10))
