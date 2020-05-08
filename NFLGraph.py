@@ -267,5 +267,5 @@ def persist_graph():
     global nfl
 
     data = nx.node_link_data(nfl)
-    with open('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\LeagueGraph.json', 'w') as file:
+    with open('..\\Projects\\nfl\\NFL_Prediction\\2020Ratings\\LeagueGraph.json', 'w') as file:
         json.dump(data, file, indent=4, sort_keys=True)

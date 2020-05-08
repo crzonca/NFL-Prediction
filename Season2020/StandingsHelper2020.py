@@ -30,7 +30,7 @@ def print_elo_rankings(teams, eliminated_teams, include_title=True):
     :return: Void
     """
 
-    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    import Projects.nfl.NFL_Prediction.Season2020.PlayoffHelper2020 as Playoffs
 
     # Sort the teams by elo, then by playoff tiebreakers
     teams = Playoffs.sort_by_tiebreakers(teams)
@@ -80,7 +80,7 @@ def print_standings(teams, eliminated_teams, include_title=True):
     :return: Void
     """
 
-    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    import Projects.nfl.NFL_Prediction.Season2020.PlayoffHelper2020 as Playoffs
 
     # Remove the eliminated teams
     remaining_teams = list(filter(lambda t: t[0] not in eliminated_teams, teams))
@@ -148,7 +148,7 @@ def print_full_standings(teams, eliminated_teams, include_title=True):
     :return: Void
     """
 
-    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    import Projects.nfl.NFL_Prediction.Season2020.PlayoffHelper2020 as Playoffs
 
     # Remove the eliminated teams
     remaining_teams = list(filter(lambda t: t[0] not in eliminated_teams, teams))
@@ -199,7 +199,7 @@ def get_full_standings_csv(teams):
     :return: Void
     """
 
-    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    import Projects.nfl.NFL_Prediction.Season2020.PlayoffHelper2020 as Playoffs
     import pandas as pd
 
     # Sort the teams by playoff tiebreakers
@@ -220,7 +220,7 @@ def get_full_standings_csv(teams):
                                   for team in teams]
     standings['Total Yards'] = [team[13] for team in teams]
 
-    standings.to_csv('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\2019Standings.csv', index=False)
+    standings.to_csv('..\\Projects\\nfl\\NFL_Prediction\\2020Ratings\\2020Standings.csv', index=False)
 
 
 def print_division_rankings(teams):
@@ -231,7 +231,7 @@ def print_division_rankings(teams):
     :return: Void
     """
 
-    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    import Projects.nfl.NFL_Prediction.Season2020.PlayoffHelper2020 as Playoffs
     nfl = Playoffs.get_league_structure()
     for conference_name, conference in nfl.items():
         for division_name, division in conference.items():
@@ -251,7 +251,7 @@ def print_division_standings(teams):
     :return: Void
     """
 
-    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    import Projects.nfl.NFL_Prediction.Season2020.PlayoffHelper2020 as Playoffs
     nfl = Playoffs.get_league_structure()
     for conference_name, conference in nfl.items():
         for division_name, division in conference.items():
@@ -271,7 +271,7 @@ def print_full_division_standings(teams):
     :return: Void
     """
 
-    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    import Projects.nfl.NFL_Prediction.Season2020.PlayoffHelper2020 as Playoffs
     nfl = Playoffs.get_league_structure()
     for conference_name, conference in nfl.items():
         for division_name, division in conference.items():
@@ -383,7 +383,7 @@ def print_schedule_difficulty(teams, remaining=False, completed=False):
     :param completed: If the schedule difficulty of only completed games should be used
     :return: Void
     """
-    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    import Projects.nfl.NFL_Prediction.Season2020.PlayoffHelper2020 as Playoffs
     from scipy.stats import norm
     import statistics
 
@@ -543,7 +543,7 @@ def compare_teams(teams, team_name1, team_name2):
              'Interceptions',
              'Passer Rating',
              'Total Yards']
-    
+
     team1_games_played = team1[1] + team1[2] + team1[3]
     team1_info = [str(team1[1]) + '-' + str(team1[2]) + '-' + str(team1[3]),
                   round(team1[4], 3),

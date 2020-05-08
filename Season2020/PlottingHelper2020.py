@@ -15,7 +15,7 @@ def plot_elo_function(teams,
                       absolute=False,
                       classic_colors=False,
                       show_plot=True,
-                      save_dir='..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\'):
+                      save_dir='..\\Projects\\nfl\\NFL_Prediction\\2020Ratings\\'):
     """
     Plots the rating of a set of teams. X axis indicates each team's object Elo rating. Y axis indicates each team's
     percentile relative to the other teams in the league.  Plot conatins each rating's tier overlaid by a logit function
@@ -278,7 +278,7 @@ def plot_conference_elo_function(teams, conference_name, week_name, absolute=Fal
     :return: Void
     """
 
-    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    import Projects.nfl.NFL_Prediction.Season2020.PlayoffHelper2020 as Playoffs
 
     # Get the teams in the conference
     conference_teams = list()
@@ -310,7 +310,7 @@ def plot_division_elo_function(teams, division_name, week_name, absolute=False, 
     :return: Void
     """
 
-    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
+    import Projects.nfl.NFL_Prediction.Season2020.PlayoffHelper2020 as Playoffs
 
     # Get the teams in the division
     division_teams = list()
@@ -341,8 +341,8 @@ def plot_team_elo_over_season(title, team_names, graph, show_plot=True):
     :return: Void
     """
 
-    import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
-    import Projects.nfl.NFL_Prediction.NFLSeason2019 as Season
+    import Projects.nfl.NFL_Prediction.Season2020.PlayoffHelper2020 as Playoffs
+    import Projects.nfl.NFL_Prediction.Season2020.NFLSeason2020 as Season
 
     # Set the style
     sns.set(style="ticks")
@@ -441,7 +441,7 @@ def plot_team_elo_over_season(title, team_names, graph, show_plot=True):
 
     # Save the figure
     save_name = title.replace(' ', '_')
-    plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\Trends\\' + save_name + '.png', dpi=300)
+    plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2020Ratings\\Trends\\' + save_name + '.png', dpi=300)
 
     # Display the plot if desired
     if show_plot:
@@ -516,7 +516,7 @@ def show_graph(nfl):
                                 font_family='sans-serif')
 
     # Save the figure
-    plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2019Ratings\\LeagueGraph.png', dpi=300)
+    plt.savefig('..\\Projects\\nfl\\NFL_Prediction\\2020Ratings\\LeagueGraph.png', dpi=300)
 
     # Show the graph
     plt.show()

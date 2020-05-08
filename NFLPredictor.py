@@ -402,6 +402,7 @@ def update_teams(teams, home_name, home_score, home_touchdowns, home_net_pass_ya
     # Update each team in the list and return the list
     teams = [new_home if team == home else team for team in teams]
     teams = [new_away if team == away else team for team in teams]
+
     return teams
 
 

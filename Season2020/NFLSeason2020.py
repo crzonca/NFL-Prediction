@@ -3,9 +3,9 @@ import itertools
 
 import Projects.nfl.NFL_Prediction.NFLGraph as Graph
 import Projects.nfl.NFL_Prediction.NFLPredictor as Predictor
-import Projects.nfl.NFL_Prediction.PlayoffHelper as Playoffs
-import Projects.nfl.NFL_Prediction.PlottingHelper as Plotter
-import Projects.nfl.NFL_Prediction.StandingsHelper as Standings
+import Projects.nfl.NFL_Prediction.Season2020.PlayoffHelper2020 as Playoffs
+import Projects.nfl.NFL_Prediction.Season2020.PlottingHelper2020 as Plotter
+import Projects.nfl.NFL_Prediction.Season2020.StandingsHelper2020 as Standings
 
 nfl_teams = list()
 
@@ -24,36 +24,30 @@ def season():
     print('*' * 120, '\n')
 
     # Plot the regular seasons initial ratings
-    if maya.now() < maya.when('3 September 2019', timezone='US/Central'):
+    if maya.now() < maya.when('10 September 2020', timezone='US/Central'):
         Plotter.plot_elo_function(nfl_teams, '', 'Initial Ratings')
 
     # Regular Season
     print('Regular Season')
-    nfl_teams = handle_week(nfl_teams, 'Week 1', week_1, eliminated_teams, '3 September 2019')
-    nfl_teams = handle_week(nfl_teams, 'Week 2', week_2, eliminated_teams, '10 September 2019')
-    nfl_teams = handle_week(nfl_teams, 'Week 3', week_3, eliminated_teams, '17 September 2019')
-    nfl_teams = handle_week(nfl_teams, 'Week 4', week_4, eliminated_teams, '24 September 2019')
-    nfl_teams = handle_week(nfl_teams, 'Week 5', week_5, eliminated_teams, '1 October 2019')
-    nfl_teams = handle_week(nfl_teams, 'Week 6', week_6, eliminated_teams, '8 October 2019')
-    nfl_teams = handle_week(nfl_teams, 'Week 7', week_7, eliminated_teams, '15 October 2019')
-    nfl_teams = handle_week(nfl_teams, 'Week 8', week_8, eliminated_teams, '22 October 2019')
-    nfl_teams = handle_week(nfl_teams, 'Week 9', week_9, eliminated_teams, '29 October 2019')
-    nfl_teams = handle_week(nfl_teams, 'Week 10', week_10, eliminated_teams, '5 November 2019')
-    nfl_teams = handle_week(nfl_teams, 'Week 11', week_11, eliminated_teams, '12 November 2019')
-    nfl_teams = handle_week(nfl_teams, 'Week 12', week_12, eliminated_teams, '19 November 2019')
-    eliminated_teams.extend(['Bengals'])
-    nfl_teams = handle_week(nfl_teams, 'Week 13', week_13, eliminated_teams, '26 November 2019')
-    eliminated_teams.extend(['Falcons', 'Lions', 'Dolphins', 'Giants', 'Cardinals'])
-    nfl_teams = handle_week(nfl_teams, 'Week 14', week_14, eliminated_teams, '3 December 2019')
-    eliminated_teams.extend(['Redskins', 'Jaguars', 'Chargers', 'Jets', 'Panthers', 'Buccaneers'])
-    nfl_teams = handle_week(nfl_teams, 'Week 15', week_15, eliminated_teams, '10 December 2019')
-    eliminated_teams.extend(['Broncos', 'Bears', 'Colts'])
-    nfl_teams = handle_week(nfl_teams, 'Week 16', week_16, eliminated_teams, '17 December 2019')
-    eliminated_teams.extend(['Rams', 'Browns'])
-    nfl_teams = handle_week(nfl_teams, 'Week 17', week_17, eliminated_teams, '24 December 2019')
-    eliminated_teams.extend(['Steelers', 'Cowboys', 'Raiders'])
+    nfl_teams = handle_week(nfl_teams, 'Week 1', week_1, eliminated_teams, '10 September 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 2', week_2, eliminated_teams, '17 September 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 3', week_3, eliminated_teams, '24 September 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 4', week_4, eliminated_teams, '1 October 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 5', week_5, eliminated_teams, '8 October 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 6', week_6, eliminated_teams, '`5 October 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 7', week_7, eliminated_teams, '22 October 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 8', week_8, eliminated_teams, '29 October 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 9', week_9, eliminated_teams, '5 November 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 10', week_10, eliminated_teams, '12 November 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 11', week_11, eliminated_teams, '19 November 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 12', week_12, eliminated_teams, '26 November 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 13', week_13, eliminated_teams, '3 December 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 14', week_14, eliminated_teams, '10 December 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 15', week_15, eliminated_teams, '17 December 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 16', week_16, eliminated_teams, '24 December 2020')
+    nfl_teams = handle_week(nfl_teams, 'Week 17', week_17, eliminated_teams, '31 December 2020')
 
-    regular_season_complete = maya.now() >= maya.when('30 December 2019', timezone='US/Central')
+    regular_season_complete = maya.now() >= maya.when('30 December 2020', timezone='US/Central')
 
     # Regular Season remaining schedule difficulty
     Standings.print_schedule_difficulty(nfl_teams,
@@ -89,13 +83,13 @@ def season():
 
     # Playoffs
     print('Playoffs')
-    nfl_teams = handle_week(nfl_teams, 'Wildcard Weekend', wildcard, eliminated_teams, '31 December 2019')
+    nfl_teams = handle_week(nfl_teams, 'Wildcard Weekend', wildcard, eliminated_teams, '6 January 2020')
     eliminated_teams.extend(['Patriots', 'Bills', 'Saints', 'Eagles'])
-    nfl_teams = handle_week(nfl_teams, 'Divisional Round', divisional, eliminated_teams, '6 January 2020')
+    nfl_teams = handle_week(nfl_teams, 'Divisional Round', divisional, eliminated_teams, '13 January 2020')
     eliminated_teams.extend(['Vikings', 'Ravens', 'Texans', 'Seahawks'])
-    nfl_teams = handle_week(nfl_teams, 'Conference Finals', conference, eliminated_teams, '13 January 2020')
+    nfl_teams = handle_week(nfl_teams, 'Conference Finals', conference, eliminated_teams, '20 January 2020')
     eliminated_teams.extend(['Titans', 'Packers'])
-    nfl_teams = handle_week(nfl_teams, 'Superbowl', superbowl, eliminated_teams, '27 January 2020')
+    nfl_teams = handle_week(nfl_teams, 'Superbowl', superbowl, eliminated_teams, '1 February 2020')
     eliminated_teams.extend([''])
 
     # Save the standings csv
@@ -107,7 +101,7 @@ def season():
             Plotter.plot_team_elo_over_season(div_name, division, Graph.nfl)
 
     if maya.now() > maya.when('31 January 2020', timezone='US/Central'):
-        Playoffs.completed_games.to_csv('..\\Projects\\nfl\\NFL_Prediction\\Game Data\\2019.csv', index=False)
+        Playoffs.completed_games.to_csv('..\\Projects\\nfl\\NFL_Prediction\\Game Data\\2020.csv', index=False)
 
         for conf_name, conf in Playoffs.get_league_structure().items():
             conf_teams = list(itertools.chain(*[division for div_name, division in conf.items()]))
@@ -119,38 +113,38 @@ def set_up_teams():
         return team_name, 0, 0, 0, elo, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
     teams = list()
-    teams.append(create_base_team('49ers', 1469.443))
-    teams.append(create_base_team('Bears', 1557.476))
-    teams.append(create_base_team('Bengals', 1459.57))
-    teams.append(create_base_team('Bills', 1462.998))
-    teams.append(create_base_team('Broncos', 1506.329))
-    teams.append(create_base_team('Browns', 1514.419))
-    teams.append(create_base_team('Buccaneers', 1474.242))
-    teams.append(create_base_team('Cardinals', 1397.315))
-    teams.append(create_base_team('Chargers', 1570.778))
-    teams.append(create_base_team('Chiefs', 1577.908))
-    teams.append(create_base_team('Colts', 1470.814))
-    teams.append(create_base_team('Cowboys', 1528.68))
-    teams.append(create_base_team('Dolphins', 1380.449))
-    teams.append(create_base_team('Eagles', 1545.958))
-    teams.append(create_base_team('Falcons', 1474.105))
-    teams.append(create_base_team('Giants', 1460.393))
-    teams.append(create_base_team('Jaguars', 1471.362))
-    teams.append(create_base_team('Jets', 1421.038))
-    teams.append(create_base_team('Lions', 1459.433))
-    teams.append(create_base_team('Packers', 1532.109))
-    teams.append(create_base_team('Panthers', 1509.894))
-    teams.append(create_base_team('Patriots', 1593.129))
-    teams.append(create_base_team('Raiders', 1410.342))
-    teams.append(create_base_team('Rams', 1571.6))
-    teams.append(create_base_team('Ravens', 1534.302))
-    teams.append(create_base_team('Redskins', 1430.362))
-    teams.append(create_base_team('Saints', 1587.095))
-    teams.append(create_base_team('Seahawks', 1535.948))
-    teams.append(create_base_team('Steelers', 1542.941))
-    teams.append(create_base_team('Texans', 1528.406))
-    teams.append(create_base_team('Titans', 1489.737))
-    teams.append(create_base_team('Vikings', 1531.423))
+    teams.append(create_base_team('49ers', 1592.393))
+    teams.append(create_base_team('Bears', 1521.315))
+    teams.append(create_base_team('Bengals', 1396.128))
+    teams.append(create_base_team('Bills', 1497.773))
+    teams.append(create_base_team('Broncos', 1504.578))
+    teams.append(create_base_team('Browns', 1461.418))
+    teams.append(create_base_team('Buccaneers', 1481.945))
+    teams.append(create_base_team('Cardinals', 1445.511))
+    teams.append(create_base_team('Chargers', 1458.323))
+    teams.append(create_base_team('Chiefs', 1627.154))
+    teams.append(create_base_team('Colts', 1462.847))
+    teams.append(create_base_team('Cowboys', 1499.454))
+    teams.append(create_base_team('Dolphins', 1427.835))
+    teams.append(create_base_team('Eagles', 1514.974))
+    teams.append(create_base_team('Falcons', 1503.82))
+    teams.append(create_base_team('Giants', 1416.607))
+    teams.append(create_base_team('Jaguars', 1454.445))
+    teams.append(create_base_team('Jets', 1475.583))
+    teams.append(create_base_team('Lions', 1403.726))
+    teams.append(create_base_team('Packers', 1590.826))
+    teams.append(create_base_team('Panthers', 1439.95))
+    teams.append(create_base_team('Patriots', 1552.752))
+    teams.append(create_base_team('Raiders', 1453.674))
+    teams.append(create_base_team('Rams', 1532.949))
+    teams.append(create_base_team('Ravens', 1604.624))
+    teams.append(create_base_team('Redskins', 1398.921))
+    teams.append(create_base_team('Saints', 1586.54))
+    teams.append(create_base_team('Seahawks', 1550.85))
+    teams.append(create_base_team('Steelers', 1505.33))
+    teams.append(create_base_team('Texans', 1547.95))
+    teams.append(create_base_team('Titans', 1548.333))
+    teams.append(create_base_team('Vikings', 1541.47))
 
     return teams
 
