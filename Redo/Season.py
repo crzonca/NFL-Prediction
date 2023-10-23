@@ -10,6 +10,7 @@ import warnings
 import PIL
 import choix
 import matplotlib.patches
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
@@ -18,6 +19,7 @@ import seaborn as sns
 from prettytable import PrettyTable
 from scipy.optimize import minimize
 from scipy.stats import norm
+from scipy.stats import poisson
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import PoissonRegressor
 from sportsipy.nfl.schedule import Schedule
@@ -31,8 +33,6 @@ team_df = pd.DataFrame(columns=['Team', 'Division', 'Games Played',
                                 'Wins', 'Losses', 'Ties',
                                 'BT', 'BT Var', 'Win Pct', 'Bayes Win Pct',
                                 'Avg Points', 'Avg Points Allowed',
-                                'Points Intercept 2', 'Points Coef 2', 'Points Allowed Coef 2', 'Adjusted Points 2',
-                                'Adjusted Points Allowed 2',
                                 'Points Intercept', 'Points Coef', 'Points Allowed Coef', 'Adjusted Points',
                                 'Adjusted Points Allowed', 'Yards Intercept', 'Yards Coef', 'Yards Allowed Coef',
                                 'Adjusted Yards', 'Adjusted Yards Allowed', 'YPG', 'YPG Allowed'])
@@ -331,8 +331,7 @@ def set_game_outcome(home_name, away_name, home_points, home_yards, away_points,
     individual_df.loc[len(individual_df.index)] = [home_name, away_name, home_points, home_yards]
     individual_df.loc[len(individual_df.index)] = [away_name, home_name, away_points, away_yards]
 
-    # points_regression = Ridge(alpha=5, fit_intercept=True)
-    points_regression = PoissonRegressor(alpha=.1, fit_intercept=True)
+    points_regression = PoissonRegressor(alpha=.5, fit_intercept=True)
     points_df = individual_df[['Team', 'Opponent', 'Points']]
     points_dummy_vars = pd.get_dummies(points_df[['Team', 'Opponent']])
 
@@ -350,7 +349,8 @@ def set_game_outcome(home_name, away_name, home_points, home_yards, away_points,
 
         if 'Team_' + team_name in points_reg_results.index:
             team_df.at[team_name, 'Points Coef'] = points_reg_results.at['Team_' + team_name, 'points_reg_coef']
-            team_df.at[team_name, 'Adjusted Points'] = math.exp(points_reg_results.at['Team_' + team_name, 'points_reg_value'])
+            team_df.at[team_name, 'Adjusted Points'] = math.exp(
+                points_reg_results.at['Team_' + team_name, 'points_reg_value'])
         else:
             team_df.at[team_name, 'Points Coef'] = 0
             team_df.at[team_name, 'Adjusted Points'] = math.exp(points_regression.intercept_)
@@ -359,7 +359,7 @@ def set_game_outcome(home_name, away_name, home_points, home_yards, away_points,
             team_df.at[team_name, 'Points Allowed Coef'] = points_reg_results.at['Opponent_' + team_name,
                                                                                  'points_reg_coef']
             team_df.at[team_name, 'Adjusted Points Allowed'] = math.exp(points_reg_results.at['Opponent_' + team_name,
-                                                                                     'points_reg_value'])
+                                                                                              'points_reg_value'])
         else:
             team_df.at[team_name, 'Points Allowed Coef'] = 0
             team_df.at[team_name, 'Adjusted Points Allowed'] = math.exp(points_regression.intercept_)
@@ -383,7 +383,8 @@ def set_game_outcome(home_name, away_name, home_points, home_yards, away_points,
 
         if 'Team_' + team_name in yards_reg_results.index:
             team_df.at[team_name, 'Yards Coef'] = yards_reg_results.at['Team_' + team_name, 'yards_reg_coef']
-            team_df.at[team_name, 'Adjusted Yards'] = math.exp(yards_reg_results.at['Team_' + team_name, 'yards_reg_value'])
+            team_df.at[team_name, 'Adjusted Yards'] = math.exp(
+                yards_reg_results.at['Team_' + team_name, 'yards_reg_value'])
         else:
             team_df.at[team_name, 'Yards Coef'] = 0
             team_df.at[team_name, 'Adjusted Yards'] = math.exp(yards_regression.intercept_)
@@ -392,7 +393,7 @@ def set_game_outcome(home_name, away_name, home_points, home_yards, away_points,
             team_df.at[team_name, 'Yards Allowed Coef'] = yards_reg_results.at['Opponent_' + team_name,
                                                                                'yards_reg_coef']
             team_df.at[team_name, 'Adjusted Yards Allowed'] = math.exp(yards_reg_results.at['Opponent_' + team_name,
-                                                                                   'yards_reg_value'])
+                                                                                            'yards_reg_value'])
         else:
             team_df.at[team_name, 'Yards Allowed Coef'] = 0
             team_df.at[team_name, 'Adjusted Yards Allowed'] = math.exp(yards_regression.intercept_)
@@ -560,19 +561,35 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
 
         if verbose:
             favored_team = home_name if line <= 0 else away_name
+            underdog = home_name if line > 0 else away_name
             location = 'at home' if line <= 0 else 'on the road'
-            print('The', favored_team.ljust(justify_width), 'are favored by', round(abs(line), 1), 'points', location)
+
+            rounded_line = round(line * 2) / 2
+
+            print('The', favored_team.ljust(justify_width), 'are favored by',
+                  round(abs(rounded_line), 1), 'points', location)
 
             home_expected_points = pred.get('Home Expected Points')
             away_expected_points = pred.get('Away Expected Points')
             winner = home_name if home_expected_points >= away_expected_points else away_name
+            loser = home_name if home_expected_points < away_expected_points else away_name
+
+            print('The', winner.ljust(justify_width), 'have a',
+                  f'{get_spread_chance(winner, loser, 0) * 100:.3f}' + '% chance to beat the',
+                  loser.ljust(justify_width + 3), 'according to the Poisson Regression')
+
             winner_points = home_expected_points if winner == home_name else away_expected_points
             loser_points = away_expected_points if winner == home_name else home_expected_points
-            pts = 'points' if round(winner_points) - round(loser_points) != 1 else 'point'
-            expected_score = '(' + str(round(winner_points)) + ' - ' + str(round(loser_points)) + ')'
+            pts = 'points' if round(winner_points - loser_points, 1) != 1.0 else 'point'
+            common_score_map = get_common_score_map()
+            common_winner_points = common_score_map.get(round(winner_points), round(winner_points))
+            common_loser_points = common_score_map.get(round(loser_points), round(loser_points))
+            if common_winner_points == common_loser_points:
+                common_winner_points = common_winner_points + 1
+            expected_score = '(Projected Score: ' + str(common_winner_points) + ' - ' + str(common_loser_points) + ')'
 
-            print('The', winner.ljust(justify_width), 'are expected to win by',
-                  round(winner_points) - round(loser_points), pts.ljust(6), expected_score)
+            print('The', winner.ljust(justify_width), 'are expected to win by an average of',
+                  str(round(winner_points - loser_points, 1)).ljust(4), pts.ljust(7), expected_score)
 
             home_bt = pred.get('BT Chance')
             home_bt_lower = pred.get('BT Chance Lower')
@@ -589,7 +606,6 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
             print('The', favored_bt.ljust(justify_width), 'have a',
                   f'{bt * 100:.3f}' + '% chance to beat the', underdog_bt.ljust(justify_width + 3),
                   'according to the BT Model')
-            # '- 95% CI (' + f'{bt_lower * 100:.3f}' + '%, ' + f'{bt_upper * 100:.3f}' + '%)')
 
             home_win_pct = pred.get('Home Bayes Wins')
             away_win_pct = pred.get('Away Bayes Wins')
@@ -613,6 +629,16 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
             print('The', winner.ljust(justify_width), 'are expected to out gain the', loser.ljust(justify_width + 8),
                   'by',
                   round(winner_yards - loser_yards), yds.ljust(5), expected_yards)
+
+            home_spread_chance = get_spread_chance(home_name, away_name, rounded_line)
+            away_spread_chance = get_spread_chance(away_name, home_name, -rounded_line)
+
+            cover_chance = home_spread_chance if line <= 0 else away_spread_chance
+            fail_to_cover_chance = home_spread_chance if line > 0 else away_spread_chance
+
+            print('The', favored_team.ljust(justify_width), 'have a',
+                  f'{cover_chance * 100:.3f}' + '% chance to cover the spread' + ' ' * 8,
+                  '(' + f'{fail_to_cover_chance * 100:.3f}' + '% chance to fail)')
             print()
 
     print()
@@ -935,18 +961,22 @@ def get_schedule_difficulties():
                 if game.get('home') == team:
                     opponents.append(game.get('away'))
 
-        opponent_bts = [math.exp(team_df.at[opponent, 'BT']) for opponent in opponents]
+        opponent_bts = [team_df.at[opponent, 'BT'] for opponent in opponents]
         team_schedule[team] = opponent_bts
 
-    team_opponent_bts = {team: math.log(statistics.mean(bts)) for team, bts in team_schedule.items()}
+    team_opponent_bts = {team: statistics.mean(bts) for team, bts in team_schedule.items()}
     team_opponent_bts = {k: v for k, v in sorted(team_opponent_bts.items(), key=lambda item: item[1], reverse=True)}
 
-    team_win_chances = {team: [1 / (1 + bt) for bt in bts] for team, bts in team_schedule.items()}
+    team_win_chances = {team: [1 / (1 + math.exp(bt)) for bt in bts] for team, bts in team_schedule.items()}
     team_average_wins = {team: round(sum(chances)) for team, chances in team_win_chances.items()}
 
     team_df = team_df.sort_values(by='BT', kind='mergesort', ascending=False)
-    table = PrettyTable(['Rank', 'Name', 'Record', 'BT', 'Avg. Opponent BT', 'Average Team Record'])
+    table = PrettyTable(['Rank', 'Name', 'Record', 'Avg. Opponent BT', 'Wins Above Average'])
     table.float_format = '0.3'
+
+    green = '\033[32m'
+    red = '\033[31m'
+    stop = '\033[0m'
 
     for index, team_info in enumerate(team_opponent_bts.items()):
         team, avg_opp_bt = team_info
@@ -959,6 +989,11 @@ def get_schedule_difficulties():
         record = ' - '.join([str(int(val)).rjust(2) for val in [wins, losses]]) + ' - ' + str(int(ties))
 
         average_wins = team_average_wins.get(team)
+        expected_wins, expected_losses, expected_ties = get_proj_record(team)
+        wins_above = expected_wins - average_wins
+        color = green if wins_above > 2 else red if wins_above < -2 else ''
+        wins_above = color + str(wins_above).rjust(2) + stop
+
         avg_record = ' - '.join([str(val).rjust(2) for val in [average_wins, 17 - average_wins, 0]])
 
         rank = index + 1
@@ -966,9 +1001,9 @@ def get_schedule_difficulties():
         table_row.append(rank)
         table_row.append(team)
         table_row.append(record)
-        table_row.append(team_df.at[team, 'BT'])
+        # table_row.append(team_df.at[team, 'BT'])
         table_row.append(avg_opp_bt)
-        table_row.append(avg_record)
+        table_row.append(wins_above)
 
         table.add_row(table_row)
 
@@ -1039,7 +1074,7 @@ def season(week_num,
                 home_name = game.get('home')
                 away_name = game.get('away')
                 if manual_odds:
-                    odds = game.get('line')
+                    odds = (game.get('line'))
                     games.append((away_name, home_name, odds))
                 else:
                     games.append((away_name, home_name, get_vegas_line(home_name, away_name, odds)))
@@ -1054,7 +1089,8 @@ def season(week_num,
             bt_chance_matrix()
             print_table(week, sort_by_division=False)
 
-    show_graph(divisional_edges_only=week_num > 8)
+    show_off_def()
+    show_graph(divisional_edges_only=week_num > 5)
 
     if week_num <= 18:
         surprises()
@@ -1272,6 +1308,57 @@ def get_total_wins_chances(team):
     return wins_dict
 
 
+def show_off_def():
+    warnings.filterwarnings("ignore")
+
+    sns.set(style="ticks")
+
+    # Format and title the graph
+    fig, ax = plt.subplots(figsize=(20, 10))
+
+    ax.set_title('')
+    ax.set_xlabel('Adjusted Points For')
+    ax.set_ylabel('Adjusted Points Against')
+    ax.set_facecolor('#FAFAFA')
+
+    images = {team: PIL.Image.open('Projects/nfl/NFL_Prediction/Redo/logos/' + team + '.png')
+              for team, row in team_df.iterrows()}
+
+    intercept = team_df['Points Intercept'].mean()
+
+    margin = 1
+    min_x = math.exp(intercept + team_df['Points Coef'].min()) - margin
+    max_x = math.exp(intercept + team_df['Points Coef'].max()) + margin
+
+    min_y = math.exp(intercept + team_df['Points Allowed Coef'].min()) - margin
+    max_y = math.exp(intercept + team_df['Points Allowed Coef'].max()) + margin
+
+    ax = plt.gca()
+    ax.set_xlim(min_x, max_x)
+    ax.set_ylim(max_y, min_y)
+    ax.set_aspect(aspect=0.3, adjustable='datalim')
+
+    for team in team_df.index:
+        xa = math.exp(intercept + team_df.at[team, 'Points Coef'])
+        ya = math.exp(intercept + team_df.at[team, 'Points Allowed Coef'])
+
+        offset = .42 if team == 'Bears' else .5
+        ax.imshow(images.get(team), extent=(xa - offset, xa + offset, ya + offset, ya - offset), alpha=.8)
+
+    plt.axvline(x=math.exp(intercept), color='r', linestyle='--', alpha=.5)
+    plt.axhline(y=math.exp(intercept), color='r', linestyle='--', alpha=.5)
+
+    for offset in [math.exp(intercept) - (float(i)) for i in
+                   range(int(math.exp(intercept))-69, int(math.exp(intercept))+70, 3)]:
+        plt.axline(xy1=(math.exp(intercept), offset), slope=1, alpha=.1)
+
+    plt.savefig('D:\\Colin\\Documents\\Programming\\Python\\PythonProjects\\Projects\\nfl\\'
+                'NFL_Prediction\\Redo\\OffenseDefense.png', dpi=300)
+
+    # Show the graph
+    # plt.show()
+
+
 def show_graph(divisional_edges_only=True):
     warnings.filterwarnings("ignore")
 
@@ -1282,7 +1369,7 @@ def show_graph(divisional_edges_only=True):
     # Format and title the graph
     fig, ax = plt.subplots(figsize=(20, 10))
     ax.set_aspect('auto')
-    ax.set_title('League Graph')
+    ax.set_title('')
     ax.set_facecolor('#FAFAFA')
 
     # Get the Pagerank of each node
@@ -1328,9 +1415,9 @@ def show_graph(divisional_edges_only=True):
                                arrowsize=10,
                                min_target_margin=target_margin)
 
-
     # Select the size of the image (relative to the X axis)
     icon_size = {team: (ax.get_xlim()[1] - ax.get_xlim()[0]) * 0.025 * math.exp(bt) for team, bt in bts.items()}
+    icon_size['Bears'] = icon_size.get('Bears') * .8
     icon_center = {team: size / 2.0 for team, size in icon_size.items()}
 
     for n in nfl.nodes:
@@ -1345,3 +1432,74 @@ def show_graph(divisional_edges_only=True):
 
     # Show the graph
     # plt.show()
+
+
+def get_common_score_map():
+    common_map = {2: 3,
+                  5: 6,
+                  8: 7,
+                  9: 10,
+                  11: 10,
+                  12: 13,
+                  15: 14,
+                  16: 17,
+                  18: 17,
+                  19: 20,
+                  21: 20,
+                  22: 23,
+                  25: 24,
+                  26: 27,
+                  28: 27,
+                  29: 30,
+                  32: 31,
+                  33: 34,
+                  35: 34,
+                  36: 37,
+                  39: 38,
+                  40: 41,
+                  43: 42,
+                  46: 45,
+                  47: 48,
+                  50: 49,
+                  53: 52,
+                  57: 56,
+                  58: 59,
+                  62: 59}
+
+    return common_map
+
+
+def get_spread_chance(team1, team2, team1_spread):
+    intercept = team_df.at[team1, 'Points Intercept']
+    team1_off_coef = team_df.at[team1, 'Points Coef']
+    team2_off_coef = team_df.at[team2, 'Points Coef']
+    team1_def_coef = team_df.at[team1, 'Points Allowed Coef']
+    team2_def_coef = team_df.at[team2, 'Points Allowed Coef']
+
+    team1_lambda = math.exp(intercept + team1_off_coef + team2_def_coef)
+    team2_lambda = math.exp(intercept + team2_off_coef + team1_def_coef)
+
+    team1_poisson = poisson(team1_lambda)
+    team2_poisson = poisson(team2_lambda)
+
+    outcome_chances = list()
+    if team1_spread <= 0:
+        for points in range(0, 71):
+            team2_points_chance = team2_poisson.pmf(points)  # The chance team2 scores x points
+            team1_minimum_chance = team1_poisson.sf(
+                points - team1_spread)  # The chance team1 scores more than (x + spread) points
+
+            outcome_chances.append(team2_points_chance * team1_minimum_chance)
+
+    else:
+        for points in range(0, 71):
+            team1_points_chance = team1_poisson.pmf(points)  # The chance team1 scores x points
+            team2_minimum_chance = team2_poisson.cdf(
+                points + team1_spread)  # The chance team2 scores less than (x + spread) points
+            team2_minimum_chance = team2_minimum_chance - team2_poisson.pmf(points + team1_spread)
+
+            outcome_chances.append(team1_points_chance * team2_minimum_chance)
+
+    team1_cover_chance = sum(outcome_chances)
+
+    return team1_cover_chance
