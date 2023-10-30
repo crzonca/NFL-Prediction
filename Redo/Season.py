@@ -564,7 +564,7 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
             underdog = home_name if line > 0 else away_name
             location = 'at home' if line <= 0 else 'on the road'
 
-            rounded_line = round(line * 2) / 2
+            rounded_line = round(line * 2.0) / 2.0
 
             print('The', favored_team.ljust(justify_width), 'are favored by',
                   round(abs(rounded_line), 1), 'points', location)
@@ -575,7 +575,7 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
             loser = home_name if home_expected_points < away_expected_points else away_name
 
             print('The', winner.ljust(justify_width), 'have a',
-                  f'{get_spread_chance(winner, loser, 0) * 100:.3f}' + '% chance to beat the',
+                  f'{get_spread_chance(winner, loser, 0.0)[0] * 100:.3f}' + '% chance to beat the',
                   loser.ljust(justify_width + 3), 'according to the Poisson Regression')
 
             winner_points = home_expected_points if winner == home_name else away_expected_points
@@ -629,16 +629,6 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
             print('The', winner.ljust(justify_width), 'are expected to out gain the', loser.ljust(justify_width + 8),
                   'by',
                   round(winner_yards - loser_yards), yds.ljust(5), expected_yards)
-
-            home_spread_chance = get_spread_chance(home_name, away_name, rounded_line)
-            away_spread_chance = get_spread_chance(away_name, home_name, -rounded_line)
-
-            cover_chance = home_spread_chance if line <= 0 else away_spread_chance
-            fail_to_cover_chance = home_spread_chance if line > 0 else away_spread_chance
-
-            print('The', favored_team.ljust(justify_width), 'have a',
-                  f'{cover_chance * 100:.3f}' + '% chance to cover the spread' + ' ' * 8,
-                  '(' + f'{fail_to_cover_chance * 100:.3f}' + '% chance to fail)')
             print()
 
     print()
@@ -1086,7 +1076,7 @@ def season(week_num,
 
             if include_parity:
                 parity_clock()
-            bt_chance_matrix()
+
             print_table(week, sort_by_division=False)
 
     show_off_def()
@@ -1095,6 +1085,8 @@ def season(week_num,
     if week_num <= 18:
         surprises()
         get_schedule_difficulties()
+
+    ats_bets()
 
 
 def bt_with_home_field():
@@ -1424,7 +1416,7 @@ def show_graph(divisional_edges_only=True):
         xa, ya = fig.transFigure.inverted().transform(ax.transData.transform(pos[n]))
         a = plt.axes([xa - icon_center.get(n), ya - icon_center.get(n), icon_size.get(n), icon_size.get(n)])
         a.set_aspect('auto')
-        a.imshow(nfl.nodes[n]['image'])
+        a.imshow(nfl.nodes[n]['image'], alpha=1.0)
         a.axis("off")
 
     plt.savefig('D:\\Colin\\Documents\\Programming\\Python\\PythonProjects\\Projects\\nfl\\'
@@ -1469,37 +1461,120 @@ def get_common_score_map():
     return common_map
 
 
-def get_spread_chance(team1, team2, team1_spread):
-    intercept = team_df.at[team1, 'Points Intercept']
-    team1_off_coef = team_df.at[team1, 'Points Coef']
-    team2_off_coef = team_df.at[team2, 'Points Coef']
-    team1_def_coef = team_df.at[team1, 'Points Allowed Coef']
-    team2_def_coef = team_df.at[team2, 'Points Allowed Coef']
+def get_spread_chance(favorite, underdog, spread):
+    if spread > 0:
+        return
 
-    team1_lambda = math.exp(intercept + team1_off_coef + team2_def_coef)
-    team2_lambda = math.exp(intercept + team2_off_coef + team1_def_coef)
+    intercept = team_df.at[favorite, 'Points Intercept']
+    favorite_off_coef = team_df.at[favorite, 'Points Coef']
+    underdog_off_coef = team_df.at[underdog, 'Points Coef']
+    favorite_def_coef = team_df.at[favorite, 'Points Allowed Coef']
+    underdog_def_coef = team_df.at[underdog, 'Points Allowed Coef']
 
-    team1_poisson = poisson(team1_lambda)
-    team2_poisson = poisson(team2_lambda)
+    favorite_lambda = math.exp(intercept + favorite_off_coef + underdog_def_coef)
+    underdog_lambda = math.exp(intercept + underdog_off_coef + favorite_def_coef)
 
-    outcome_chances = list()
-    if team1_spread <= 0:
-        for points in range(0, 71):
-            team2_points_chance = team2_poisson.pmf(points)  # The chance team2 scores x points
-            team1_minimum_chance = team1_poisson.sf(
-                points - team1_spread)  # The chance team1 scores more than (x + spread) points
+    favorite_poisson = poisson(favorite_lambda)
+    underdog_poisson = poisson(underdog_lambda)
 
-            outcome_chances.append(team2_points_chance * team1_minimum_chance)
+    cover_chances = list()
+    push_chances = list()
+    for points in range(0, 71):
+        underdog_points_chance = underdog_poisson.pmf(points)  # The chance underdog scores x points
 
-    else:
-        for points in range(0, 71):
-            team1_points_chance = team1_poisson.pmf(points)  # The chance team1 scores x points
-            team2_minimum_chance = team2_poisson.cdf(
-                points + team1_spread)  # The chance team2 scores less than (x + spread) points
-            team2_minimum_chance = team2_minimum_chance - team2_poisson.pmf(points + team1_spread)
+        if spread.is_integer():
+            favorite_points_chance = favorite_poisson.pmf(points - spread)  # The chance favorite scores (x + spread) points
+        else:
+            favorite_points_chance = 0.0
 
-            outcome_chances.append(team1_points_chance * team2_minimum_chance)
+        favorite_minimum_chance = favorite_poisson.sf(points - spread)  # The chance favorite scores more than (x + spread) points
 
-    team1_cover_chance = sum(outcome_chances)
+        cover_chances.append(underdog_points_chance * favorite_minimum_chance)
+        push_chances.append(underdog_points_chance * favorite_points_chance)
 
-    return team1_cover_chance
+    cover_chance = sum(cover_chances)
+    push_chance = sum(push_chances)
+    fail_chance = 1 - cover_chance - push_chance
+
+    return cover_chance, push_chance, fail_chance
+
+
+def ats_bets():
+    odds = Odds.get_fanduel_odds()
+
+    bets = list()
+    for game in odds:
+        home_team, away_team, home_spread, away_spread, home_american, away_american = game
+
+        home_spread = float(home_spread)
+        away_spread = float(away_spread)
+
+        home_team = home_team.split()[-1]
+        away_team = away_team.split()[-1]
+
+        favorite = home_team if home_spread < 0.0 else away_team
+        underdog = away_team if home_spread < 0.0 else home_team
+
+        favorite_spread = home_spread if home_spread < 0 else away_spread
+        underdog_spread = away_spread if home_spread < 0 else home_spread
+
+        favorite_american = home_american if home_spread < 0 else away_american
+        underdog_american = away_american if home_spread < 0 else home_american
+
+        cover_chance, push_chance, fail_chance = get_spread_chance(favorite, underdog, favorite_spread)
+
+        favorite_chance = Odds.convert_american_to_probability(favorite_american)
+        underdog_chance = Odds.convert_american_to_probability(underdog_american)
+
+        favorite_payout = 1 / favorite_chance
+        underdog_payout = 1 / underdog_chance
+
+        expected_favorite_payout = favorite_payout * cover_chance + push_chance
+        expected_underdog_payout = underdog_payout * fail_chance + push_chance
+
+        favorite_row = {'Team': favorite,
+                        'Spread': favorite_spread,
+                        'Opponent': underdog,
+                        'American Odds': favorite_american,
+                        'Probability': f'{favorite_chance * 100:.3f}' + '%',
+                        'Payout': round(favorite_payout, 2),
+                        'Poisson Chance': f'{cover_chance * 100:.3f}' + '%',
+                        'Expected Return': round(expected_favorite_payout, 2),
+                        'Expected Profit': round(expected_favorite_payout, 2) - 1,
+                        'Push Chance': f'{push_chance * 100:.3f}' + '%'}
+
+        underdog_row = {'Team': underdog,
+                        'Spread': underdog_spread,
+                        'Opponent': favorite,
+                        'American Odds': underdog_american,
+                        'Probability': f'{underdog_chance * 100:.3f}' + '%',
+                        'Payout': round(underdog_payout, 2),
+                        'Poisson Chance': f'{fail_chance * 100:.3f}' + '%',
+                        'Expected Return': round(expected_underdog_payout, 2),
+                        'Expected Profit': round(expected_underdog_payout, 2) - 1,
+                        'Push Chance': f'{push_chance * 100:.3f}' + '%'}
+
+        bets.append(favorite_row)
+        bets.append(underdog_row)
+
+    bet_df = pd.DataFrame(bets)
+    bet_df = bet_df.sort_values(by='Expected Return', ascending=False)
+
+    good_bet_df = bet_df.loc[bet_df['Expected Return'] > 1].reset_index(drop=True)
+    bad_bet_df = bet_df.loc[bet_df['Expected Return'] <= 1].reset_index(drop=True)
+
+    green = '\033[32m'
+    red = '\033[31m'
+    stop = '\033[0m'
+
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.width', None)
+
+    print(green)
+    print(good_bet_df)
+    print(stop)
+
+    print(red)
+    print(bad_bet_df)
+    print(stop)
