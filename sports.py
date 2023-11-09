@@ -112,6 +112,9 @@ def set_game_outcome(home_name, away_name, home_points, away_points, home_otl, a
     home_victory = home_points > away_points
     away_victory = away_points > home_points
 
+    home_points = home_points - 1 if away_otl else home_points
+    away_points = away_points - 1 if home_otl else away_points
+
     game_df.loc[len(game_df.index)] = [home_name, 1 if home_victory else 0, home_points, away_points]
     game_df.loc[len(game_df.index)] = [away_name, 1 if away_victory else 0, away_points, home_points]
 
@@ -120,8 +123,7 @@ def set_game_outcome(home_name, away_name, home_points, away_points, home_otl, a
 
     winner = home_name if home_victory else away_name
     loser = away_name if home_victory else home_name
-    if not home_otl and not away_otl:
-        graph.add_edge(loser, winner)
+    graph.add_edge(loser, winner)
 
     home_games_played = team_df.at[home_name, 'Games Played']
     away_games_played = team_df.at[away_name, 'Games Played']
@@ -195,6 +197,8 @@ def fit_poisson(alpha=.1):
         else:
             team_df.at[team_name, 'Points Allowed Coef'] = 0
             team_df.at[team_name, 'Adjusted Points Allowed'] = math.exp(points_regression.intercept_)
+
+        team_df['Adjusted Point Diff'] = team_df['Adjusted Points'] - team_df['Adjusted Points Allowed']
 
     team_df = team_df.fillna(0)
 
@@ -280,21 +284,24 @@ def print_table(schedule_path, use_nba, total_games=82, sort_key='BT'):
     team_df = team_df.sort_values(by=sort_key, kind='mergesort', ascending=ascending_order)
 
     nba_columns = ['Rank', 'Name', 'Record', 'Bayes Win Pct', 'BT',
-                   'Proj. Record', 'Adj. PPG', 'Adj. PPG Allowed']
+                   'Proj. Record', 'Adj. PPG', 'Adj. PPG Allowed', 'Adj. Point Diff']
 
     nhl_columns = ['Rank', 'Name', 'Record', 'Points', 'Bayes Win Pct', 'BT',
-                   'Proj. Record', 'Proj. Points', 'Adj. PPG', 'Adj. PPG Allowed']
+                   'Proj. Record', 'Proj. Points', 'Adj. PPG', 'Adj. PPG Allowed', 'Adj. Point Diff']
 
     columns = nba_columns if use_nba else nhl_columns
 
     table = PrettyTable(columns)
     table.float_format = '0.3'
 
-    points_coefs = team_df['Points Coef']
-    points_allowed_coefs = team_df['Points Allowed Coef']
+    points_intercept = team_df['Points Intercept'][0]
+    points_coefs = (points_intercept + team_df['Points Coef']).apply(np.exp)
+    points_allowed_coefs = (points_intercept + team_df['Points Allowed Coef']).apply(np.exp)
+    points_diff_coefs = team_df['Adjusted Point Diff']
 
-    points_var = statistics.variance(points_coefs)
-    points_allowed_var = statistics.variance(points_allowed_coefs)
+    points_var = statistics.variance(team_df['Points Coef'])
+    points_allowed_var = statistics.variance(team_df['Points Allowed Coef'])
+    points_diff_var = statistics.variance(points_coefs - points_allowed_coefs)
 
     stop = '\033[0m'
 
@@ -313,6 +320,7 @@ def print_table(schedule_path, use_nba, total_games=82, sort_key='BT'):
         points_pct = .1
         points_color = get_color(row['Points Coef'], points_var, alpha=points_pct)
         points_allowed_color = get_color(row['Points Allowed Coef'], points_allowed_var, alpha=points_pct, invert=True)
+        points_diff_color = get_color(row['Adjusted Point Diff'], points_diff_var, alpha=points_pct)
 
         table_row.append(rank)
         table_row.append(index)
@@ -341,6 +349,8 @@ def print_table(schedule_path, use_nba, total_games=82, sort_key='BT'):
 
         table_row.append(points_color + str(round(row['Adjusted Points'], 1)) + stop)
         table_row.append(points_allowed_color + str(round(row['Adjusted Points Allowed'], 1)) + stop)
+        jw = 5 if use_nba else 4
+        table_row.append(points_diff_color + str(round(row['Adjusted Point Diff'], 1)).rjust(jw) + stop)
 
         table.add_row(table_row)
 
@@ -682,7 +692,7 @@ def season(use_nba,
                                     'Win Pct', 'Bayes Win Pct',
                                     'Avg Points', 'Avg Points Allowed',
                                     'Points Intercept', 'Points Coef', 'Points Allowed Coef',
-                                    'Adjusted Points', 'Adjusted Points Allowed'])
+                                    'Adjusted Points', 'Adjusted Points Allowed', 'Adjusted Point Diff'])
 
     game_df = pd.DataFrame(columns=['Team', 'Win', 'Points', 'Points Allowed'])
     individual_df = pd.DataFrame(columns=['Team', 'Opponent', 'Points'])
@@ -713,6 +723,7 @@ def season(use_nba,
 
     if use_nba:
         ats_bets()
+        straight_up_bets()
 
     if include_schedule_difficulty:
         get_schedule_difficulties(schedule_path, total_games=total_games)
@@ -782,7 +793,7 @@ def get_preseason_bts(schedule_path, preseason_path, use_mse=True):
     return team_bts
 
 
-def predict_score(team1, team2, justify_width=0):
+def predict_score(team1, team2):
     intercept = team_df.at[team1, 'Points Intercept']
 
     team1_off_coef = team_df.at[team1, 'Points Coef']
@@ -798,10 +809,63 @@ def predict_score(team1, team2, justify_width=0):
     loser = team1 if team1_score < team2_score else team2
     loser_score = team1_score if team1_score < team2_score else team2_score
 
-    print('The', winner.ljust(justify_width), 'are projected to beat the', loser.ljust(justify_width),
-          round(winner_score), '-', round(loser_score))
+    return winner, loser, winner_score, loser_score
 
-    return team1_score, team2_score
+
+def predict_scores(matchups):
+    teams = set([matchup[0] for matchup in matchups]).union(set([matchup[1] for matchup in matchups]))
+    justify_width = max([len(t) for t in teams])
+
+    predictions = list()
+    for team1, team2 in matchups:
+        team1 = team1.split()[-1]
+        team2 = team2.split()[-1]
+
+        if team1 == 'Blazers':
+            team1 = 'Trail Blazers'
+
+        if team2 == 'Blazers':
+            team2 = 'Trail Blazers'
+
+        winner, loser, winner_score, loser_score = predict_score(team1, team2)
+        margin = winner_score - loser_score
+        predictions.append((winner, loser, winner_score, loser_score, margin))
+
+    for prediction in sorted(predictions, key=lambda t: t[-1], reverse=True):
+        winner, loser, winner_score, loser_score, margin = prediction
+        print('The', winner.ljust(justify_width), 'are projected to beat the', loser.ljust(justify_width),
+              round(winner_score), '-', round(loser_score))
+
+
+def predict_outcomes(matchups):
+    teams = set([matchup[0] for matchup in matchups]).union(set([matchup[1] for matchup in matchups]))
+    justify_width = max([len(t) for t in teams])
+
+    predictions = list()
+    for team1, team2 in matchups:
+        team1 = team1.split()[-1]
+        team2 = team2.split()[-1]
+
+        if team1 == 'Blazers':
+            team1 = 'Trail Blazers'
+
+        if team2 == 'Blazers':
+            team2 = 'Trail Blazers'
+
+        team1_bt = team_df.at[team1, 'BT']
+        team2_bt = team_df.at[team2, 'BT']
+
+        favorite = team1 if team1_bt >= team2_bt else team2
+        underdog = team2 if team1_bt >= team2_bt else team1
+        favorite_bt = team1_bt if team1_bt >= team2_bt else team2_bt
+        underdog_bt = team2_bt if team1_bt >= team2_bt else team1_bt
+
+        favorite_chance = math.exp(favorite_bt) / (math.exp(favorite_bt) + math.exp(underdog_bt))
+        predictions.append((favorite, underdog,favorite_chance))
+
+    for prediction in sorted(predictions, key=lambda t: t[-1], reverse=True):
+        winner, loser, chance = prediction
+        print('The', winner.ljust(justify_width), 'have a ' + f'{chance * 100:.3f}' + '%' + ' chance to beat the', loser.ljust(justify_width))
 
 
 def get_spread_chance(favorite, underdog, spread):
@@ -846,6 +910,8 @@ def get_spread_chance(favorite, underdog, spread):
 
 def ats_bets():
     odds = Odds.get_fanduel_odds(sport='nba', future_days=1)
+
+    predict_scores([(t[0], t[1]) for t in odds])
 
     bets = list()
     for game in odds:
@@ -907,6 +973,83 @@ def ats_bets():
 
         bets.append(favorite_row)
         bets.append(underdog_row)
+
+    bet_df = pd.DataFrame(bets)
+    bet_df = bet_df.sort_values(by='Expected Return', ascending=False)
+
+    good_bet_df = bet_df.loc[bet_df['Expected Return'] > 1].reset_index(drop=True)
+    bad_bet_df = bet_df.loc[bet_df['Expected Return'] <= 1].reset_index(drop=True)
+
+    green = '\033[32m'
+    red = '\033[31m'
+    stop = '\033[0m'
+
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.width', None)
+
+    print(green)
+    print(good_bet_df)
+    print(stop)
+
+    print(red)
+    print(bad_bet_df)
+    print(stop)
+
+
+def straight_up_bets():
+    odds = Odds.get_fanduel_odds(sport='nba', future_days=1, bet_type='h2h')
+
+    predict_outcomes([(t[0], t[1]) for t in odds])
+
+    bets = list()
+    for game in odds:
+        home_team, away_team, _, _, home_american, away_american = game
+
+        home_team = home_team.split()[-1]
+        away_team = away_team.split()[-1]
+
+        if home_team == 'Blazers':
+            home_team = 'Trail Blazers'
+
+        if away_team == 'Blazers':
+            away_team = 'Trail Blazers'
+
+        home_bt = team_df.at[home_team, 'BT']
+        away_bt = team_df.at[away_team, 'BT']
+
+        home_chance = Odds.convert_american_to_probability(home_american)
+        away_chance = Odds.convert_american_to_probability(away_american)
+
+        home_payout = 1 / home_chance
+        away_payout = 1 / away_chance
+
+        home_bt_chance = math.exp(home_bt) / (math.exp(home_bt) + math.exp(away_bt))
+        away_bt_chance = math.exp(away_bt) / (math.exp(home_bt) + math.exp(away_bt))
+
+        expected_home_payout = home_payout * home_bt_chance
+        expected_away_payout = away_payout * away_bt_chance
+
+        home_row = {'Team': home_team,
+                    'Opponent': away_team,
+                    'American Odds': home_american,
+                    'Probability': f'{home_chance * 100:.3f}' + '%',
+                    'Payout': round(home_payout, 2),
+                    'BT Chance': f'{home_bt_chance * 100:.3f}' + '%',
+                    'Expected Return': round(expected_home_payout, 2),
+                    'Expected Profit': round(expected_home_payout, 2) - 1}
+
+        away_row = {'Team': away_team,
+                    'Opponent': home_team,
+                    'American Odds': away_american,
+                    'Probability': f'{away_chance * 100:.3f}' + '%',
+                    'Payout': round(away_payout, 2),
+                    'BT Chance': f'{away_bt_chance * 100:.3f}' + '%',
+                    'Expected Return': round(expected_away_payout, 2),
+                    'Expected Profit': round(expected_away_payout, 2) - 1}
+
+        bets.append(home_row)
+        bets.append(away_row)
 
     bet_df = pd.DataFrame(bets)
     bet_df = bet_df.sort_values(by='Expected Return', ascending=False)
