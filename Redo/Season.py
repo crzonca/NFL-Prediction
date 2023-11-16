@@ -331,7 +331,7 @@ def set_game_outcome(home_name, away_name, home_points, home_yards, away_points,
     individual_df.loc[len(individual_df.index)] = [home_name, away_name, home_points, home_yards]
     individual_df.loc[len(individual_df.index)] = [away_name, home_name, away_points, away_yards]
 
-    points_regression = PoissonRegressor(alpha=.5, fit_intercept=True)
+    points_regression = PoissonRegressor(alpha=0.6, fit_intercept=True)
     points_df = individual_df[['Team', 'Opponent', 'Points']]
     points_dummy_vars = pd.get_dummies(points_df[['Team', 'Opponent']])
 
@@ -364,8 +364,11 @@ def set_game_outcome(home_name, away_name, home_points, home_yards, away_points,
             team_df.at[team_name, 'Points Allowed Coef'] = 0
             team_df.at[team_name, 'Adjusted Points Allowed'] = math.exp(points_regression.intercept_)
 
+    team_df['Adjusted Point Diff'] = team_df.apply(lambda r: r['Adjusted Points'] - r['Adjusted Points Allowed'],
+                                                   axis=1)
+
     # yards_regression = Ridge(alpha=10, fit_intercept=True)
-    yards_regression = PoissonRegressor(alpha=3.0, fit_intercept=True)
+    yards_regression = PoissonRegressor(alpha=1.0, fit_intercept=True)
     yards_df = individual_df[['Team', 'Opponent', 'Yards']]
     yards_dummy_vars = pd.get_dummies(yards_df[['Team', 'Opponent']])
 
@@ -961,7 +964,7 @@ def get_schedule_difficulties():
     team_average_wins = {team: round(sum(chances)) for team, chances in team_win_chances.items()}
 
     team_df = team_df.sort_values(by='BT', kind='mergesort', ascending=False)
-    table = PrettyTable(['Rank', 'Name', 'Record', 'Avg. Opponent BT', 'Wins Above Average'])
+    table = PrettyTable(['Rank', 'Name', 'Record', 'Avg. Opponent BT', 'Games Above Average'])
     table.float_format = '0.3'
 
     green = '\033[32m'
@@ -980,9 +983,9 @@ def get_schedule_difficulties():
 
         average_wins = team_average_wins.get(team)
         expected_wins, expected_losses, expected_ties = get_proj_record(team)
-        wins_above = expected_wins - average_wins
-        color = green if wins_above > 2 else red if wins_above < -2 else ''
-        wins_above = color + str(wins_above).rjust(2) + stop
+        games_above = (expected_wins - average_wins) / 2
+        color = green if games_above > 1 else red if games_above < -1 else ''
+        games_above = color + str(games_above).rjust(4) + stop
 
         avg_record = ' - '.join([str(val).rjust(2) for val in [average_wins, 17 - average_wins, 0]])
 
@@ -993,7 +996,7 @@ def get_schedule_difficulties():
         table_row.append(record)
         # table_row.append(team_df.at[team, 'BT'])
         table_row.append(avg_opp_bt)
-        table_row.append(wins_above)
+        table_row.append(games_above)
 
         table.add_row(table_row)
 
@@ -1334,15 +1337,19 @@ def show_off_def():
         xa = math.exp(intercept + team_df.at[team, 'Points Coef'])
         ya = math.exp(intercept + team_df.at[team, 'Points Allowed Coef'])
 
-        offset = .42 if team == 'Bears' else .5
+        offset = .4 if team == 'Bears' else .5
         ax.imshow(images.get(team), extent=(xa - offset, xa + offset, ya + offset, ya - offset), alpha=.8)
 
     plt.axvline(x=math.exp(intercept), color='r', linestyle='--', alpha=.5)
     plt.axhline(y=math.exp(intercept), color='r', linestyle='--', alpha=.5)
 
-    for offset in [math.exp(intercept) - (float(i)) for i in
-                   range(int(math.exp(intercept))-69, int(math.exp(intercept))+70, 3)]:
-        plt.axline(xy1=(math.exp(intercept), offset), slope=1, alpha=.1)
+    average = math.exp(intercept)
+    offset_dist = 3 * math.sqrt(2)
+    offsets = set(np.arange(0, 75, offset_dist))
+    offsets = offsets.union({-offset for offset in offsets})
+
+    for offset in [average + offset for offset in offsets]:
+        plt.axline(xy1=(average, offset), slope=1, alpha=.1)
 
     plt.savefig('D:\\Colin\\Documents\\Programming\\Python\\PythonProjects\\Projects\\nfl\\'
                 'NFL_Prediction\\Redo\\OffenseDefense.png', dpi=300)
@@ -1505,6 +1512,9 @@ def ats_bets():
     bets = list()
     for game in odds:
         home_team, away_team, home_spread, away_spread, home_american, away_american = game
+
+        if home_american == 9900 or away_american == 9900:
+            continue
 
         home_spread = float(home_spread)
         away_spread = float(away_spread)
