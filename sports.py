@@ -112,11 +112,11 @@ def set_game_outcome(home_name, away_name, home_points, away_points, home_otl, a
     home_victory = home_points > away_points
     away_victory = away_points > home_points
 
-    home_points = home_points - 1 if away_otl else home_points
-    away_points = away_points - 1 if home_otl else away_points
-
     game_df.loc[len(game_df.index)] = [home_name, 1 if home_victory else 0, home_points, away_points]
     game_df.loc[len(game_df.index)] = [away_name, 1 if away_victory else 0, away_points, home_points]
+
+    home_points = home_points - 1 if away_otl else home_points
+    away_points = away_points - 1 if home_otl else away_points
 
     individual_df.loc[len(individual_df.index)] = [home_name, away_name, home_points]
     individual_df.loc[len(individual_df.index)] = [away_name, home_name, away_points]
@@ -241,6 +241,13 @@ def get_proj_record(team_name, schedule_path, total_games=82):
 
     expected_wins = sum(win_probs) + wins
     expected_losses = total_games - expected_wins
+
+    # TODO Remove
+    if total_games != 82:
+        diff = 82 - total_games
+        adjustment = round(diff / 2)
+        expected_wins = expected_wins + adjustment
+        expected_losses = expected_losses + adjustment
 
     return round(expected_wins), round(expected_losses)
 
@@ -431,7 +438,7 @@ def show_off_def(use_nba):
 
     intercept = team_df['Points Intercept'].mean()
 
-    margin = 3 if use_nba else .25
+    margin = 3 if use_nba else .05
     min_x = math.exp(intercept + team_df['Points Coef'].min()) - margin
     max_x = math.exp(intercept + team_df['Points Coef'].max()) + margin
 
@@ -447,16 +454,20 @@ def show_off_def(use_nba):
         xa = math.exp(intercept + team_df.at[team, 'Points Coef'])
         ya = math.exp(intercept + team_df.at[team, 'Points Allowed Coef'])
 
-        offset = 1.5 if use_nba else .075
+        offset = 1.25 if use_nba else .02
         ax.imshow(images.get(team), extent=(xa - offset, xa + offset, ya + offset, ya - offset), alpha=.8)
 
     plt.axvline(x=math.exp(intercept), color='r', linestyle='--', alpha=.5)
     plt.axhline(y=math.exp(intercept), color='r', linestyle='--', alpha=.5)
 
-    step = 6 if use_nba else 1
-    for offset in [math.exp(intercept) - (float(i)) for i in
-                   range(int(math.exp(intercept)) - 171, int(math.exp(intercept)) + 170, step)]:
-        plt.axline(xy1=(math.exp(intercept), offset), slope=1, alpha=.1)
+    average = math.exp(intercept)
+    step = 5 if use_nba else .5
+    offset_dist = step / math.sqrt(2)
+    offsets = set(np.arange(0, 150, offset_dist))
+    offsets = offsets.union({-offset for offset in offsets})
+
+    for offset in [average + offset for offset in offsets]:
+        plt.axline(xy1=(average, offset), slope=1, alpha=.1)
 
     # Show the graph
     plt.show()
