@@ -815,7 +815,7 @@ def print_table(week, sort_key='BT', sort_by_division=False):
         table_row.append(points_allowed_color + str(round(row['Adjusted Points Allowed'], 1)) + stop)
         table_row.append(yards_allowed_color + str(round(row['Adjusted Yards Allowed'], 1)) + stop)
 
-        if week <= 18:
+        if 12 <= week < 18:
             table_row.append(f'{get_division_winner_chance(index) * 100:.3f}' + '%')
             table_row.append(f'{get_wildcard_chance(index) * 100:.3f}' + '%')
             table_row.append(f'{(get_division_winner_chance(index) + get_wildcard_chance(index)) * 100:.3f}' + '%')
