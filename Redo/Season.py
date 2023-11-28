@@ -27,6 +27,7 @@ from sportsipy.nfl.teams import Teams
 
 import Projects.nfl.NFL_Prediction.Core.BayesianResume as br
 import Projects.nfl.NFL_Prediction.OddsHelper as Odds
+from Projects.nfl.NFL_Prediction.Redo.poibin import PoiBin
 
 graph = nx.MultiDiGraph()
 team_df = pd.DataFrame(columns=['Team', 'Division', 'Games Played',
@@ -752,11 +753,17 @@ def print_table(week, sort_key='BT', sort_by_division=False):
         team_df = team_df.sort_values(by='Division', kind='mergesort', ascending=False)
 
     if week > 18:
-        table = PrettyTable(['Rank', 'Name', 'Record', 'Bayes Win Pct', 'BT',
-                             'Adj. PPG', 'Adj. YPG', 'Adj. PPG Allowed', 'Adj. YPG Allowed'])
+        columns = ['Rank', 'Name', 'Record', 'Bayes Win Pct', 'BT',
+                   'Adj. PPG', 'Adj. YPG', 'Adj. PPG Allowed', 'Adj. YPG Allowed']
     else:
-        table = PrettyTable(['Rank', 'Name', 'Record', 'Bayes Win Pct', 'BT',
-                             'Proj. Record', 'Adj. PPG', 'Adj. YPG', 'Adj. PPG Allowed', 'Adj. YPG Allowed'])
+        columns = ['Rank', 'Name', 'Record', 'Bayes Win Pct', 'BT',
+                   'Proj. Record', 'Adj. PPG', 'Adj. YPG', 'Adj. PPG Allowed', 'Adj. YPG Allowed']
+        if week >= 12:
+            columns.append('Win Division Chance')
+            columns.append('Make Wild Card Chance')
+            columns.append('Make Playoffs Chance')
+
+    table = PrettyTable(columns)
     table.float_format = '0.3'
 
     points_coefs = team_df['Points Coef']
@@ -807,6 +814,11 @@ def print_table(week, sort_key='BT', sort_by_division=False):
         table_row.append(yards_color + str(round(row['Adjusted Yards'], 1)) + stop)
         table_row.append(points_allowed_color + str(round(row['Adjusted Points Allowed'], 1)) + stop)
         table_row.append(yards_allowed_color + str(round(row['Adjusted Yards Allowed'], 1)) + stop)
+
+        if week <= 18:
+            table_row.append(f'{get_division_winner_chance(index) * 100:.3f}' + '%')
+            table_row.append(f'{get_wildcard_chance(index) * 100:.3f}' + '%')
+            table_row.append(f'{(get_division_winner_chance(index) + get_wildcard_chance(index)) * 100:.3f}' + '%')
 
         table.add_row(table_row)
 
@@ -1067,7 +1079,8 @@ def season(week_num,
                 home_name = game.get('home')
                 away_name = game.get('away')
                 if manual_odds:
-                    odds = (game.get('line'))
+                    # odds = (game.get('line'))
+                    odds = 0
                     games.append((away_name, home_name, odds))
                 else:
                     games.append((away_name, home_name, get_vegas_line(home_name, away_name, odds)))
@@ -1084,6 +1097,8 @@ def season(week_num,
 
     show_off_def()
     show_graph(divisional_edges_only=week_num > 5)
+
+    get_wildcard_chance('Cowboys')
 
     if week_num <= 18:
         surprises()
@@ -1588,3 +1603,141 @@ def ats_bets():
     print(red)
     print(bad_bet_df)
     print(stop)
+
+
+def get_wildcard_chance(team):
+    teams_division = get_division(team)
+    teams_conference = teams_division.split()[0]
+    conference_opponents = [opp for opp in team_df.index if opp != team and get_division(opp).split()[0] == teams_conference]
+
+    team_bt = team_df.at[team, 'BT']
+
+    tiebreak_opponents = dict()
+    for opponent in conference_opponents:
+        opponent_bt = team_df.at[opponent, 'BT']
+
+        h2h_win_chance, h2h_tie_chance, h2h_loss_chance = get_h2h_chances(team, opponent)
+
+        if h2h_win_chance == 1:
+            tiebreak_opponents[opponent] = True
+        elif h2h_loss_chance == 1:
+            tiebreak_opponents[opponent] = False
+        else:
+            if opponent_bt > team_bt:
+                tiebreak_opponents[opponent] = False
+            else:
+                tiebreak_opponents[opponent] = True
+
+    total_wins_chances = get_total_wins_chances(team)
+    opp_wins_chances = {opp: get_total_wins_chances(opp) for opp in conference_opponents}
+    temp_df = pd.DataFrame(opp_wins_chances)
+
+    win_chances = list()
+    for win_total, chance in total_wins_chances.items():
+        if chance == 0:
+            continue
+
+        all_opponent_chances = list()
+        for opponent, opp_chances in opp_wins_chances.items():
+
+            # Each opponents chance to get the required number of wins to beat the team
+            if tiebreak_opponents.get(opponent):
+                opponent_chances = {k: v for k, v in opp_chances.items() if k > win_total}
+            else:
+                opponent_chances = {k: v for k, v in opp_chances.items() if k >= win_total}
+
+            opponent_chance = sum(opponent_chances.values())
+
+            # Times that opponents chance to lose their division (be in wild card hunt)
+            all_opponent_chances.append(opponent_chance * (1 - get_division_winner_chance(opponent)))
+
+        # The teams chance to have 2 or fewer teams beat them in the WC race
+        pb = PoiBin(all_opponent_chances)
+        make_wc_chance = pb.cdf(2)
+
+        # Times the teams chance to get that number of wins
+        win_chances.append(chance * make_wc_chance)
+
+    # Total chance to win a WC slot times the teams chance to lose their division (be in wild card hunt)
+    wc_chance = sum(win_chances) * (1 - get_division_winner_chance(team))
+    return wc_chance
+
+
+def get_division_winner_chance(team):
+    teams_division = get_division(team)
+    division_opponents = [opp for opp in team_df.index if opp != team and get_division(opp) == teams_division]
+
+    team_bt = team_df.at[team, 'BT']
+
+    tiebreak_opponents = dict()
+    for opponent in division_opponents:
+        opponent_bt = team_df.at[opponent, 'BT']
+
+        h2h_win_chance, h2h_tie_chance, h2h_loss_chance = get_h2h_chances(team, opponent)
+
+        if h2h_win_chance == 1:
+            tiebreak_opponents[opponent] = True
+        elif h2h_loss_chance == 1:
+            tiebreak_opponents[opponent] = False
+        else:
+            if opponent_bt > team_bt:
+                tiebreak_opponents[opponent] = False
+            else:
+                tiebreak_opponents[opponent] = True
+
+    total_wins_chances = get_total_wins_chances(team)
+    opp_wins_chances = {opp: get_total_wins_chances(opp) for opp in division_opponents}
+
+    win_chances = list()
+    for win_total, chance in total_wins_chances.items():
+        if chance == 0:
+            continue
+
+        all_opponent_chances = list()
+        for opponent, opp_chances in opp_wins_chances.items():
+            if tiebreak_opponents.get(opponent):
+                opponent_chances = {k: v for k, v in opp_chances.items() if k <= win_total}
+            else:
+                opponent_chances = {k: v for k, v in opp_chances.items() if k < win_total}
+
+            opponent_chance = sum(opponent_chances.values())
+            all_opponent_chances.append(opponent_chance)
+
+        win_chances.append(chance * np.prod(all_opponent_chances))
+
+    first_place_chance = sum(win_chances)
+    return first_place_chance
+
+
+def get_h2h_chances(team, opponent):
+    previous_games = [e for e in graph.edges if team in e and opponent in e]
+    previous_wins = [(loser, winner) for loser, winner, num in previous_games if winner == team]
+    previous_losses = [(loser, winner) for loser, winner, num in previous_games if loser == team]
+
+    team_bt = team_df.at[team, 'BT']
+    opponent_bt = team_df.at[opponent, 'BT']
+    bt_chance = math.exp(team_bt) / (math.exp(team_bt) + math.exp(opponent_bt))
+
+    if len(previous_games) == 2:
+        if len(previous_wins) == 2:
+            h2h_win_chance = 1
+            h2h_tie_chance = 0
+        elif len(previous_wins) == 1:
+            h2h_win_chance = 0
+            h2h_tie_chance = 1
+        else:
+            h2h_win_chance = 0
+            h2h_tie_chance = 0
+    elif len(previous_games) == 1:
+        if len(previous_wins) == 1:
+            h2h_win_chance = bt_chance
+            h2h_tie_chance = 1 - bt_chance
+        else:
+            h2h_win_chance = 0
+            h2h_tie_chance = bt_chance
+    else:
+        h2h_win_chance = bt_chance ** 2
+        h2h_tie_chance = 1 - (1 - bt_chance) ** 2 - bt_chance ** 2
+
+    h2h_loss_chance = 1 - h2h_win_chance - h2h_tie_chance
+    return h2h_win_chance, h2h_tie_chance, h2h_loss_chance
