@@ -20,6 +20,7 @@ from prettytable import PrettyTable
 from scipy.optimize import minimize
 from scipy.stats import norm
 from scipy.stats import poisson
+from scipy.stats import rankdata
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import PoissonRegressor
 from sportsipy.nfl.schedule import Schedule
@@ -752,29 +753,29 @@ def print_table(week, sort_key='BT', sort_by_division=False):
     if sort_by_division:
         team_df = team_df.sort_values(by='Division', kind='mergesort', ascending=False)
 
+    index_col = 'Division' if sort_by_division else 'Rank'
+
     if week > 18:
-        columns = ['Rank', 'Name', 'Record', 'Bayes Win Pct', 'BT',
-                   'Adj. PPG', 'Adj. YPG', 'Adj. PPG Allowed', 'Adj. YPG Allowed']
+        columns = [index_col, 'Name', 'Record', 'Bayes Win %', 'BT',
+                   'Adj. PPG', 'Adj. PPG Allowed', 'Adj. Point Diff']
     else:
-        columns = ['Rank', 'Name', 'Record', 'Bayes Win Pct', 'BT',
-                   'Proj. Record', 'Adj. PPG', 'Adj. YPG', 'Adj. PPG Allowed', 'Adj. YPG Allowed']
+        columns = [index_col, 'Name', 'Record', 'Bayes Win %', 'BT',
+                   'Proj. Record', 'Adj. PPG', 'Adj. PPG Allowed', 'Adj. Point Diff']
         if week >= 12:
-            columns.append('Win Division Chance')
-            columns.append('Make Wild Card Chance')
-            columns.append('Make Playoffs Chance')
+            columns.append('Win Division')
+            columns.append('Make Wild Card')
+            columns.append('Make Playoffs')
+            columns.append('First Round Bye')
 
     table = PrettyTable(columns)
     table.float_format = '0.3'
 
     points_coefs = team_df['Points Coef']
     points_allowed_coefs = team_df['Points Allowed Coef']
-    yards_coefs = team_df['Yards Coef']
-    yards_allowed_coefs = team_df['Yards Allowed Coef']
 
     points_var = statistics.variance(points_coefs)
     points_allowed_var = statistics.variance(points_allowed_coefs)
-    yards_var = statistics.variance(yards_coefs)
-    yards_allowed_var = statistics.variance(yards_allowed_coefs)
+    points_diff_var = statistics.variance(team_df['Adjusted Point Diff'])
 
     stop = '\033[0m'
 
@@ -792,17 +793,18 @@ def print_table(week, sort_key='BT', sort_by_division=False):
         yards_pct = .1
         points_color = get_color(row['Points Coef'], points_var, alpha=points_pct)
         points_allowed_color = get_color(row['Points Allowed Coef'], points_allowed_var, alpha=points_pct, invert=True)
+        points_diff_color = get_color(row['Adjusted Point Diff'], points_diff_var, alpha=points_pct, invert=False)
 
-        yards_color = get_color(row['Yards Coef'], yards_var, alpha=yards_pct)
-        yards_allowed_color = get_color(row['Yards Allowed Coef'], yards_allowed_var, alpha=yards_pct, invert=True)
-
-        table_row.append(rank)
+        if sort_by_division:
+            table_row.append(row['Division'])
+        else:
+            table_row.append(rank)
         table_row.append(index)
         table_row.append(record)
-        table_row.append(row['Bayes Win Pct'])
+        table_row.append((f"{row['Bayes Win Pct'] * 100:.1f}" + '%').rjust(5))
 
         bt_color = get_color(row['BT'], row['BT Var'])
-        table_row.append(bt_color + str(round(rescale_bt(row['BT']), 3)) + stop)
+        table_row.append(bt_color + f"{rescale_bt(row['BT']):.3f}".rjust(6) + stop)
 
         if week <= 18:
             proj_record = get_proj_record(index)
@@ -811,14 +813,14 @@ def print_table(week, sort_key='BT', sort_by_division=False):
             table_row.append(proj_record)
 
         table_row.append(points_color + str(round(row['Adjusted Points'], 1)) + stop)
-        table_row.append(yards_color + str(round(row['Adjusted Yards'], 1)) + stop)
         table_row.append(points_allowed_color + str(round(row['Adjusted Points Allowed'], 1)) + stop)
-        table_row.append(yards_allowed_color + str(round(row['Adjusted Yards Allowed'], 1)) + stop)
+        table_row.append(points_diff_color + str(round(row['Adjusted Point Diff'], 1)).rjust(5) + stop)
 
         if 12 <= week < 18:
-            table_row.append(f'{get_division_winner_chance(index) * 100:.3f}' + '%')
-            table_row.append(f'{get_wildcard_chance(index) * 100:.3f}' + '%')
-            table_row.append(f'{(get_division_winner_chance(index) + get_wildcard_chance(index)) * 100:.3f}' + '%')
+            table_row.append((f'{get_division_winner_chance(index) * 100:.1f}' + '%').rjust(6))
+            table_row.append((f'{get_wildcard_chance(index) * 100:.1f}' + '%').rjust(6))
+            table_row.append((f'{(get_division_winner_chance(index) + get_wildcard_chance(index)) * 100:.1f}' + '%').rjust(6))
+            table_row.append((f'{get_first_round_bye_chance(index) * 100:.1f}' + '%').rjust(6))
 
         table.add_row(table_row)
 
@@ -1097,8 +1099,6 @@ def season(week_num,
 
     show_off_def()
     show_graph(divisional_edges_only=week_num > 5)
-
-    get_wildcard_chance('Cowboys')
 
     if week_num <= 18:
         surprises()
@@ -1605,6 +1605,39 @@ def ats_bets():
     print(stop)
 
 
+def get_first_round_bye_chance(team):
+    teams_division = get_division(team)
+    teams_conference = teams_division.split()[0]
+    conference_opponents = [opp for opp in team_df.index if opp != team and get_division(opp).split()[0] == teams_conference]
+
+    team_bt = team_df.at[team, 'BT']
+
+    tiebreak_opponents = {opp: get_tiebreak(team, opp, divisional=False) for opp in conference_opponents}
+
+    total_wins_chances = get_total_wins_chances(team)
+    opp_wins_chances = {opp: get_total_wins_chances(opp) for opp in conference_opponents}
+
+    win_chances = list()
+    for win_total, chance in total_wins_chances.items():
+        if chance == 0:
+            continue
+
+        all_opponent_chances = list()
+        for opponent, opp_chances in opp_wins_chances.items():
+            if tiebreak_opponents.get(opponent):
+                opponent_chances = {k: v for k, v in opp_chances.items() if k <= win_total}
+            else:
+                opponent_chances = {k: v for k, v in opp_chances.items() if k < win_total}
+
+            opponent_chance = sum(opponent_chances.values())
+            all_opponent_chances.append(opponent_chance)
+
+        win_chances.append(chance * np.prod(all_opponent_chances))
+
+    first_place_chance = sum(win_chances)
+    return first_place_chance
+
+
 def get_wildcard_chance(team):
     teams_division = get_division(team)
     teams_conference = teams_division.split()[0]
@@ -1612,25 +1645,10 @@ def get_wildcard_chance(team):
 
     team_bt = team_df.at[team, 'BT']
 
-    tiebreak_opponents = dict()
-    for opponent in conference_opponents:
-        opponent_bt = team_df.at[opponent, 'BT']
-
-        h2h_win_chance, h2h_tie_chance, h2h_loss_chance = get_h2h_chances(team, opponent)
-
-        if h2h_win_chance == 1:
-            tiebreak_opponents[opponent] = True
-        elif h2h_loss_chance == 1:
-            tiebreak_opponents[opponent] = False
-        else:
-            if opponent_bt > team_bt:
-                tiebreak_opponents[opponent] = False
-            else:
-                tiebreak_opponents[opponent] = True
+    tiebreak_opponents = {opp: get_tiebreak(team, opp, divisional=False) for opp in conference_opponents}
 
     total_wins_chances = get_total_wins_chances(team)
     opp_wins_chances = {opp: get_total_wins_chances(opp) for opp in conference_opponents}
-    temp_df = pd.DataFrame(opp_wins_chances)
 
     win_chances = list()
     for win_total, chance in total_wins_chances.items():
@@ -1669,21 +1687,7 @@ def get_division_winner_chance(team):
 
     team_bt = team_df.at[team, 'BT']
 
-    tiebreak_opponents = dict()
-    for opponent in division_opponents:
-        opponent_bt = team_df.at[opponent, 'BT']
-
-        h2h_win_chance, h2h_tie_chance, h2h_loss_chance = get_h2h_chances(team, opponent)
-
-        if h2h_win_chance == 1:
-            tiebreak_opponents[opponent] = True
-        elif h2h_loss_chance == 1:
-            tiebreak_opponents[opponent] = False
-        else:
-            if opponent_bt > team_bt:
-                tiebreak_opponents[opponent] = False
-            else:
-                tiebreak_opponents[opponent] = True
+    tiebreak_opponents = {opp: get_tiebreak(team, opp, divisional=True) for opp in division_opponents}
 
     total_wins_chances = get_total_wins_chances(team)
     opp_wins_chances = {opp: get_total_wins_chances(opp) for opp in division_opponents}
@@ -1709,35 +1713,344 @@ def get_division_winner_chance(team):
     return first_place_chance
 
 
-def get_h2h_chances(team, opponent):
+def get_tiebreak_head_to_head(team, opponent):
     previous_games = [e for e in graph.edges if team in e and opponent in e]
     previous_wins = [(loser, winner) for loser, winner, num in previous_games if winner == team]
     previous_losses = [(loser, winner) for loser, winner, num in previous_games if loser == team]
 
+    if len(previous_wins) > len(previous_losses):
+        return True
+
+    if len(previous_wins) < len(previous_losses):
+        return False
+
+    return None
+
+
+def get_tiebreak_divisional_win_pct(team, opponent):
+    division = get_division(team)
+    teams_opponents = [opp for opp in team_df.index if opp != team and get_division(opp) == division]
+    opponents_opponents = [opp for opp in team_df.index if opp != opponent and get_division(opp) == division]
+
+    teams_divisional_games = [e for e in graph.edges if team in e and
+                              any(opp in e for opp in teams_opponents)]
+    opponents_divisional_games = [e for e in graph.edges if opponent in e and
+                                  any(opp in e for opp in opponents_opponents)]
+
+    team_divisional_wins = [(loser, winner) for loser, winner, num in teams_divisional_games if winner == team]
+    team_divisional_losses = [(loser, winner) for loser, winner, num in teams_divisional_games if loser == team]
+    team_divisional_games = len(team_divisional_wins) + len(team_divisional_losses)
+    if team_divisional_games == 0:
+        team_divisional_win_pct = 0
+    else:
+        team_divisional_win_pct = len(team_divisional_wins) / team_divisional_games
+
+    opponent_divisional_wins = [(loser, winner) for loser, winner, num in opponents_divisional_games
+                                if winner == opponent]
+    opponent_divisional_losses = [(loser, winner) for loser, winner, num in opponents_divisional_games
+                                  if loser == opponent]
+    opponent_divisional_games = len(opponent_divisional_wins) + len(opponent_divisional_losses)
+    if opponent_divisional_games == 0:
+        opponent_divisional_win_pct = 0
+    else:
+        opponent_divisional_win_pct = len(opponent_divisional_wins) / opponent_divisional_games
+
+    if team_divisional_win_pct > opponent_divisional_win_pct:
+        return True
+
+    if team_divisional_win_pct < opponent_divisional_win_pct:
+        return False
+
+    return None
+
+
+def get_tiebreak_conference_win_pct(team, opponent):
+    teams_conference = get_division(team).split()[0]
+    opponents_conference = get_division(opponent).split()[0]
+    teams_opponents = [opp for opp in team_df.index if opp != team
+                       and get_division(opp).split()[0] == teams_conference]
+    opponents_opponents = [opp for opp in team_df.index if opp != opponent
+                           and get_division(opp).split()[0] == opponents_conference]
+
+    teams_conference_games = [e for e in graph.edges if team in e and
+                              any(opp in e for opp in teams_opponents)]
+    opponents_conference_games = [e for e in graph.edges if opponent in e and
+                                  any(opp in e for opp in opponents_opponents)]
+
+    team_conference_wins = [(loser, winner) for loser, winner, num in teams_conference_games if winner == team]
+    team_conference_losses = [(loser, winner) for loser, winner, num in teams_conference_games if loser == team]
+    team_conference_games = len(team_conference_wins) + len(team_conference_losses)
+    if team_conference_games == 0:
+        team_conference_win_pct = 0
+    else:
+        team_conference_win_pct = len(team_conference_wins) / team_conference_games
+
+    opponent_conference_wins = [(loser, winner) for loser, winner, num in opponents_conference_games
+                                if winner == opponent]
+    opponent_conference_losses = [(loser, winner) for loser, winner, num in opponents_conference_games
+                                  if loser == opponent]
+    opponent_conference_games = len(opponent_conference_wins) + len(opponent_conference_losses)
+    if opponent_conference_games == 0:
+        opponent_conference_win_pct = 0
+    else:
+        opponent_conference_win_pct = len(opponent_conference_wins) / opponent_conference_games
+
+    if team_conference_win_pct > opponent_conference_win_pct:
+        return True
+
+    if team_conference_win_pct < opponent_conference_win_pct:
+        return False
+
+    return None
+
+
+def get_tiebreak_common_win_pct(team, opponent, divisional=True):
+    teams_games = [e for e in graph.edges if team in e]
+    opponents_games = [e for e in graph.edges if opponent in e]
+
+    teams_opponents = set([loser for loser, winner, num in teams_games]).union(
+        set([winner for loser, winner, num in teams_games]))
+
+    opponents_opponents = set([loser for loser, winner, num in opponents_games]).union(
+        set([winner for loser, winner, num in opponents_games]))
+
+    common_opponents = teams_opponents.intersection(opponents_opponents)
+
+    teams_common_games = [e for e in graph.edges if team in e and
+                          any(opp in e for opp in common_opponents)]
+    opponents_common_games = [e for e in graph.edges if opponent in e and
+                              any(opp in e for opp in common_opponents)]
+
+    if not divisional and len(teams_common_games) + len(opponents_common_games) < 4:
+        return None
+
+    team_common_wins = [(loser, winner) for loser, winner, num in teams_common_games if winner == team]
+    team_common_losses = [(loser, winner) for loser, winner, num in teams_common_games if loser == team]
+    team_common_games = len(team_common_wins) + len(team_common_losses)
+    if team_common_games == 0:
+        team_common_win_pct = 0
+    else:
+        team_common_win_pct = len(team_common_wins) / team_common_games
+
+    opponent_common_wins = [(loser, winner) for loser, winner, num in opponents_common_games
+                                if winner == opponent]
+    opponent_common_losses = [(loser, winner) for loser, winner, num in opponents_common_games
+                                  if loser == opponent]
+    opponent_common_games = len(opponent_common_wins) + len(opponent_common_losses)
+    if opponent_common_games == 0:
+        opponent_common_win_pct = 0
+    else:
+        opponent_common_win_pct = len(opponent_common_wins) / opponent_common_games
+
+    if team_common_win_pct > opponent_common_win_pct:
+        return True
+
+    if team_common_win_pct < opponent_common_win_pct:
+        return False
+
+    return None
+
+
+def get_tiebreak_strength_of_victory(team, opponent):
+    teams_games = [e for e in graph.edges if team in e]
+    opponents_games = [e for e in graph.edges if opponent in e]
+
+    team_wins = [(loser, winner) for loser, winner, num in teams_games if winner == team]
+    opponent_wins = [(loser, winner) for loser, winner, num in opponents_games if winner == opponent]
+
+    team_total_wins = 0
+    team_total_losses = 0
+    team_total_ties = 0
+    for loser, team in team_wins:
+        team_total_wins = team_total_wins + team_df.at[loser, 'Wins']
+        team_total_losses = team_total_losses + team_df.at[loser, 'Losses']
+        team_total_ties = team_total_ties + team_df.at[loser, 'Ties']
+
+    opponent_total_wins = 0
+    opponent_total_losses = 0
+    opponent_total_ties = 0
+    for loser, opponent in opponent_wins:
+        opponent_total_wins = opponent_total_wins + team_df.at[loser, 'Wins']
+        opponent_total_losses = opponent_total_losses + team_df.at[loser, 'Losses']
+        opponent_total_ties = opponent_total_ties + team_df.at[loser, 'Ties']
+
+    team_total_games = team_total_wins + team_total_losses + team_total_ties
+    if team_total_games == 0:
+        team_total_wp = 0
+    else:
+        team_total_wp = team_total_wins / team_total_games
+
+    opponent_total_games = opponent_total_wins + opponent_total_losses + opponent_total_ties
+    if opponent_total_games == 0:
+        opponent_total_wp = 0
+    else:
+        opponent_total_wp = opponent_total_wins / opponent_total_games
+
+    if team_total_wp > opponent_total_wp:
+        return True
+
+    if team_total_wp < opponent_total_wp:
+        return False
+
+    return None
+
+
+def get_tiebreak_strength_of_schedule(team, opponent):
+    teams_games = [e for e in graph.edges if team in e]
+    opponents_games = [e for e in graph.edges if opponent in e]
+
+    team_total_wins = 0
+    team_total_losses = 0
+    team_total_ties = 0
+    for loser, winner in teams_games:
+        if winner == team:
+            other_team = loser
+        else:
+            other_team = winner
+        team_total_wins = team_total_wins + team_df.at[other_team, 'Wins']
+        team_total_losses = team_total_losses + team_df.at[other_team, 'Losses']
+        team_total_ties = team_total_ties + team_df.at[other_team, 'Ties']
+
+    opponent_total_wins = 0
+    opponent_total_losses = 0
+    opponent_total_ties = 0
+    for loser, winner in opponents_games:
+        if winner == opponent:
+            other_team = loser
+        else:
+            other_team = winner
+        opponent_total_wins = opponent_total_wins + team_df.at[other_team, 'Wins']
+        opponent_total_losses = opponent_total_losses + team_df.at[other_team, 'Losses']
+        opponent_total_ties = opponent_total_ties + team_df.at[other_team, 'Ties']
+
+    team_total_games = team_total_wins + team_total_losses + team_total_ties
+    if team_total_games == 0:
+        team_total_wp = 0
+    else:
+        team_total_wp = team_total_wins / team_total_games
+
+    opponent_total_games = opponent_total_wins + opponent_total_losses + opponent_total_ties
+    if opponent_total_games == 0:
+        opponent_total_wp = 0
+    else:
+        opponent_total_wp = opponent_total_wins / opponent_total_games
+
+    if team_total_wp > opponent_total_wp:
+        return True
+
+    if team_total_wp < opponent_total_wp:
+        return False
+
+    return None
+
+
+def get_tiebreak_conference_point_diff(team, opponent):
+    import warnings
+    warnings.filterwarnings('ignore')
+
+    teams_conference = get_division(team).split()[0]
+    opponents_conference = get_division(opponent).split()[0]
+
+    teams_conf_df = team_df.loc[team_df['Division'].str.startswith(teams_conference)]
+    teams_conf_df['Total Points'] = teams_conf_df.apply(lambda r: r['Avg Points'] * r['Games Played'], axis=1)
+    teams_conf_df['Total Points Allowed'] = teams_conf_df.apply(lambda r: r['Avg Points Allowed'] * r['Games Played'],
+                                                                axis=1)
+    teams_conf_df['Total Point Diff'] = teams_conf_df.apply(lambda r: r['Total Points'] - r['Total Points Allowed'],
+                                                            axis=1)
+
+    teams_index = list(teams_conf_df.index).index(team)
+    teams_point_diff_rank = rankdata(teams_conf_df['Total Point Diff'], method='min')[teams_index]
+
+    opponent_conf_df = team_df.loc[team_df['Division'].str.startswith(opponents_conference)]
+    opponent_conf_df['Total Points'] = opponent_conf_df.apply(lambda r: r['Avg Points'] * r['Games Played'], axis=1)
+    opponent_conf_df['Total Points Allowed'] = opponent_conf_df.apply(lambda r: r['Avg Points Allowed'] *
+                                                                                r['Games Played'], axis=1)
+    opponent_conf_df['Total Point Diff'] = opponent_conf_df.apply(lambda r: r['Total Points'] -
+                                                                            r['Total Points Allowed'], axis=1)
+
+    opponents_index = list(opponent_conf_df.index).index(opponent)
+    opponents_point_diff_rank = rankdata(teams_conf_df['Total Point Diff'], method='min')[opponents_index]
+
+    if teams_point_diff_rank > opponents_point_diff_rank:
+        return True
+
+    if teams_point_diff_rank < opponents_point_diff_rank:
+        return False
+
+    return None
+
+
+def get_tiebreak_overall_point_diff(team, opponent):
+    teams_conference = get_division(team).split()[0]
+    opponents_conference = get_division(opponent).split()[0]
+
+    team_df_copy = team_df.copy()
+
+    team_df_copy['Total Points'] = team_df_copy.apply(lambda r: r['Avg Points'] * r['Games Played'], axis=1)
+    team_df_copy['Total Points Allowed'] = team_df_copy.apply(lambda r: r['Avg Points Allowed'] * r['Games Played'],
+                                                                axis=1)
+    team_df_copy['Total Point Diff'] = team_df_copy.apply(lambda r: r['Total Points'] - r['Total Points Allowed'],
+                                                            axis=1)
+
+    teams_index = list(team_df_copy.index).index(team)
+    opponents_index = list(team_df_copy.index).index(opponent)
+    ranking = rankdata(team_df_copy['Total Point Diff'], method='min')
+    teams_point_diff_rank = ranking[teams_index]
+    opponents_point_diff_rank = ranking[opponents_index]
+
+    if teams_point_diff_rank > opponents_point_diff_rank:
+        return True
+
+    if teams_point_diff_rank < opponents_point_diff_rank:
+        return False
+
+    return None
+
+
+def get_tiebreak(team, opponent, divisional=True):
+    # This is all done as things are currently, not as they may play out
+    h2h = get_tiebreak_head_to_head(team, opponent)
+    if h2h is not None:
+        return h2h
+
+    if divisional:
+        divisional_wp = get_tiebreak_divisional_win_pct(team, opponent)
+        if divisional_wp is not None:
+            return divisional_wp
+    else:
+        conference_wp = get_tiebreak_conference_win_pct(team, opponent)
+        if conference_wp is not None:
+            return conference_wp
+
+    common_wp = get_tiebreak_common_win_pct(team, opponent, divisional=divisional)
+    if common_wp is not None:
+        return common_wp
+
+    if divisional:
+        conference_wp = get_tiebreak_conference_win_pct(team, opponent)
+        if conference_wp is not None:
+            return conference_wp
+
+    sov = get_tiebreak_strength_of_victory(team, opponent)
+    if sov is not None:
+        return sov
+
+    sos = get_tiebreak_strength_of_schedule(team, opponent)
+    if sos is not None:
+        return sos
+
+    conf_point_diff = get_tiebreak_conference_point_diff(team, opponent)
+    if conf_point_diff is not None:
+        return conf_point_diff
+
+    overall_point_diff = get_tiebreak_overall_point_diff(team, opponent)
+    if overall_point_diff is not None:
+        return overall_point_diff
+
     team_bt = team_df.at[team, 'BT']
     opponent_bt = team_df.at[opponent, 'BT']
-    bt_chance = math.exp(team_bt) / (math.exp(team_bt) + math.exp(opponent_bt))
 
-    if len(previous_games) == 2:
-        if len(previous_wins) == 2:
-            h2h_win_chance = 1
-            h2h_tie_chance = 0
-        elif len(previous_wins) == 1:
-            h2h_win_chance = 0
-            h2h_tie_chance = 1
-        else:
-            h2h_win_chance = 0
-            h2h_tie_chance = 0
-    elif len(previous_games) == 1:
-        if len(previous_wins) == 1:
-            h2h_win_chance = bt_chance
-            h2h_tie_chance = 1 - bt_chance
-        else:
-            h2h_win_chance = 0
-            h2h_tie_chance = bt_chance
+    if team_bt == opponent_bt:
+        return team > opponent
     else:
-        h2h_win_chance = bt_chance ** 2
-        h2h_tie_chance = 1 - (1 - bt_chance) ** 2 - bt_chance ** 2
-
-    h2h_loss_chance = 1 - h2h_win_chance - h2h_tie_chance
-    return h2h_win_chance, h2h_tie_chance, h2h_loss_chance
+        return team_bt > opponent_bt
