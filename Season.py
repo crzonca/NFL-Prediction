@@ -1633,7 +1633,7 @@ def plot_matchup(team1, team2, team1_chance, team1_spread):
     # Team 1 Logo and Stats
     black_logo = PIL.Image.open('Projects/nfl/NFL_Prediction/Redo/logos/black.png')
 
-    a = plt.axes([-.1, .69, .6, .16])
+    a = plt.axes([-.125, .69, .6, .16])
     a.set_aspect('auto')
     a.axis("off")
     a.imshow(team1_logo, origin='upper', extent=(0, 1, 0, 1), alpha=0.7)
@@ -1667,10 +1667,10 @@ def plot_matchup(team1, team2, team1_chance, team1_spread):
                   'Off: ' + str(round(team1_off, 1)).ljust(6) + ' (' + str(team1_off_rank) + ordinal_suffix_map.get(team1_off_rank, 'th') + ')\n' + \
                   'Def: ' + str(round(team1_def, 1)).ljust(6) + ' (' + str(team1_def_rank) + ordinal_suffix_map.get(team1_def_rank, 'th') + ')'
 
-    plt.text(x=1.1, y=.2, s=team1_stats, fontsize=15)
+    plt.text(x=1.075, y=.2, s=team1_stats, fontsize=16)
 
     # Team 2 Logo and Stats
-    a = plt.axes([-.1, .52, .6, .16])
+    a = plt.axes([-.125, .52, .6, .16])
     a.set_aspect('auto')
     a.axis("off")
     a.imshow(team2_logo, origin='upper', extent=(0, 1, 0, 1), alpha=0.7)
@@ -1704,7 +1704,7 @@ def plot_matchup(team1, team2, team1_chance, team1_spread):
                   'Off: ' + str(round(team2_off, 1)).ljust(6) + ' (' + str(team2_off_rank) + ordinal_suffix_map.get(team2_off_rank, 'th') + ')\n' + \
                   'Def: ' + str(round(team2_def, 1)).ljust(6) + ' (' + str(team2_def_rank) + ordinal_suffix_map.get(team2_def_rank, 'th') + ')'
 
-    plt.text(x=1.1, y=.2, s=team2_stats, fontsize=15)
+    plt.text(x=1.075, y=.2, s=team2_stats, fontsize=16)
 
     # Pie charts
     team2_chance = 1 - team1_chance
