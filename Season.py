@@ -12,6 +12,7 @@ import choix
 import matplotlib.patches
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -20,6 +21,7 @@ from prettytable import PrettyTable
 from scipy.optimize import minimize
 from scipy.stats import norm
 from scipy.stats import poisson
+from scipy.stats import skellam
 from scipy.stats import rankdata
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import PoissonRegressor
@@ -576,15 +578,15 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
 
             home_expected_points = pred.get('Home Expected Points')
             away_expected_points = pred.get('Away Expected Points')
-            winner = home_name if home_expected_points >= away_expected_points else away_name
-            loser = home_name if home_expected_points < away_expected_points else away_name
+            pois_winner = home_name if home_expected_points >= away_expected_points else away_name
+            pois_loser = home_name if home_expected_points < away_expected_points else away_name
 
-            print('The', winner.ljust(justify_width), 'have a',
-                  f'{get_spread_chance(winner, loser, 0.0)[0] * 100:.3f}' + '% chance to beat the',
-                  loser.ljust(justify_width + 3), 'according to the Poisson Regression')
+            print('The', pois_winner.ljust(justify_width), 'have a',
+                  f'{get_spread_chance(pois_winner, pois_loser, 0.0)[0] * 100:.3f}' + '% chance to beat the',
+                  pois_loser.ljust(justify_width + 3), 'according to the Poisson Regression')
 
-            winner_points = home_expected_points if winner == home_name else away_expected_points
-            loser_points = away_expected_points if winner == home_name else home_expected_points
+            winner_points = home_expected_points if pois_winner == home_name else away_expected_points
+            loser_points = away_expected_points if pois_winner == home_name else home_expected_points
             pts = 'points' if round(winner_points - loser_points, 1) != 1.0 else 'point'
             common_score_map = get_common_score_map()
             common_winner_points = common_score_map.get(round(winner_points), round(winner_points))
@@ -593,7 +595,7 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
                 common_winner_points = common_winner_points + 1
             expected_score = '(Projected Score: ' + str(common_winner_points) + ' - ' + str(common_loser_points) + ')'
 
-            print('The', winner.ljust(justify_width), 'are expected to win by an average of',
+            print('The', pois_winner.ljust(justify_width), 'are expected to win by an average of',
                   str(round(winner_points - loser_points, 1)).ljust(4), pts.ljust(7), expected_score)
 
             home_bt = pred.get('BT Chance')
@@ -635,6 +637,8 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
                   'by',
                   round(winner_yards - loser_yards), yds.ljust(5), expected_yards)
             print()
+
+            plot_matchup(favored_team, underdog, prob, rounded_line if location == 'at home' else -rounded_line)
 
     print()
 
@@ -753,30 +757,29 @@ def print_table(week, sort_key='BT', sort_by_division=False):
     if sort_by_division:
         team_df = team_df.sort_values(by='Division', kind='mergesort', ascending=False)
 
+    index_col = 'Division' if sort_by_division else 'Rank'
+
     if week > 18:
-        columns = ['Rank', 'Name', 'Record', 'Bayes Win Pct', 'BT',
-                   'Adj. PPG', 'Adj. PPG Allowed', 'Adj. Point Diff', 'Adj. YPG', 'Adj. YPG Allowed']
+        columns = [index_col, 'Name', 'Record', 'Bayes Win %', 'BT',
+                   'Adj. PPG', 'Adj. PPG Allowed', 'Adj. Point Diff']
     else:
-        columns = ['Rank', 'Name', 'Record', 'Bayes Win Pct', 'BT',
-                   'Proj. Record', 'Adj. PPG', 'Adj. PPG Allowed', 'Adj. Point Diff', 'Adj. YPG', 'Adj. YPG Allowed']
-        if week >= 12:
+        columns = [index_col, 'Name', 'Record', 'Bayes Win %', 'BT',
+                   'Proj. Record', 'Adj. PPG', 'Adj. PPG Allowed', 'Adj. Point Diff']
+        if week >= 10:
             columns.append('Win Division')
             columns.append('Make Wild Card')
             columns.append('Make Playoffs')
+            columns.append('First Round Bye')
 
     table = PrettyTable(columns)
     table.float_format = '0.3'
 
     points_coefs = team_df['Points Coef']
     points_allowed_coefs = team_df['Points Allowed Coef']
-    yards_coefs = team_df['Yards Coef']
-    yards_allowed_coefs = team_df['Yards Allowed Coef']
 
     points_var = statistics.variance(points_coefs)
     points_allowed_var = statistics.variance(points_allowed_coefs)
     points_diff_var = statistics.variance(team_df['Adjusted Point Diff'])
-    yards_var = statistics.variance(yards_coefs)
-    yards_allowed_var = statistics.variance(yards_allowed_coefs)
 
     stop = '\033[0m'
 
@@ -796,16 +799,16 @@ def print_table(week, sort_key='BT', sort_by_division=False):
         points_allowed_color = get_color(row['Points Allowed Coef'], points_allowed_var, alpha=points_pct, invert=True)
         points_diff_color = get_color(row['Adjusted Point Diff'], points_diff_var, alpha=points_pct, invert=False)
 
-        yards_color = get_color(row['Yards Coef'], yards_var, alpha=yards_pct)
-        yards_allowed_color = get_color(row['Yards Allowed Coef'], yards_allowed_var, alpha=yards_pct, invert=True)
-
-        table_row.append(rank)
+        if sort_by_division:
+            table_row.append(row['Division'])
+        else:
+            table_row.append(rank)
         table_row.append(index)
         table_row.append(record)
-        table_row.append(row['Bayes Win Pct'])
+        table_row.append((f"{row['Bayes Win Pct'] * 100:.1f}" + '%').rjust(5))
 
         bt_color = get_color(row['BT'], row['BT Var'])
-        table_row.append(bt_color + str(round(rescale_bt(row['BT']), 3)) + stop)
+        table_row.append(bt_color + f"{rescale_bt(row['BT']):.3f}".rjust(6) + stop)
 
         if week <= 18:
             proj_record = get_proj_record(index)
@@ -816,13 +819,12 @@ def print_table(week, sort_key='BT', sort_by_division=False):
         table_row.append(points_color + str(round(row['Adjusted Points'], 1)) + stop)
         table_row.append(points_allowed_color + str(round(row['Adjusted Points Allowed'], 1)) + stop)
         table_row.append(points_diff_color + str(round(row['Adjusted Point Diff'], 1)).rjust(5) + stop)
-        table_row.append(yards_color + str(round(row['Adjusted Yards'], 1)) + stop)
-        table_row.append(yards_allowed_color + str(round(row['Adjusted Yards Allowed'], 1)) + stop)
 
-        if 12 <= week < 18:
+        if 10 <= week < 18:
             table_row.append((f'{get_division_winner_chance(index) * 100:.1f}' + '%').rjust(6))
             table_row.append((f'{get_wildcard_chance(index) * 100:.1f}' + '%').rjust(6))
             table_row.append((f'{(get_division_winner_chance(index) + get_wildcard_chance(index)) * 100:.1f}' + '%').rjust(6))
+            table_row.append((f'{get_first_round_bye_chance(index) * 100:.1f}' + '%').rjust(6))
 
         table.add_row(table_row)
 
@@ -1099,12 +1101,8 @@ def season(week_num,
 
             print_table(week, sort_by_division=False)
 
-    get_tiebreak_conference_point_diff('Dolphins', 'Bears')
-
     show_off_def()
     show_graph(divisional_edges_only=week_num > 5)
-
-    get_wildcard_chance('Cowboys')
 
     if week_num <= 18:
         surprises()
@@ -1489,6 +1487,260 @@ def get_common_score_map():
     return common_map
 
 
+def plot_matchup(team1, team2, team1_chance, team1_spread):
+    # Setup
+    plt.rcParams['font.family'] = 'monospace'
+
+    is_favorite = team1_spread < 0
+    if is_favorite:
+        cover_chance, push_chance, fail_chance = get_spread_chance(team1, team2, team1_spread)
+    else:
+        # TODO verify
+        t2_cover_chance, push_chance, t2_fail_chance = get_spread_chance(team2, team1, -team1_spread)
+        cover_chance = 1 - push_chance - t2_fail_chance
+        fail_chance = 1 - push_chance - t2_cover_chance
+
+    team1_spread = math.floor(team1_spread)
+    team1_spread = -team1_spread
+
+    team1_logo = PIL.Image.open('Projects/nfl/NFL_Prediction/Redo/logos/' + team1 + '.png')
+    team2_logo = PIL.Image.open('Projects/nfl/NFL_Prediction/Redo/logos/' + team2 + '.png')
+
+    ordinal_suffix_map = {1: 'st',
+                          2: 'nd',
+                          3: 'rd',
+                          21: 'st',
+                          22: 'nd',
+                          31: 'st',
+                          32: 'nd'}
+
+    # Skellam PMF
+    intercept = team_df.at[team1, 'Points Intercept']
+    team1_off_coef = team_df.at[team1, 'Points Coef']
+    team2_off_coef = team_df.at[team2, 'Points Coef']
+    team1_def_coef = team_df.at[team1, 'Points Allowed Coef']
+    team2_def_coef = team_df.at[team2, 'Points Allowed Coef']
+
+    team1_lambda = math.exp(intercept + team1_off_coef + team2_def_coef)
+    team2_lambda = math.exp(intercept + team2_off_coef + team1_def_coef)
+
+    skel = skellam(team1_lambda, team2_lambda)
+    loss_chance = skel.cdf(0)
+
+    min_end = skel.ppf(.001)
+    max_end = skel.ppf(.999)
+
+    x_range = np.arange(min_end, max_end, 1.0)
+    pmf_range = [skel.pmf(x) for x in x_range]
+
+    fig, ax = plt.subplots(figsize=(20, 10))
+
+    ax.set_xlabel('Margin of Victory')
+    ax.set_ylabel('Chance')
+    ax.set_facecolor('#FAFAFA')
+
+    plt.plot(x_range, pmf_range)
+    plt.ylim((0.0, 0.09))
+
+    # Projected score
+    common_score_map = get_common_score_map()
+    common_team1_points = common_score_map.get(round(team1_lambda), round(team1_lambda))
+    common_team2_points = common_score_map.get(round(team2_lambda), round(team2_lambda))
+    if common_team1_points == common_team2_points:
+        common_team1_points = common_team1_points + 1
+    winner = team1 if common_team1_points > common_team2_points else team2
+    winner_common_points = common_team1_points if common_team1_points > common_team2_points else common_team2_points
+    loser_common_points = common_team2_points if common_team1_points > common_team2_points else common_team1_points
+    expected_score = str(winner_common_points) + ' - ' + str(loser_common_points)
+    ax.set_title('Projected Score: ' + expected_score + ' ' + winner, fontsize=35)
+
+    # Fill PMF
+    def add_pct_text(range_start, range_end, chance):
+        range_size = range_end - range_start
+        if range_size <= 5 and chance < .15:
+            return
+        pmfs = list()
+        for x in range(int(range_start), int(range_end)):
+            prob = skel.pmf(x)
+            pmfs.append(prob)
+        total = sum(pmfs)
+
+        total_prob = 0
+        for x in range(int(range_start), int(range_end)):
+            prob = skel.pmf(x)
+            total_prob = total_prob + prob
+            if total_prob >= total / 2:
+                r1_center = x
+                break
+
+        r1_height = skel.pmf(r1_center) / 2
+        r1_size = r1_height * 2 / .06 * 40
+        r1_size = max([r1_size, 10])
+        r1_size = min([r1_size, 35])
+        if 3 < range_size <= 5:
+            r1_size = min([r1_size, 20])
+        ax.annotate(f"{chance * 100:.1f}" + '%', xy=(r1_center, r1_height), ha='center', fontsize=r1_size)
+
+    if is_favorite:
+        r1 = np.arange(min_end, 1, 1.0)
+        add_pct_text(min_end, 1, loss_chance)
+
+        r2 = np.arange(0, team1_spread + 1, 1.0)
+        add_pct_text(0, team1_spread + 1, fail_chance - loss_chance)
+
+        r3 = np.arange(team1_spread, max_end, 1.0)
+        add_pct_text(team1_spread, max_end, cover_chance)
+    else:
+        r1 = np.arange(min_end, team1_spread + 1, 1.0)
+        add_pct_text(min_end, team1_spread + 1, cover_chance)   # TODO Verify chance
+
+        r2 = np.arange(team1_spread, 1, 1.0)
+        add_pct_text(team1_spread, 1, fail_chance)   # TODO Verify chance
+
+        r3 = np.arange(0, max_end, 1.0)
+        add_pct_text(0, max_end, 1 - loss_chance)   # TODO Verify chance
+
+    plt.fill_between(x=r1,
+                     y1=[0 for x in range(len(r1))],
+                     y2=[skel.pmf(x) for x in r1],
+                     color='r' if is_favorite else 'r',
+                     alpha=.3)
+
+    plt.fill_between(x=r2,
+                     y1=[0 for x in range(len(r2))],
+                     y2=[skel.pmf(x) for x in r2],
+                     color='y' if is_favorite else 'g',
+                     alpha=.3)
+
+    plt.fill_between(x=r3,
+                     y1=[0 for x in range(len(r3))],
+                     y2=[skel.pmf(x) for x in r3],
+                     color='g' if is_favorite else 'darkgreen',
+                     alpha=.3)
+
+    # Mean margin of victory
+    skel_mean = team1_lambda - team2_lambda
+    ax.vlines(x=skel_mean,
+              ymin=0,
+              ymax=skel.pmf(math.floor(skel_mean)),
+              linestyles='dashed',
+              label='mean',
+              color='k',
+              alpha=.8)
+    new_x_ticks = [tick for tick in list(ax.get_xticks()) if abs(tick - skel_mean) > 2]
+    ax.set_xticks(new_x_ticks + [round(skel_mean, 1)])
+
+    # Team 1 Logo and Stats
+    black_logo = PIL.Image.open('Projects/nfl/NFL_Prediction/Redo/logos/black.png')
+
+    a = plt.axes([-.1, .69, .6, .16])
+    a.set_aspect('auto')
+    a.axis("off")
+    a.imshow(team1_logo, origin='upper', extent=(0, 1, 0, 1), alpha=0.7)
+
+    wins = team_df.at[team1, 'Wins']
+    losses = team_df.at[team1, 'Losses']
+    ties = team_df.at[team1, 'Ties']
+    team1_record = ' - '.join([str(int(val)) for val in [wins, losses]]) + ' - ' + str(int(ties))
+
+    proj_record = get_proj_record(team1)
+    ties = proj_record[-1]
+    team1_proj_record = ' - '.join([str(val) for val in proj_record[:-1]]) + ' - ' + str(int(ties))
+
+    team1_bt = team_df.at[team1, 'BT']
+    team1_off = team_df.at[team1, 'Adjusted Points']
+    team1_def = team_df.at[team1, 'Adjusted Points Allowed']
+
+    team1_bt_index = list(team_df['BT']).index(team1_bt)
+    team1_bt_rank = rankdata(team_df['BT'], method='max')[team1_bt_index]
+    team1_bt_rank = 33 - team1_bt_rank
+
+    team1_off_index = list(team_df['Adjusted Points']).index(team1_off)
+    team1_off_rank = rankdata(team_df['Adjusted Points'], method='max')[team1_off_index]
+    team1_off_rank = 33 - team1_off_rank
+
+    team1_def_index = list(team_df['Adjusted Points Allowed']).index(team1_def)
+    team1_def_rank = rankdata(team_df['Adjusted Points Allowed'], method='max')[team1_def_index]
+
+    team1_stats = 'Rec: ' + team1_record + ' (Proj ' + team1_proj_record + ')\n' + \
+                  'BT:  ' + str(round(team1_bt, 3)).ljust(6) + ' (' + str(team1_bt_rank) + ordinal_suffix_map.get(team1_bt_rank, 'th') + ')\n' + \
+                  'Off: ' + str(round(team1_off, 1)).ljust(6) + ' (' + str(team1_off_rank) + ordinal_suffix_map.get(team1_off_rank, 'th') + ')\n' + \
+                  'Def: ' + str(round(team1_def, 1)).ljust(6) + ' (' + str(team1_def_rank) + ordinal_suffix_map.get(team1_def_rank, 'th') + ')'
+
+    plt.text(x=1.1, y=.2, s=team1_stats, fontsize=15)
+
+    # Team 2 Logo and Stats
+    a = plt.axes([-.1, .52, .6, .16])
+    a.set_aspect('auto')
+    a.axis("off")
+    a.imshow(team2_logo, origin='upper', extent=(0, 1, 0, 1), alpha=0.7)
+
+    wins = team_df.at[team2, 'Wins']
+    losses = team_df.at[team2, 'Losses']
+    ties = team_df.at[team2, 'Ties']
+    team2_record = ' - '.join([str(int(val)) for val in [wins, losses]]) + ' - ' + str(int(ties))
+
+    proj_record = get_proj_record(team2)
+    ties = proj_record[-1]
+    team2_proj_record = ' - '.join([str(val) for val in proj_record[:-1]]) + ' - ' + str(int(ties))
+
+    team2_bt = team_df.at[team2, 'BT']
+    team2_off = team_df.at[team2, 'Adjusted Points']
+    team2_def = team_df.at[team2, 'Adjusted Points Allowed']
+
+    team2_bt_index = list(team_df['BT']).index(team2_bt)
+    team2_bt_rank = rankdata(team_df['BT'], method='max')[team2_bt_index]
+    team2_bt_rank = 33 - team2_bt_rank
+
+    team2_off_index = list(team_df['Adjusted Points']).index(team2_off)
+    team2_off_rank = rankdata(team_df['Adjusted Points'], method='max')[team2_off_index]
+    team2_off_rank = 33 - team2_off_rank
+
+    team2_def_index = list(team_df['Adjusted Points Allowed']).index(team2_def)
+    team2_def_rank = rankdata(team_df['Adjusted Points Allowed'], method='max')[team2_def_index]
+
+    team2_stats = 'Rec: ' + team2_record + ' (Proj ' + team2_proj_record + ')\n' + \
+                  'BT:  ' + str(round(team2_bt, 3)).ljust(6) + ' (' + str(team2_bt_rank) + ordinal_suffix_map.get(team2_bt_rank, 'th') + ')\n' + \
+                  'Off: ' + str(round(team2_off, 1)).ljust(6) + ' (' + str(team2_off_rank) + ordinal_suffix_map.get(team2_off_rank, 'th') + ')\n' + \
+                  'Def: ' + str(round(team2_def, 1)).ljust(6) + ' (' + str(team2_def_rank) + ordinal_suffix_map.get(team2_def_rank, 'th') + ')'
+
+    plt.text(x=1.1, y=.2, s=team2_stats, fontsize=15)
+
+    # Pie charts
+    team2_chance = 1 - team1_chance
+    a = plt.axes([.73, .67, .14, .18])
+    a.pie([team1_chance, team2_chance],
+          labels=[team1, team2],
+          colors=[team_df.at[team1, 'Primary Colors'], team_df.at[team2, 'Primary Colors']],
+          autopct='%1.1f%%',
+          startangle=90,
+          wedgeprops={'alpha': 0.8})
+    a.set_aspect('equal')
+    a.set_title('Overall Chance', pad=-5)
+    a.axis("off")
+
+    team1_bt = team_df.at[team1, 'BT']
+    team2_bt = team_df.at[team2, 'BT']
+
+    team1_bt_chance = math.exp(team1_bt) / (math.exp(team1_bt) + math.exp(team2_bt))
+    team2_bt_chance = 1 - team1_bt_chance
+
+    a = plt.axes([.73, .5, .14, .18])
+    a.pie([team1_bt_chance, team2_bt_chance],
+          labels=[team1, team2],
+          colors=[team_df.at[team1, 'Primary Colors'], team_df.at[team2, 'Primary Colors']],
+          autopct='%1.1f%%',
+          startangle=90,
+          wedgeprops={'alpha': 0.8})
+    a.set_aspect('equal')
+    a.set_title('BT Chance', y=0, pad=-5)
+    a.axis("off")
+
+    ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0, decimals=1))
+
+    plt.show()
+
+
 def get_spread_chance(favorite, underdog, spread):
     if spread > 0:
         return
@@ -1502,26 +1754,10 @@ def get_spread_chance(favorite, underdog, spread):
     favorite_lambda = math.exp(intercept + favorite_off_coef + underdog_def_coef)
     underdog_lambda = math.exp(intercept + underdog_off_coef + favorite_def_coef)
 
-    favorite_poisson = poisson(favorite_lambda)
-    underdog_poisson = poisson(underdog_lambda)
+    skel = skellam(favorite_lambda, underdog_lambda)
 
-    cover_chances = list()
-    push_chances = list()
-    for points in range(0, 71):
-        underdog_points_chance = underdog_poisson.pmf(points)  # The chance underdog scores x points
-
-        if spread.is_integer():
-            favorite_points_chance = favorite_poisson.pmf(points - spread)  # The chance favorite scores (x + spread) points
-        else:
-            favorite_points_chance = 0.0
-
-        favorite_minimum_chance = favorite_poisson.sf(points - spread)  # The chance favorite scores more than (x + spread) points
-
-        cover_chances.append(underdog_points_chance * favorite_minimum_chance)
-        push_chances.append(underdog_points_chance * favorite_points_chance)
-
-    cover_chance = sum(cover_chances)
-    push_chance = sum(push_chances)
+    push_chance = skel.pmf(-spread) if spread.is_integer() else 0.0
+    cover_chance = skel.sf(-spread)
     fail_chance = 1 - cover_chance - push_chance
 
     return cover_chance, push_chance, fail_chance
@@ -1611,6 +1847,39 @@ def ats_bets():
     print(stop)
 
 
+def get_first_round_bye_chance(team):
+    teams_division = get_division(team)
+    teams_conference = teams_division.split()[0]
+    conference_opponents = [opp for opp in team_df.index if opp != team and get_division(opp).split()[0] == teams_conference]
+
+    team_bt = team_df.at[team, 'BT']
+
+    tiebreak_opponents = {opp: get_tiebreak(team, opp, divisional=False) for opp in conference_opponents}
+
+    total_wins_chances = get_total_wins_chances(team)
+    opp_wins_chances = {opp: get_total_wins_chances(opp) for opp in conference_opponents}
+
+    win_chances = list()
+    for win_total, chance in total_wins_chances.items():
+        if chance == 0:
+            continue
+
+        all_opponent_chances = list()
+        for opponent, opp_chances in opp_wins_chances.items():
+            if tiebreak_opponents.get(opponent):
+                opponent_chances = {k: v for k, v in opp_chances.items() if k <= win_total}
+            else:
+                opponent_chances = {k: v for k, v in opp_chances.items() if k < win_total}
+
+            opponent_chance = sum(opponent_chances.values())
+            all_opponent_chances.append(opponent_chance)
+
+        win_chances.append(chance * np.prod(all_opponent_chances))
+
+    first_place_chance = sum(win_chances)
+    return first_place_chance
+
+
 def get_wildcard_chance(team):
     teams_division = get_division(team)
     teams_conference = teams_division.split()[0]
@@ -1622,7 +1891,6 @@ def get_wildcard_chance(team):
 
     total_wins_chances = get_total_wins_chances(team)
     opp_wins_chances = {opp: get_total_wins_chances(opp) for opp in conference_opponents}
-    temp_df = pd.DataFrame(opp_wins_chances)
 
     win_chances = list()
     for win_total, chance in total_wins_chances.items():
