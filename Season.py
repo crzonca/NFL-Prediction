@@ -1557,7 +1557,7 @@ def plot_matchup(team1, team2, team1_chance, team1_spread):
     # Fill PMF
     def add_pct_text(range_start, range_end, chance):
         range_size = range_end - range_start
-        if range_size <= 5 and chance < .15:
+        if (range_size <= 5 and chance < .15) or range_size <= 2:
             return
         pmfs = list()
         for x in range(int(range_start), int(range_end)):
@@ -1609,7 +1609,7 @@ def plot_matchup(team1, team2, team1_chance, team1_spread):
     plt.fill_between(x=r2,
                      y1=[0 for x in range(len(r2))],
                      y2=[skel.pmf(x) for x in r2],
-                     color='y' if is_favorite else 'g',
+                     color='yellowgreen' if is_favorite else 'g',
                      alpha=.3)
 
     plt.fill_between(x=r3,
