@@ -566,13 +566,13 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
         print('The', winner.ljust(justify_width), 'have a',
               f'{prob * 100:.3f}' + '% chance to beat the', loser.ljust(justify_width))
 
+        favored_team = home_name if line <= 0 else away_name
+        underdog = home_name if line > 0 else away_name
+        location = 'at home' if line <= 0 else 'on the road'
+
+        rounded_line = round(line * 2.0) / 2.0
+
         if verbose:
-            favored_team = home_name if line <= 0 else away_name
-            underdog = home_name if line > 0 else away_name
-            location = 'at home' if line <= 0 else 'on the road'
-
-            rounded_line = round(line * 2.0) / 2.0
-
             print('The', favored_team.ljust(justify_width), 'are favored by',
                   round(abs(rounded_line), 1), 'points', location)
 
@@ -638,7 +638,7 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
                   round(winner_yards - loser_yards), yds.ljust(5), expected_yards)
             print()
 
-            plot_matchup(favored_team, underdog, prob, rounded_line if location == 'at home' else -rounded_line)
+        plot_matchup(favored_team, underdog, prob, rounded_line if location == 'at home' else -rounded_line)
 
     print()
 
@@ -1535,7 +1535,7 @@ def plot_matchup(team1, team2, team1_chance, team1_spread):
 
     fig, ax = plt.subplots(figsize=(20, 10))
 
-    ax.set_xlabel('Margin of Victory')
+    ax.set_xlabel(team1 + ' Margin of Victory')
     ax.set_ylabel('Chance')
     ax.set_facecolor('#FAFAFA')
 
