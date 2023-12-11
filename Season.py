@@ -664,6 +664,49 @@ def order_predictions_bt(games_to_predict):
     print()
 
 
+def get_remaining_win_probs_model(team_name, model, pt):
+    schedule = load_schedule().get('weeks')
+
+    wins = team_df.at[team_name, 'Wins']
+    losses = team_df.at[team_name, 'Losses']
+    ties = team_df.at[team_name, 'Ties']
+    games_played = wins + losses + ties
+
+    intercept = team_df.at[team_name, 'Points Intercept']
+    team_off_coef = team_df.at[team_name, 'Points Coef']
+    team_def_coef = team_df.at[team_name, 'Points Allowed Coef']
+
+    win_probs = list()
+    for week in schedule:
+        for game in week:
+            if game.get('away') == team_name:
+                opponent = game.get('home')
+                opp_off_coef = team_df.at[opponent, 'Points Coef']
+                opp_def_coef = team_df.at[opponent, 'Points Allowed Coef']
+
+                team_lambda = math.exp(intercept + team_off_coef + opp_def_coef)
+                opp_lambda = math.exp(intercept + opp_off_coef + team_def_coef)
+
+                vegas_line = team_lambda - opp_lambda
+
+                win_prob = predict_game(model, pt, team_name, opponent, vegas_line)
+                win_probs.append(win_prob.get('Away Win Prob'))
+            if game.get('home') == team_name:
+                opponent = game.get('away')
+                opp_off_coef = team_df.at[opponent, 'Points Coef']
+                opp_def_coef = team_df.at[opponent, 'Points Allowed Coef']
+
+                team_lambda = math.exp(intercept + team_off_coef + opp_def_coef)
+                opp_lambda = math.exp(intercept + opp_off_coef + team_def_coef)
+
+                vegas_line = opp_lambda - team_lambda
+
+                win_prob = predict_game(model, pt, opponent, team_name, vegas_line)
+                win_probs.append(win_prob.get('Home Win Prob'))
+
+    return win_probs[games_played:17]
+
+
 def get_remaining_win_probs(team_name):
     schedule = load_schedule().get('weeks')
     opponents = list()
@@ -690,8 +733,34 @@ def get_remaining_win_probs(team_name):
     return win_probs
 
 
-def get_proj_record(team_name):
-    win_probs = get_remaining_win_probs(team_name)
+def get_total_wins_chances(team, model, pt, use_model=False):
+    wins = team_df.at[team, 'Wins']
+    wins_dict = {win_total: 0.0 for win_total in range(18)}
+
+    win_probs = get_remaining_win_probs_model(team, model, pt) if use_model else get_remaining_win_probs(team)
+    loss_probs = [1 - win_prob for win_prob in win_probs]
+
+    win_mask = list(itertools.product([0, 1], repeat=len(win_probs)))
+    for win_combo in win_mask:
+        loss_combo = [0 if game == 1 else 1 for game in win_combo]
+
+        win_combo_probs = list(itertools.compress(win_probs, win_combo))
+        loss_combo_probs = list(itertools.compress(loss_probs, loss_combo))
+        win_combo_wins = len(win_combo_probs) + wins
+
+        total_wins_prob = np.prod(win_combo_probs)
+        total_losses_prob = np.prod(loss_combo_probs)
+
+        combo_prob = total_wins_prob * total_losses_prob
+
+        wins_dict[win_combo_wins] = wins_dict.get(win_combo_wins) + combo_prob
+
+    return wins_dict
+
+
+def get_proj_record(team_name, model, pt, use_model=False):
+    win_probs = get_remaining_win_probs_model(team_name, model, pt) if use_model else get_remaining_win_probs(team_name)
+
     wins = team_df.at[team_name, 'Wins']
     ties = team_df.at[team_name, 'Ties']
 
@@ -745,7 +814,7 @@ def rescale_bt(original_bt, avg_value=0.0):
     return new_bt
 
 
-def print_table(week, sort_key='BT', sort_by_division=False):
+def print_table(week, model, pt, use_model=False, sort_key='BT', sort_by_division=False):
     global team_df
 
     if sort_key in ['Avg Points Allowed', 'Points Allowed Coef', 'Adjusted Points Allowed',
@@ -811,7 +880,7 @@ def print_table(week, sort_key='BT', sort_by_division=False):
         table_row.append(bt_color + f"{rescale_bt(row['BT']):.3f}".rjust(6) + stop)
 
         if week <= 18:
-            proj_record = get_proj_record(index)
+            proj_record = get_proj_record(index, model, pt, use_model=use_model)
             ties = proj_record[-1]
             proj_record = ' - '.join([str(val).rjust(2) for val in proj_record[:-1]]) + ' - ' + str(int(ties))
             table_row.append(proj_record)
@@ -821,10 +890,10 @@ def print_table(week, sort_key='BT', sort_by_division=False):
         table_row.append(points_diff_color + str(round(row['Adjusted Point Diff'], 1)).rjust(5) + stop)
 
         if 10 <= week < 18:
-            table_row.append((f'{get_division_winner_chance(index) * 100:.1f}' + '%').rjust(6))
-            table_row.append((f'{get_wildcard_chance(index) * 100:.1f}' + '%').rjust(6))
-            table_row.append((f'{(get_division_winner_chance(index) + get_wildcard_chance(index)) * 100:.1f}' + '%').rjust(6))
-            table_row.append((f'{get_first_round_bye_chance(index) * 100:.1f}' + '%').rjust(6))
+            table_row.append((f'{get_division_winner_chance(index, model, pt, use_model=use_model) * 100:.1f}' + '%').rjust(6))
+            table_row.append((f'{get_wildcard_chance(index, model, pt, use_model=use_model) * 100:.1f}' + '%').rjust(6))
+            table_row.append((f'{(get_division_winner_chance(index, model, pt, use_model=use_model) + get_wildcard_chance(index, model, pt, use_model=use_model)) * 100:.1f}' + '%').rjust(6))
+            table_row.append((f'{get_first_round_bye_chance(index, model, pt, use_model=use_model) * 100:.1f}' + '%').rjust(6))
 
         table.add_row(table_row)
 
@@ -883,13 +952,9 @@ def surprises():
     surprise_dict = dict()
     for team in team_df.index:
         team_wins = last_year_wins.get(team)
+        team_wp = team_wins / 17
 
-        if team == 'Steelers' or team == 'Lions':
-            team_wp = team_wins / 16
-        else:
-            team_wp = team_wins / 17
-
-        proj_wins, proj_losses, proj_ties = get_proj_record(team)
+        proj_wins, proj_losses, proj_ties = get_proj_record(team, None, None, use_model=False)
         proj_wp = proj_wins / (proj_wins + proj_losses)
         surprise_dict[team] = team_wp - proj_wp
 
@@ -1000,7 +1065,7 @@ def get_schedule_difficulties():
         record = ' - '.join([str(int(val)).rjust(2) for val in [wins, losses]]) + ' - ' + str(int(ties))
 
         average_wins = team_average_wins.get(team)
-        expected_wins, expected_losses, expected_ties = get_proj_record(team)
+        expected_wins, expected_losses, expected_ties = get_proj_record(team, None, None, use_model=False)
         games_above = (expected_wins - average_wins) / 2
         color = green if games_above > 1 else red if games_above < -1 else ''
         games_above = color + str(games_above).rjust(4) + stop
@@ -1071,7 +1136,7 @@ def season(week_num,
             team_df.at[team, 'BT Var'] = .15
             team_df.at[team, 'Bayes Win Pct'] = .5
         print('Preseason')
-        print_table(week_num)
+        print_table(week_num, None, None)
 
     all_week_results = get_games_before_week(week_num, use_persisted=True)
 
@@ -1099,7 +1164,7 @@ def season(week_num,
             if include_parity:
                 parity_clock()
 
-            print_table(week, sort_by_division=False)
+            print_table(week, model, pt, use_model=True, sort_by_division=False)
 
     show_off_def()
     show_graph(divisional_edges_only=week_num > 5)
@@ -1295,31 +1360,6 @@ def get_preseason_bts(use_mse=True):
     df['BT Projection'] = df['BT Projection'].round(1)
 
     return team_bts
-
-
-def get_total_wins_chances(team):
-    wins = team_df.at[team, 'Wins']
-    wins_dict = {win_total: 0.0 for win_total in range(18)}
-
-    win_probs = get_remaining_win_probs(team)
-    loss_probs = [1 - win_prob for win_prob in win_probs]
-
-    win_mask = list(itertools.product([0, 1], repeat=len(win_probs)))
-    for win_combo in win_mask:
-        loss_combo = [0 if game == 1 else 1 for game in win_combo]
-
-        win_combo_probs = list(itertools.compress(win_probs, win_combo))
-        loss_combo_probs = list(itertools.compress(loss_probs, loss_combo))
-        win_combo_wins = len(win_combo_probs) + wins
-
-        total_wins_prob = np.prod(win_combo_probs)
-        total_losses_prob = np.prod(loss_combo_probs)
-
-        combo_prob = total_wins_prob * total_losses_prob
-
-        wins_dict[win_combo_wins] = wins_dict.get(win_combo_wins) + combo_prob
-
-    return wins_dict
 
 
 def show_off_def():
@@ -1547,7 +1587,10 @@ def plot_matchup(team1, team2, team1_chance, team1_spread):
     common_team1_points = common_score_map.get(round(team1_lambda), round(team1_lambda))
     common_team2_points = common_score_map.get(round(team2_lambda), round(team2_lambda))
     if common_team1_points == common_team2_points:
-        common_team1_points = common_team1_points + 1
+        if team1_lambda >= team2_lambda:
+            common_team1_points = common_team1_points + 1
+        else:
+            common_team2_points = common_team2_points + 1
     winner = team1 if common_team1_points > common_team2_points else team2
     winner_common_points = common_team1_points if common_team1_points > common_team2_points else common_team2_points
     loser_common_points = common_team2_points if common_team1_points > common_team2_points else common_team1_points
@@ -1643,7 +1686,7 @@ def plot_matchup(team1, team2, team1_chance, team1_spread):
     ties = team_df.at[team1, 'Ties']
     team1_record = ' - '.join([str(int(val)) for val in [wins, losses]]) + ' - ' + str(int(ties))
 
-    proj_record = get_proj_record(team1)
+    proj_record = get_proj_record(team1, None, None, use_model=False)
     ties = proj_record[-1]
     team1_proj_record = ' - '.join([str(val) for val in proj_record[:-1]]) + ' - ' + str(int(ties))
 
@@ -1680,7 +1723,7 @@ def plot_matchup(team1, team2, team1_chance, team1_spread):
     ties = team_df.at[team2, 'Ties']
     team2_record = ' - '.join([str(int(val)) for val in [wins, losses]]) + ' - ' + str(int(ties))
 
-    proj_record = get_proj_record(team2)
+    proj_record = get_proj_record(team2, None, None, use_model=False)
     ties = proj_record[-1]
     team2_proj_record = ' - '.join([str(val) for val in proj_record[:-1]]) + ' - ' + str(int(ties))
 
@@ -1847,7 +1890,7 @@ def ats_bets():
     print(stop)
 
 
-def get_first_round_bye_chance(team):
+def get_first_round_bye_chance(team, model, pt, use_model=False):
     teams_division = get_division(team)
     teams_conference = teams_division.split()[0]
     conference_opponents = [opp for opp in team_df.index if opp != team and get_division(opp).split()[0] == teams_conference]
@@ -1856,8 +1899,8 @@ def get_first_round_bye_chance(team):
 
     tiebreak_opponents = {opp: get_tiebreak(team, opp, divisional=False) for opp in conference_opponents}
 
-    total_wins_chances = get_total_wins_chances(team)
-    opp_wins_chances = {opp: get_total_wins_chances(opp) for opp in conference_opponents}
+    total_wins_chances = get_total_wins_chances(team, model, pt, use_model=use_model)
+    opp_wins_chances = {opp: get_total_wins_chances(opp, model, pt, use_model=use_model) for opp in conference_opponents}
 
     win_chances = list()
     for win_total, chance in total_wins_chances.items():
@@ -1880,7 +1923,7 @@ def get_first_round_bye_chance(team):
     return first_place_chance
 
 
-def get_wildcard_chance(team):
+def get_wildcard_chance(team, model, pt, use_model=False):
     teams_division = get_division(team)
     teams_conference = teams_division.split()[0]
     conference_opponents = [opp for opp in team_df.index if opp != team and get_division(opp).split()[0] == teams_conference]
@@ -1889,8 +1932,8 @@ def get_wildcard_chance(team):
 
     tiebreak_opponents = {opp: get_tiebreak(team, opp, divisional=False) for opp in conference_opponents}
 
-    total_wins_chances = get_total_wins_chances(team)
-    opp_wins_chances = {opp: get_total_wins_chances(opp) for opp in conference_opponents}
+    total_wins_chances = get_total_wins_chances(team, model, pt, use_model=use_model)
+    opp_wins_chances = {opp: get_total_wins_chances(opp, model, pt, use_model=use_model) for opp in conference_opponents}
 
     win_chances = list()
     for win_total, chance in total_wins_chances.items():
@@ -1909,7 +1952,7 @@ def get_wildcard_chance(team):
             opponent_chance = sum(opponent_chances.values())
 
             # Times that opponents chance to lose their division (be in wild card hunt)
-            all_opponent_chances.append(opponent_chance * (1 - get_division_winner_chance(opponent)))
+            all_opponent_chances.append(opponent_chance * (1 - get_division_winner_chance(opponent, model, pt, use_model=use_model)))
 
         # The teams chance to have 2 or fewer teams beat them in the WC race
         pb = PoiBin(all_opponent_chances)
@@ -1919,11 +1962,11 @@ def get_wildcard_chance(team):
         win_chances.append(chance * make_wc_chance)
 
     # Total chance to win a WC slot times the teams chance to lose their division (be in wild card hunt)
-    wc_chance = sum(win_chances) * (1 - get_division_winner_chance(team))
+    wc_chance = sum(win_chances) * (1 - get_division_winner_chance(team, model, pt, use_model=use_model))
     return wc_chance
 
 
-def get_division_winner_chance(team):
+def get_division_winner_chance(team, model, pt, use_model=False):
     teams_division = get_division(team)
     division_opponents = [opp for opp in team_df.index if opp != team and get_division(opp) == teams_division]
 
@@ -1931,8 +1974,8 @@ def get_division_winner_chance(team):
 
     tiebreak_opponents = {opp: get_tiebreak(team, opp, divisional=True) for opp in division_opponents}
 
-    total_wins_chances = get_total_wins_chances(team)
-    opp_wins_chances = {opp: get_total_wins_chances(opp) for opp in division_opponents}
+    total_wins_chances = get_total_wins_chances(team, model, pt, use_model=use_model)
+    opp_wins_chances = {opp: get_total_wins_chances(opp, model, pt, use_model=use_model) for opp in division_opponents}
 
     win_chances = list()
     for win_total, chance in total_wins_chances.items():
