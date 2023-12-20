@@ -35,14 +35,14 @@ from Projects.nfl.NFL_Prediction.Redo.poibin import PoiBin
 graph = nx.MultiDiGraph()
 team_df = pd.DataFrame(columns=['Team', 'Division', 'Games Played',
                                 'Wins', 'Losses', 'Ties',
-                                'BT', 'BT Var', 'Win Pct', 'Bayes Win Pct',
+                                'BT', 'BT Var', 'BT Pct', 'Win Pct', 'Bayes Win Pct',
                                 'Avg Points', 'Avg Points Allowed',
                                 'Points Intercept', 'Points Coef', 'Points Allowed Coef', 'Adjusted Points',
                                 'Adjusted Points Allowed', 'Yards Intercept', 'Yards Coef', 'Yards Allowed Coef',
                                 'Adjusted Yards', 'Adjusted Yards Allowed', 'YPG', 'YPG Allowed'])
 
 game_df = pd.DataFrame(columns=['Team', 'Win', 'Points', 'Points Allowed', 'Yards', 'Yards Allowed'])
-individual_df = pd.DataFrame(columns=['Team', 'Opponent', 'Points', 'Yards'])
+individual_df = pd.DataFrame(columns=['Game ID', 'Team', 'Opponent', 'Points', 'Yards', 'Game Num', 'Weight'])
 
 
 def load_model():
@@ -313,11 +313,14 @@ def get_game_results(week, week_results):
         home_version = [game for game in matching_games if game[3] == 'Home'][0]
         away_version = [game for game in matching_games if game[3] == 'Away'][0]
 
-        set_game_outcome(away_version[0], home_version[0],
+        set_game_outcome(game_id, away_version[0], home_version[0],
                          away_version[2], away_version[1], home_version[2], home_version[1])
 
+    fit_poisson()
+    fit_bt()
 
-def set_game_outcome(home_name, away_name, home_points, home_yards, away_points, away_yards):
+
+def set_game_outcome(game_id, home_name, away_name, home_points, home_yards, away_points, away_yards):
     global graph
     global team_df
     global game_df
@@ -332,14 +335,103 @@ def set_game_outcome(home_name, away_name, home_points, home_yards, away_points,
     game_df.loc[len(game_df.index)] = [away_name, 1 if away_victory else 0,
                                        away_points, home_points, away_yards, home_yards]
 
-    individual_df.loc[len(individual_df.index)] = [home_name, away_name, home_points, home_yards]
-    individual_df.loc[len(individual_df.index)] = [away_name, home_name, away_points, away_yards]
+    home_game_num = len(individual_df.loc[individual_df['Team'] == home_name]) + 1
+    away_game_num = len(individual_df.loc[individual_df['Team'] == away_name]) + 1
 
-    points_regression = PoissonRegressor(alpha=0.6, fit_intercept=True)
-    points_df = individual_df[['Team', 'Opponent', 'Points']]
+    individual_df.loc[len(individual_df.index)] = [game_id, home_name, away_name, home_points, home_yards, home_game_num, 0]
+    individual_df.loc[len(individual_df.index)] = [game_id, away_name, home_name, away_points, away_yards, away_game_num, 0]
+
+    def get_sample_weight(row, team_name, gamma=.15):
+        if not 0 < gamma <= 1:
+            return row['Weight']
+
+        team = row['Team']
+        if team != team_name:
+            return row['Weight']
+
+        game = row['Game ID']
+        matching_games = individual_df.loc[individual_df['Game ID'] == game]
+        game_num = matching_games['Game Num'].mean()
+
+        matching_games = individual_df.loc[individual_df['Game ID'] == game_id]
+        max_game_num = matching_games['Game Num'].mean()
+
+        games_back = max_game_num - game_num
+
+        # TODO Gamma should be > .66; 1 to disable
+        exponential_smoothing = math.pow(gamma, games_back)
+
+        # TODO Gamma should be < .25; 0 to disable
+        gaussian_kernel = math.exp(-1 * games_back ** 2 / 2 * gamma ** 2)
+
+        return gaussian_kernel
+
+    individual_df['Weight'] = individual_df.apply(lambda r: get_sample_weight(r, home_name), axis=1)
+    individual_df['Weight'] = individual_df.apply(lambda r: get_sample_weight(r, away_name), axis=1)
+
+    if not tie:
+        winner = home_name if home_victory else away_name
+        loser = away_name if home_victory else home_name
+        graph.add_edge(loser, winner)
+    else:
+        graph.add_edge(away_name, home_name)
+        graph.add_edge(home_name, away_name)
+
+    home_games_played = team_df.at[home_name, 'Games Played']
+    away_games_played = team_df.at[away_name, 'Games Played']
+
+    team_df.at[home_name, 'Games Played'] = home_games_played + 1
+    team_df.at[away_name, 'Games Played'] = away_games_played + 1
+
+    team_df.at[home_name, 'Wins'] = team_df.at[home_name, 'Wins'] + 1 if home_victory else team_df.at[home_name, 'Wins']
+    team_df.at[away_name, 'Wins'] = team_df.at[away_name, 'Wins'] + 1 if away_victory else team_df.at[away_name, 'Wins']
+
+    team_df.at[home_name, 'Losses'] = team_df.at[home_name, 'Losses'] + 1 \
+        if away_victory else team_df.at[home_name, 'Losses']
+    team_df.at[away_name, 'Losses'] = team_df.at[away_name, 'Losses'] + 1 \
+        if home_victory else team_df.at[away_name, 'Losses']
+
+    team_df.at[home_name, 'Ties'] = team_df.at[home_name, 'Ties'] + 1 if tie else team_df.at[home_name, 'Ties']
+    team_df.at[away_name, 'Ties'] = team_df.at[away_name, 'Ties'] + 1 if tie else team_df.at[away_name, 'Ties']
+
+    team_df.at[home_name, 'Win Pct'] = team_df.at[home_name, 'Wins'] / team_df.at[home_name, 'Games Played']
+    team_df.at[away_name, 'Win Pct'] = team_df.at[away_name, 'Wins'] / team_df.at[away_name, 'Games Played']
+
+    team_df.at[home_name, 'Bayes Win Pct'] = get_bayes_avg_wins(home_name)
+    team_df.at[away_name, 'Bayes Win Pct'] = get_bayes_avg_wins(away_name)
+
+    team_df.at[home_name, 'Avg Points'] = (team_df.at[home_name, 'Avg Points'] * home_games_played
+                                           + home_points) / team_df.at[home_name, 'Games Played']
+    team_df.at[away_name, 'Avg Points'] = (team_df.at[away_name, 'Avg Points'] * away_games_played
+                                           + away_points) / team_df.at[away_name, 'Games Played']
+
+    team_df.at[home_name, 'Avg Points Allowed'] = (team_df.at[home_name, 'Avg Points Allowed'] * home_games_played
+                                                   + away_points) / team_df.at[home_name, 'Games Played']
+    team_df.at[away_name, 'Avg Points Allowed'] = (team_df.at[away_name, 'Avg Points Allowed'] * away_games_played
+                                                   + home_points) / team_df.at[away_name, 'Games Played']
+
+    team_df.at[home_name, 'YPG'] = (team_df.at[home_name, 'YPG'] * home_games_played
+                                    + home_yards) / team_df.at[home_name, 'Games Played']
+    team_df.at[away_name, 'YPG'] = (team_df.at[away_name, 'YPG'] * away_games_played
+                                    + away_yards) / team_df.at[away_name, 'Games Played']
+
+    team_df.at[home_name, 'YPG Allowed'] = (team_df.at[home_name, 'YPG Allowed'] * home_games_played
+                                            + away_yards) / team_df.at[home_name, 'Games Played']
+    team_df.at[away_name, 'YPG Allowed'] = (team_df.at[away_name, 'YPG Allowed'] * away_games_played
+                                            + home_yards) / team_df.at[away_name, 'Games Played']
+
+    team_df = team_df.fillna(0)
+
+
+def fit_poisson(points_alpha=0.6, yards_alpha=1.0):
+    global team_df
+    global individual_df
+
+    points_regression = PoissonRegressor(alpha=points_alpha, fit_intercept=True)
+    points_df = individual_df[['Team', 'Opponent', 'Points', 'Weight']]
     points_dummy_vars = pd.get_dummies(points_df[['Team', 'Opponent']])
 
-    points_regression.fit(X=points_dummy_vars, y=points_df['Points'])
+    points_regression.fit(X=points_dummy_vars, y=points_df['Points'], sample_weight=points_df['Weight'])
 
     points_reg_results = pd.DataFrame({
         'coef_name': points_dummy_vars.columns.values,
@@ -371,12 +463,11 @@ def set_game_outcome(home_name, away_name, home_points, home_yards, away_points,
     team_df['Adjusted Point Diff'] = team_df.apply(lambda r: r['Adjusted Points'] - r['Adjusted Points Allowed'],
                                                    axis=1)
 
-    # yards_regression = Ridge(alpha=10, fit_intercept=True)
-    yards_regression = PoissonRegressor(alpha=1.0, fit_intercept=True)
-    yards_df = individual_df[['Team', 'Opponent', 'Yards']]
+    yards_regression = PoissonRegressor(alpha=yards_alpha, fit_intercept=True)
+    yards_df = individual_df[['Team', 'Opponent', 'Yards', 'Weight']]
     yards_dummy_vars = pd.get_dummies(yards_df[['Team', 'Opponent']])
 
-    yards_regression.fit(X=yards_dummy_vars, y=yards_df['Yards'])
+    yards_regression.fit(X=yards_dummy_vars, y=yards_df['Yards'], sample_weight=points_df['Weight'])
 
     yards_reg_results = pd.DataFrame({
         'coef_name': yards_dummy_vars.columns.values,
@@ -405,65 +496,26 @@ def set_game_outcome(home_name, away_name, home_points, home_yards, away_points,
             team_df.at[team_name, 'Yards Allowed Coef'] = 0
             team_df.at[team_name, 'Adjusted Yards Allowed'] = math.exp(yards_regression.intercept_)
 
-    if not tie:
-        winner = home_name if home_victory else away_name
-        loser = away_name if home_victory else home_name
-        graph.add_edge(loser, winner)
-    else:
-        graph.add_edge(away_name, home_name)
-        graph.add_edge(home_name, away_name)
+    team_df = team_df.fillna(0)
+
+
+def fit_bt():
+    global graph
+    global team_df
 
     bt_df = get_bradley_terry_from_graph(graph)
 
     bts = {index: row['BT'] for index, row in bt_df.iterrows()}
     bt_vars = {index: row['Var'] for index, row in bt_df.iterrows()}
 
-    home_games_played = team_df.at[home_name, 'Games Played']
-    away_games_played = team_df.at[away_name, 'Games Played']
-
-    team_df.at[home_name, 'Games Played'] = home_games_played + 1
-    team_df.at[away_name, 'Games Played'] = away_games_played + 1
-
-    team_df.at[home_name, 'Wins'] = team_df.at[home_name, 'Wins'] + 1 if home_victory else team_df.at[home_name, 'Wins']
-    team_df.at[away_name, 'Wins'] = team_df.at[away_name, 'Wins'] + 1 if away_victory else team_df.at[away_name, 'Wins']
-
-    team_df.at[home_name, 'Losses'] = team_df.at[home_name, 'Losses'] + 1 \
-        if away_victory else team_df.at[home_name, 'Losses']
-    team_df.at[away_name, 'Losses'] = team_df.at[away_name, 'Losses'] + 1 \
-        if home_victory else team_df.at[away_name, 'Losses']
-
-    team_df.at[home_name, 'Ties'] = team_df.at[home_name, 'Ties'] + 1 if tie else team_df.at[home_name, 'Ties']
-    team_df.at[away_name, 'Ties'] = team_df.at[away_name, 'Ties'] + 1 if tie else team_df.at[away_name, 'Ties']
-
     for team_name in team_df.index:
         team_df.at[team_name, 'BT'] = bts.get(team_name)
         team_df.at[team_name, 'BT Var'] = bt_vars.get(team_name)
 
-    team_df.at[home_name, 'Win Pct'] = team_df.at[home_name, 'Wins'] / team_df.at[home_name, 'Games Played']
-    team_df.at[away_name, 'Win Pct'] = team_df.at[away_name, 'Wins'] / team_df.at[away_name, 'Games Played']
-
-    team_df.at[home_name, 'Bayes Win Pct'] = get_bayes_avg_wins(home_name)
-    team_df.at[away_name, 'Bayes Win Pct'] = get_bayes_avg_wins(away_name)
-
-    team_df.at[home_name, 'Avg Points'] = (team_df.at[home_name, 'Avg Points'] * home_games_played
-                                           + home_points) / team_df.at[home_name, 'Games Played']
-    team_df.at[away_name, 'Avg Points'] = (team_df.at[away_name, 'Avg Points'] * away_games_played
-                                           + away_points) / team_df.at[away_name, 'Games Played']
-
-    team_df.at[home_name, 'Avg Points Allowed'] = (team_df.at[home_name, 'Avg Points Allowed'] * home_games_played
-                                                   + away_points) / team_df.at[home_name, 'Games Played']
-    team_df.at[away_name, 'Avg Points Allowed'] = (team_df.at[away_name, 'Avg Points Allowed'] * away_games_played
-                                                   + home_points) / team_df.at[away_name, 'Games Played']
-
-    team_df.at[home_name, 'YPG'] = (team_df.at[home_name, 'YPG'] * home_games_played
-                                    + home_yards) / team_df.at[home_name, 'Games Played']
-    team_df.at[away_name, 'YPG'] = (team_df.at[away_name, 'YPG'] * away_games_played
-                                    + away_yards) / team_df.at[away_name, 'Games Played']
-
-    team_df.at[home_name, 'YPG Allowed'] = (team_df.at[home_name, 'YPG Allowed'] * home_games_played
-                                            + away_yards) / team_df.at[home_name, 'Games Played']
-    team_df.at[away_name, 'YPG Allowed'] = (team_df.at[away_name, 'YPG Allowed'] * away_games_played
-                                            + home_yards) / team_df.at[away_name, 'Games Played']
+        bt_var = statistics.variance(bts.values())
+        bt_sd = math.sqrt(bt_var)
+        bt_norm = norm(0, bt_sd)
+        team_df.at[team_name, 'BT Pct'] = bt_norm.cdf(bts.get(team_name, 0))
 
     team_df = team_df.fillna(0)
 
@@ -829,10 +881,10 @@ def print_table(week, model, pt, use_model=False, sort_key='BT', sort_by_divisio
     index_col = 'Division' if sort_by_division else 'Rank'
 
     if week > 18:
-        columns = [index_col, 'Name', 'Record', 'Bayes Win %', 'BT',
+        columns = [index_col, 'Name', 'Record', 'Bayes Win %', 'Score',
                    'Adj. PPG', 'Adj. PPG Allowed', 'Adj. Point Diff']
     else:
-        columns = [index_col, 'Name', 'Record', 'Bayes Win %', 'BT',
+        columns = [index_col, 'Name', 'Record', 'Bayes Win %', 'Score',
                    'Proj. Record', 'Adj. PPG', 'Adj. PPG Allowed', 'Adj. Point Diff']
         if week >= 10:
             columns.append('Win Division')
@@ -877,7 +929,8 @@ def print_table(week, model, pt, use_model=False, sort_key='BT', sort_by_divisio
         table_row.append((f"{row['Bayes Win Pct'] * 100:.1f}" + '%').rjust(5))
 
         bt_color = get_color(row['BT'], row['BT Var'])
-        table_row.append(bt_color + f"{rescale_bt(row['BT']):.3f}".rjust(6) + stop)
+        # table_row.append(bt_color + f"{rescale_bt(row['BT']):.3f}".rjust(6) + stop)
+        table_row.append(bt_color + f"{row['BT Pct'] * 100:.1f}".rjust(5) + stop)
 
         if week <= 18:
             proj_record = get_proj_record(index, model, pt, use_model=use_model)
@@ -1150,8 +1203,7 @@ def season(week_num,
                 home_name = game.get('home')
                 away_name = game.get('away')
                 if manual_odds:
-                    # odds = (game.get('line'))
-                    odds = 0
+                    odds = game.get('line', 0)
                     games.append((away_name, home_name, odds))
                 else:
                     games.append((away_name, home_name, get_vegas_line(home_name, away_name, odds)))
@@ -1164,7 +1216,7 @@ def season(week_num,
             if include_parity:
                 parity_clock()
 
-            print_table(week, model, pt, use_model=True, sort_by_division=False)
+            print_table(week, model, pt, use_model=False, sort_by_division=False)
 
     show_off_def()
     show_graph(divisional_edges_only=week_num > 5)
@@ -1173,7 +1225,8 @@ def season(week_num,
         surprises()
         get_schedule_difficulties()
 
-    ats_bets()
+    if not manual_odds:
+        ats_bets()
 
 
 def bt_with_home_field():
@@ -1691,6 +1744,7 @@ def plot_matchup(team1, team2, team1_chance, team1_spread):
     team1_proj_record = ' - '.join([str(val) for val in proj_record[:-1]]) + ' - ' + str(int(ties))
 
     team1_bt = team_df.at[team1, 'BT']
+    team1_bt_pct = team_df.at[team1, 'BT Pct'] * 100
     team1_off = team_df.at[team1, 'Adjusted Points']
     team1_def = team_df.at[team1, 'Adjusted Points Allowed']
 
@@ -1706,9 +1760,9 @@ def plot_matchup(team1, team2, team1_chance, team1_spread):
     team1_def_rank = rankdata(team_df['Adjusted Points Allowed'], method='max')[team1_def_index]
 
     team1_stats = 'Rec: ' + team1_record + ' (Proj ' + team1_proj_record + ')\n' + \
-                  'BT:  ' + str(round(team1_bt, 3)).ljust(6) + ' (' + str(team1_bt_rank) + ordinal_suffix_map.get(team1_bt_rank, 'th') + ')\n' + \
-                  'Off: ' + str(round(team1_off, 1)).ljust(6) + ' (' + str(team1_off_rank) + ordinal_suffix_map.get(team1_off_rank, 'th') + ')\n' + \
-                  'Def: ' + str(round(team1_def, 1)).ljust(6) + ' (' + str(team1_def_rank) + ordinal_suffix_map.get(team1_def_rank, 'th') + ')'
+                  'Ovr: ' + str(round(team1_bt_pct, 1)).rjust(4) + ' (' + str(team1_bt_rank) + ordinal_suffix_map.get(team1_bt_rank, 'th') + ')\n' + \
+                  'Off: ' + str(round(team1_off, 1)).rjust(4) + ' (' + str(team1_off_rank) + ordinal_suffix_map.get(team1_off_rank, 'th') + ')\n' + \
+                  'Def: ' + str(round(team1_def, 1)).rjust(4) + ' (' + str(team1_def_rank) + ordinal_suffix_map.get(team1_def_rank, 'th') + ')'
 
     plt.text(x=1.075, y=.2, s=team1_stats, fontsize=16)
 
@@ -1728,6 +1782,7 @@ def plot_matchup(team1, team2, team1_chance, team1_spread):
     team2_proj_record = ' - '.join([str(val) for val in proj_record[:-1]]) + ' - ' + str(int(ties))
 
     team2_bt = team_df.at[team2, 'BT']
+    team2_bt_pct = team_df.at[team2, 'BT Pct'] * 100
     team2_off = team_df.at[team2, 'Adjusted Points']
     team2_def = team_df.at[team2, 'Adjusted Points Allowed']
 
@@ -1743,9 +1798,9 @@ def plot_matchup(team1, team2, team1_chance, team1_spread):
     team2_def_rank = rankdata(team_df['Adjusted Points Allowed'], method='max')[team2_def_index]
 
     team2_stats = 'Rec: ' + team2_record + ' (Proj ' + team2_proj_record + ')\n' + \
-                  'BT:  ' + str(round(team2_bt, 3)).ljust(6) + ' (' + str(team2_bt_rank) + ordinal_suffix_map.get(team2_bt_rank, 'th') + ')\n' + \
-                  'Off: ' + str(round(team2_off, 1)).ljust(6) + ' (' + str(team2_off_rank) + ordinal_suffix_map.get(team2_off_rank, 'th') + ')\n' + \
-                  'Def: ' + str(round(team2_def, 1)).ljust(6) + ' (' + str(team2_def_rank) + ordinal_suffix_map.get(team2_def_rank, 'th') + ')'
+                  'Ovr: ' + str(round(team2_bt_pct, 1)).rjust(4) + ' (' + str(team2_bt_rank) + ordinal_suffix_map.get(team2_bt_rank, 'th') + ')\n' + \
+                  'Off: ' + str(round(team2_off, 1)).rjust(4) + ' (' + str(team2_off_rank) + ordinal_suffix_map.get(team2_off_rank, 'th') + ')\n' + \
+                  'Def: ' + str(round(team2_def, 1)).rjust(4) + ' (' + str(team2_def_rank) + ordinal_suffix_map.get(team2_def_rank, 'th') + ')'
 
     plt.text(x=1.075, y=.2, s=team2_stats, fontsize=16)
 
@@ -1920,6 +1975,8 @@ def get_first_round_bye_chance(team, model, pt, use_model=False):
         win_chances.append(chance * np.prod(all_opponent_chances))
 
     first_place_chance = sum(win_chances)
+    first_place_chance = min([first_place_chance, 1])
+    first_place_chance = max([first_place_chance, 0])
     return first_place_chance
 
 
@@ -1963,6 +2020,8 @@ def get_wildcard_chance(team, model, pt, use_model=False):
 
     # Total chance to win a WC slot times the teams chance to lose their division (be in wild card hunt)
     wc_chance = sum(win_chances) * (1 - get_division_winner_chance(team, model, pt, use_model=use_model))
+    wc_chance = min([wc_chance, 1])
+    wc_chance = max([wc_chance, 0])
     return wc_chance
 
 
@@ -1995,6 +2054,8 @@ def get_division_winner_chance(team, model, pt, use_model=False):
         win_chances.append(chance * np.prod(all_opponent_chances))
 
     first_place_chance = sum(win_chances)
+    first_place_chance = min([first_place_chance, 1])
+    first_place_chance = max([first_place_chance, 0])
     return first_place_chance
 
 
