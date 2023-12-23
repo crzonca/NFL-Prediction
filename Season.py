@@ -341,9 +341,8 @@ def set_game_outcome(game_id, home_name, away_name, home_points, home_yards, awa
     individual_df.loc[len(individual_df.index)] = [game_id, home_name, away_name, home_points, home_yards, home_game_num, 0]
     individual_df.loc[len(individual_df.index)] = [game_id, away_name, home_name, away_points, away_yards, away_game_num, 0]
 
-    def get_sample_weight(row, team_name, gamma=.15):
-        if not 0 < gamma <= 1:
-            return row['Weight']
+    def get_sample_weight(row, team_name, use_exp=False, disabled=False):
+        gamma = .96 if use_exp else .07
 
         team = row['Team']
         if team != team_name:
@@ -358,13 +357,10 @@ def set_game_outcome(game_id, home_name, away_name, home_points, home_yards, awa
 
         games_back = max_game_num - game_num
 
-        # TODO Gamma should be > .66; 1 to disable
         exponential_smoothing = math.pow(gamma, games_back)
-
-        # TODO Gamma should be < .25; 0 to disable
         gaussian_kernel = math.exp(-1 * games_back ** 2 / 2 * gamma ** 2)
 
-        return gaussian_kernel
+        return 1.0 if disabled else exponential_smoothing if use_exp else gaussian_kernel
 
     individual_df['Weight'] = individual_df.apply(lambda r: get_sample_weight(r, home_name), axis=1)
     individual_df['Weight'] = individual_df.apply(lambda r: get_sample_weight(r, away_name), axis=1)
