@@ -3,8 +3,7 @@ import json
 import math
 import statistics
 import warnings
-
-import requests
+from datetime import datetime
 
 import PIL
 import choix
@@ -12,13 +11,16 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
+import requests
 import seaborn as sns
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
 from prettytable import PrettyTable
-from scipy.optimize import minimize
-from scipy.stats import norm, poisson
+from scipy.optimize import minimize, minimize_scalar
+from scipy.stats import norm, poisson, chi2
 from sklearn.linear_model import PoissonRegressor
+
 import Projects.nfl.NFL_Prediction.OddsHelper as Odds
-from datetime import datetime, timezone
 
 graph = nx.MultiDiGraph()
 team_df = pd.DataFrame()
@@ -118,15 +120,20 @@ def set_game_outcome(home_name, away_name, home_points, away_points, home_otl, a
     home_points = home_points - 1 if away_otl else home_points
     away_points = away_points - 1 if home_otl else away_points
 
-    individual_df.loc[len(individual_df.index)] = [home_name, away_name, home_points]
-    individual_df.loc[len(individual_df.index)] = [away_name, home_name, away_points]
+    individual_df.loc[len(individual_df.index)] = [home_name, away_name, home_points, 1]
+    individual_df.loc[len(individual_df.index)] = [away_name, home_name, away_points, 0]
 
     winner = home_name if home_victory else away_name
     loser = away_name if home_victory else home_name
     graph.add_edge(loser, winner)
 
-    home_games_played = team_df.at[home_name, 'Games Played']
-    away_games_played = team_df.at[away_name, 'Games Played']
+    try:
+        home_games_played = team_df.at[home_name, 'Games Played']
+        away_games_played = team_df.at[away_name, 'Games Played']
+    except KeyError as e:
+        print(home_name)
+        print(away_name)
+        i = 0
 
     team_df.at[home_name, 'Games Played'] = home_games_played + 1
     team_df.at[away_name, 'Games Played'] = away_games_played + 1
@@ -159,6 +166,58 @@ def set_game_outcome(home_name, away_name, home_points, away_points, home_otl, a
                                                    + home_points) / team_df.at[away_name, 'Games Played']
 
     team_df = team_df.fillna(0)
+
+
+def fit_neg_bin():
+    global individual_df
+    points_df = individual_df[['Team', 'Opponent', 'Points', 'Is_Home']]
+    points_df = points_df.rename(columns={'Team': 'Offense',
+                                          'Opponent': 'Defense'})
+
+    poisson_model = smf.glm(formula="Points ~ Offense + Defense + Is_Home",
+                            data=points_df,
+                            family=sm.families.Poisson()).fit(disp=1)
+    print('Poisson Model:')
+    print(poisson_model.summary())
+    print()
+
+    pearson_chi2 = chi2(df=poisson_model.df_resid)
+    alpha = .05
+    print('Critical Value for alpha=.05:', pearson_chi2.ppf(1 - alpha))
+    print('Test Statistic:              ', poisson_model.pearson_chi2)
+    p_value = pearson_chi2.sf(poisson_model.pearson_chi2)
+    print('P-Value:                     ', p_value)
+    if p_value < alpha:
+        print('The Poisson Model is not a good fit for the data')
+    else:
+        print('The Poisson Model is a good fit for the data')
+    print()
+
+    points_df['event_rate'] = poisson_model.mu
+    points_df['auxiliary_reg'] = points_df.apply(lambda x: ((x['Points'] - x['event_rate']) ** 2 - x['event_rate']) / x['event_rate'], axis=1)
+
+    aux_olsr_results = smf.ols("auxiliary_reg ~ event_rate - 1", data=points_df).fit()
+    print(aux_olsr_results.summary())
+    print()
+
+    neg_bin_model = smf.glm(formula="Points ~ Offense + Defense + Is_Home",
+                            data=points_df,
+                            family=sm.genmod.families.family.NegativeBinomial(alpha=aux_olsr_results.params[0])).fit()
+
+    print('Negative Binomial Model:')
+    print(neg_bin_model.summary())
+    print()
+
+    pearson_chi2 = chi2(df=neg_bin_model.df_resid)
+    print('Critical Value for alpha=.05:', pearson_chi2.ppf(1 - alpha))
+    print('Test Statistic:              ', neg_bin_model.pearson_chi2)
+    p_value = pearson_chi2.sf(neg_bin_model.pearson_chi2)
+    print('P-Value:                     ', p_value)
+    if p_value < alpha:
+        print('The Negative Binomial Model is not a good fit for the data')
+    else:
+        print('The Negative Binomial Model is a good fit for the data')
+    print()
 
 
 def fit_poisson(alpha=.1):
@@ -236,18 +295,18 @@ def get_remaining_win_probs(team_name, schedule_path, total_games=82):
 
 
 def get_proj_record(team_name, schedule_path, total_games=82):
+    if team_name == 'Lakers' or team_name == 'Pacers':
+        total_games = total_games + 1
     win_probs = get_remaining_win_probs(team_name, schedule_path, total_games=total_games)
     wins = team_df.at[team_name, 'Wins']
 
     expected_wins = sum(win_probs) + wins
     expected_losses = total_games - expected_wins
 
-    # TODO Remove
-    if total_games != 82:
-        diff = 82 - total_games
-        adjustment = round(diff / 2)
-        expected_wins = expected_wins + adjustment
-        expected_losses = expected_losses + adjustment
+    if team_name == 'Lakers':
+        expected_wins = expected_wins - 1
+    if team_name == 'Pacers':
+        expected_losses = expected_losses - 1
 
     return round(expected_wins), round(expected_losses)
 
@@ -290,10 +349,10 @@ def print_table(schedule_path, use_nba, total_games=82, sort_key='BT'):
         ascending_order = False
     team_df = team_df.sort_values(by=sort_key, kind='mergesort', ascending=ascending_order)
 
-    nba_columns = ['Rank', 'Name', 'Record', 'Bayes Win Pct', 'BT',
+    nba_columns = ['Rank', 'Name', 'Record', 'Bayes Win Pct', 'Score',
                    'Proj. Record', 'Adj. PPG', 'Adj. PPG Allowed', 'Adj. Point Diff']
 
-    nhl_columns = ['Rank', 'Name', 'Record', 'Points', 'Bayes Win Pct', 'BT',
+    nhl_columns = ['Rank', 'Name', 'Record', 'Points', 'Bayes Win Pct', 'Score',
                    'Proj. Record', 'Proj. Points', 'Adj. PPG', 'Adj. PPG Allowed', 'Adj. Point Diff']
 
     columns = nba_columns if use_nba else nhl_columns
@@ -310,6 +369,10 @@ def print_table(schedule_path, use_nba, total_games=82, sort_key='BT'):
     points_allowed_var = statistics.variance(team_df['Points Allowed Coef'])
     points_diff_var = statistics.variance(points_coefs - points_allowed_coefs)
 
+    bt_var = statistics.variance(team_df['BT'])
+    bt_sd = math.sqrt(bt_var)
+    bt_norm = norm(0, bt_sd)
+
     stop = '\033[0m'
 
     for index, row in team_df.iterrows():
@@ -318,6 +381,12 @@ def print_table(schedule_path, use_nba, total_games=82, sort_key='BT'):
         wins = row['Wins']
         losses = row['Losses']
         otl = row['OTL']
+
+        if index == 'Lakers':
+            wins = wins - 1
+        if index == 'Pacers':
+            losses = losses - 1
+
         nba_record = ' - '.join([str(int(val)).rjust(2) for val in [wins, losses]])
         nhl_record = ' - '.join([str(int(val)).rjust(2) for val in [wins, losses - otl, otl]])
         record = nba_record if use_nba else nhl_record
@@ -335,10 +404,10 @@ def print_table(schedule_path, use_nba, total_games=82, sort_key='BT'):
         if not use_nba:
             table_row.append(int(wins * 2 + otl))
 
-        table_row.append(row['Bayes Win Pct'])
+        table_row.append((f"{row['Bayes Win Pct'] * 100:.1f}" + '%').rjust(5))
 
         bt_color = get_color(row['BT'], row['BT Var'])
-        table_row.append(bt_color + str(round(rescale_bt(row['BT']), 3)) + stop)
+        table_row.append(bt_color + f"{bt_norm.cdf(row['BT']) * 100:.1f}".rjust(5) + stop)
 
         proj_record = get_proj_record(index, schedule_path, total_games=total_games)
 
@@ -438,7 +507,7 @@ def show_off_def(use_nba):
 
     intercept = team_df['Points Intercept'].mean()
 
-    margin = 3 if use_nba else .05
+    margin = 3 if use_nba else .1
     min_x = math.exp(intercept + team_df['Points Coef'].min()) - margin
     max_x = math.exp(intercept + team_df['Points Coef'].max()) + margin
 
@@ -454,7 +523,8 @@ def show_off_def(use_nba):
         xa = math.exp(intercept + team_df.at[team, 'Points Coef'])
         ya = math.exp(intercept + team_df.at[team, 'Points Allowed Coef'])
 
-        offset = 1.25 if use_nba else .02
+        offset = 1.25 if use_nba else .065
+        offset = 1.25 if use_nba else .065
         ax.imshow(images.get(team), extent=(xa - offset, xa + offset, ya + offset, ya - offset), alpha=.8)
 
     plt.axvline(x=math.exp(intercept), color='r', linestyle='--', alpha=.5)
@@ -462,7 +532,7 @@ def show_off_def(use_nba):
 
     average = math.exp(intercept)
     step = 5 if use_nba else .5
-    offset_dist = step / math.sqrt(2)
+    offset_dist = step * math.sqrt(2)
     offsets = set(np.arange(0, 150, offset_dist))
     offsets = offsets.union({-offset for offset in offsets})
 
@@ -571,35 +641,65 @@ def get_results_df(use_nba):
     all_games_df = all_games_df.loc[all_games_df['GameStatus'] == 'Final']
 
     nba_name_map = {'Cleveland Cavaliers': 'Cavaliers',
+                    'Cleveland': 'Cavaliers',
                     'Detroit Pistons': 'Pistons',
+                    'Detroit': 'Pistons',
                     'Atlanta Hawks': 'Hawks',
+                    'Atlanta': 'Hawks',
                     'New Orleans Pelicans': 'Pelicans',
+                    'New Orleans': 'Pelicans',
                     'Charlotte Hornets': 'Hornets',
+                    'Charlotte': 'Hornets',
                     'Washington Wizards': 'Wizards',
+                    'Washington': 'Wizards',
                     'Denver Nuggets': 'Nuggets',
+                    'Denver': 'Nuggets',
                     'Brooklyn Nets': 'Nets',
+                    'Brooklyn': 'Nets',
                     'Minnesota Timberwolves': 'Timberwolves',
+                    'Minnesota': 'Timberwolves',
                     'Oklahoma City Thunder': 'Thunder',
+                    'Oklahoma City': 'Thunder',
                     'San Antonio Spurs': 'Spurs',
+                    'San Antonio': 'Spurs',
                     'Houston Rockets': 'Rockets',
+                    'Houston': 'Rockets',
                     'Dallas Mavericks': 'Mavericks',
+                    'Dallas': 'Mavericks',
                     'Portland Trail Blazers': 'Trail Blazers',
+                    'Portland': 'Trail Blazers',
                     'Chicago Bulls': 'Bulls',
+                    'Chicago': 'Bulls',
                     'Utah Jazz': 'Jazz',
+                    'Utah': 'Jazz',
                     'Orlando Magic': 'Magic',
+                    'Orlando': 'Magic',
                     'New York Knicks': 'Knicks',
+                    'New York': 'Knicks',
                     'Los Angeles Lakers': 'Lakers',
+                    'L.A. Lakers': 'Lakers',
                     'Milwaukee Bucks': 'Bucks',
+                    'Milwaukee': 'Bucks',
                     'Sacramento Kings': 'Kings',
+                    'Sacramento': 'Kings',
                     'Philadelphia 76ers': '76ers',
+                    'Philadelphia': '76ers',
                     'Toronto Raptors': 'Raptors',
+                    'Toronto': 'Raptors',
                     'Memphis Grizzlies': 'Grizzlies',
+                    'Memphis': 'Grizzlies',
                     'Miami Heat': 'Heat',
+                    'Miami': 'Heat',
                     'Los Angeles Clippers': 'Clippers',
+                    'L.A. Clippers': 'Clippers',
                     'Phoenix Suns': 'Suns',
+                    'Phoenix': 'Suns',
                     'Golden State Warriors': 'Warriors',
+                    'Golden State': 'Warriors',
                     'Indiana Pacers': 'Pacers',
-                    'Boston Celtics': 'Celtics'}
+                    'Indiana': 'Pacers',
+                    'Boston Celtics': 'Celtics',
+                    'Boston': 'Celtics'}
 
     nhl_name_map = {'Pittsburgh Penguins': 'Penguins',
                     'Arizona Coyotes': 'Coyotes',
@@ -679,10 +779,12 @@ def get_results_df(use_nba):
                 all_games_df.at[index, 'Away Points'] = all_games_df.at[index, 'Away Points'] + 1
 
     all_games_df = all_games_df[['Home', 'Away', 'Home Points', 'Away Points', 'Home OTL', 'Away OTL']]
+
     return all_games_df
 
 
 def season(use_nba,
+           pot=20.0,
            total_games=82,
            preseason_path=None,
            preseason=False,
@@ -706,7 +808,7 @@ def season(use_nba,
                                     'Adjusted Points', 'Adjusted Points Allowed', 'Adjusted Point Diff'])
 
     game_df = pd.DataFrame(columns=['Team', 'Win', 'Points', 'Points Allowed'])
-    individual_df = pd.DataFrame(columns=['Team', 'Opponent', 'Points'])
+    individual_df = pd.DataFrame(columns=['Team', 'Opponent', 'Points', 'Is_Home'])
 
     schedule = load_schedule(schedule_path)
 
@@ -731,10 +833,11 @@ def season(use_nba,
 
     show_off_def(use_nba)
     show_graph(use_nba)
+    # fit_neg_bin()
 
     if use_nba:
-        ats_bets()
-        straight_up_bets()
+        ats_bets(pot)
+        straight_up_bets(pot)
 
     if include_schedule_difficulty:
         get_schedule_difficulties(schedule_path, total_games=total_games)
@@ -919,7 +1022,24 @@ def get_spread_chance(favorite, underdog, spread):
     return cover_chance, push_chance, fail_chance
 
 
-def ats_bets():
+def utility(amount, pos_chance, pos_payout, push_chance, neg_chance, pot):
+    def utility_func(x, alpha=1.05):
+        # Risk Averse:
+        #   alpha > 1
+        # Risk Neutral:
+        #   alpha = 1
+        # Risk Seeking:
+        #   alpha < 1
+        if alpha == 1:
+            return math.log(x)
+        return math.pow(x, 1 - alpha) / (1 - alpha)
+    u = pos_chance * utility_func(pot + (amount * pos_payout) - amount) + \
+        push_chance * utility_func(pot) + \
+        neg_chance * utility_func(pot - amount)
+    return -u
+
+
+def ats_bets(pot):
     odds = Odds.get_fanduel_odds(sport='nba', future_days=1)
 
     predict_scores([(t[0], t[1]) for t in odds])
@@ -960,6 +1080,16 @@ def ats_bets():
         expected_favorite_payout = favorite_payout * cover_chance + push_chance
         expected_underdog_payout = underdog_payout * fail_chance + push_chance
 
+        amount = 1.5
+        favorite_bet_amount = minimize_scalar(utility,
+                                              amount,
+                                              bounds=(0.0, pot),
+                                              args=(cover_chance, favorite_payout, push_chance, fail_chance, pot))
+        underdog_bet_amount = minimize_scalar(utility,
+                                              amount,
+                                              bounds=(0.0, pot),
+                                              args=(fail_chance, underdog_payout, push_chance, cover_chance, pot))
+
         favorite_row = {'Team': favorite,
                         'Spread': favorite_spread,
                         'Opponent': underdog,
@@ -967,9 +1097,11 @@ def ats_bets():
                         'Probability': f'{favorite_chance * 100:.3f}' + '%',
                         'Payout': round(favorite_payout, 2),
                         'Poisson Chance': f'{cover_chance * 100:.3f}' + '%',
-                        'Expected Return': round(expected_favorite_payout, 2),
-                        'Expected Profit': round(expected_favorite_payout, 2) - 1,
-                        'Push Chance': f'{push_chance * 100:.3f}' + '%'}
+                        'Push Chance': f'{push_chance * 100:.3f}' + '%',
+                        'Expected Value': expected_favorite_payout,
+                        'Bet Amount': '${:,.2f}'.format(favorite_bet_amount.x),
+                        'Expected Return': '${:,.2f}'.format(favorite_bet_amount.x * expected_favorite_payout),
+                        'Expected Profit': '${:,.2f}'.format(favorite_bet_amount.x * expected_favorite_payout - favorite_bet_amount.x)}
 
         underdog_row = {'Team': underdog,
                         'Spread': underdog_spread,
@@ -978,18 +1110,20 @@ def ats_bets():
                         'Probability': f'{underdog_chance * 100:.3f}' + '%',
                         'Payout': round(underdog_payout, 2),
                         'Poisson Chance': f'{fail_chance * 100:.3f}' + '%',
-                        'Expected Return': round(expected_underdog_payout, 2),
-                        'Expected Profit': round(expected_underdog_payout, 2) - 1,
-                        'Push Chance': f'{push_chance * 100:.3f}' + '%'}
+                        'Push Chance': f'{push_chance * 100:.3f}' + '%',
+                        'Expected Value': expected_underdog_payout,
+                        'Bet Amount': '${:,.2f}'.format(underdog_bet_amount.x),
+                        'Expected Return': '${:,.2f}'.format(underdog_bet_amount.x * expected_underdog_payout),
+                        'Expected Profit': '${:,.2f}'.format(underdog_bet_amount.x * expected_underdog_payout - underdog_bet_amount.x)}
 
         bets.append(favorite_row)
         bets.append(underdog_row)
 
     bet_df = pd.DataFrame(bets)
-    bet_df = bet_df.sort_values(by='Expected Return', ascending=False)
+    bet_df = bet_df.sort_values(by='Expected Value', ascending=False)
 
-    good_bet_df = bet_df.loc[bet_df['Expected Return'] > 1].reset_index(drop=True)
-    bad_bet_df = bet_df.loc[bet_df['Expected Return'] <= 1].reset_index(drop=True)
+    good_bet_df = bet_df.loc[bet_df['Expected Value'] > 1].reset_index(drop=True)
+    bad_bet_df = bet_df.loc[bet_df['Expected Value'] <= 1].reset_index(drop=True)
 
     green = '\033[32m'
     red = '\033[31m'
@@ -1008,7 +1142,7 @@ def ats_bets():
     print(stop)
 
 
-def straight_up_bets():
+def straight_up_bets(pot):
     odds = Odds.get_fanduel_odds(sport='nba', future_days=1, bet_type='h2h')
 
     predict_outcomes([(t[0], t[1]) for t in odds])
@@ -1041,14 +1175,26 @@ def straight_up_bets():
         expected_home_payout = home_payout * home_bt_chance
         expected_away_payout = away_payout * away_bt_chance
 
+        amount = 1.5
+        home_bet_amount = minimize_scalar(utility,
+                                          amount,
+                                          bounds=(0.0, pot),
+                                          args=(home_bt_chance, home_payout, 0, 1 - home_bt_chance, pot))
+        away_bet_amount = minimize_scalar(utility,
+                                          amount,
+                                          bounds=(0.0, pot),
+                                          args=(away_bt_chance, away_payout, 0, 1 - away_bt_chance, pot))
+
         home_row = {'Team': home_team,
                     'Opponent': away_team,
                     'American Odds': home_american,
                     'Probability': f'{home_chance * 100:.3f}' + '%',
                     'Payout': round(home_payout, 2),
                     'BT Chance': f'{home_bt_chance * 100:.3f}' + '%',
-                    'Expected Return': round(expected_home_payout, 2),
-                    'Expected Profit': round(expected_home_payout, 2) - 1}
+                    'Expected Value': expected_home_payout,
+                    'Bet Amount': '${:,.2f}'.format(home_bet_amount.x),
+                    'Expected Return': '${:,.2f}'.format(home_bet_amount.x * expected_home_payout),
+                    'Expected Profit': '${:,.2f}'.format(home_bet_amount.x * expected_home_payout - home_bet_amount.x)}
 
         away_row = {'Team': away_team,
                     'Opponent': home_team,
@@ -1056,17 +1202,19 @@ def straight_up_bets():
                     'Probability': f'{away_chance * 100:.3f}' + '%',
                     'Payout': round(away_payout, 2),
                     'BT Chance': f'{away_bt_chance * 100:.3f}' + '%',
-                    'Expected Return': round(expected_away_payout, 2),
-                    'Expected Profit': round(expected_away_payout, 2) - 1}
+                    'Expected Value': expected_away_payout,
+                    'Bet Amount': '${:,.2f}'.format(away_bet_amount.x),
+                    'Expected Return': '${:,.2f}'.format(away_bet_amount.x * expected_away_payout),
+                    'Expected Profit': '${:,.2f}'.format(away_bet_amount.x * expected_away_payout - away_bet_amount.x)}
 
         bets.append(home_row)
         bets.append(away_row)
 
     bet_df = pd.DataFrame(bets)
-    bet_df = bet_df.sort_values(by='Expected Return', ascending=False)
+    bet_df = bet_df.sort_values(by='Expected Value', ascending=False)
 
-    good_bet_df = bet_df.loc[bet_df['Expected Return'] > 1].reset_index(drop=True)
-    bad_bet_df = bet_df.loc[bet_df['Expected Return'] <= 1].reset_index(drop=True)
+    good_bet_df = bet_df.loc[bet_df['Expected Value'] > 1].reset_index(drop=True)
+    bad_bet_df = bet_df.loc[bet_df['Expected Value'] <= 1].reset_index(drop=True)
 
     green = '\033[32m'
     red = '\033[31m'
