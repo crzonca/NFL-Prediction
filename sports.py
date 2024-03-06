@@ -17,7 +17,7 @@ import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from prettytable import PrettyTable
 from scipy.optimize import minimize, minimize_scalar
-from scipy.stats import norm, poisson, chi2
+from scipy.stats import norm, poisson, chi2, skellam
 from sklearn.linear_model import PoissonRegressor
 
 import Projects.nfl.NFL_Prediction.OddsHelper as Odds
@@ -995,35 +995,16 @@ def get_spread_chance(favorite, underdog, spread):
     favorite_lambda = math.exp(intercept + favorite_off_coef + underdog_def_coef)
     underdog_lambda = math.exp(intercept + underdog_off_coef + favorite_def_coef)
 
-    favorite_poisson = poisson(favorite_lambda)
-    underdog_poisson = poisson(underdog_lambda)
-
-    cover_chances = list()
-    push_chances = list()
-    for points in range(0, 201):
-        underdog_points_chance = underdog_poisson.pmf(points)  # The chance underdog scores x points
-
-        if spread.is_integer():
-            favorite_points_chance = favorite_poisson.pmf(
-                points - spread)  # The chance favorite scores (x + spread) points
-        else:
-            favorite_points_chance = 0.0
-
-        favorite_minimum_chance = favorite_poisson.sf(
-            points - spread)  # The chance favorite scores more than (x + spread) points
-
-        cover_chances.append(underdog_points_chance * favorite_minimum_chance)
-        push_chances.append(underdog_points_chance * favorite_points_chance)
-
-    cover_chance = sum(cover_chances)
-    push_chance = sum(push_chances)
+    skel = skellam(favorite_lambda, underdog_lambda)
+    cover_chance = skel.sf(-spread)
+    push_chance = skel.pmf(-spread)
     fail_chance = 1 - cover_chance - push_chance
 
     return cover_chance, push_chance, fail_chance
 
 
 def utility(amount, pos_chance, pos_payout, push_chance, neg_chance, pot):
-    def utility_func(x, alpha=1.05):
+    def crra_utility(x, alpha=1.2):
         # Risk Averse:
         #   alpha > 1
         # Risk Neutral:
@@ -1033,9 +1014,10 @@ def utility(amount, pos_chance, pos_payout, push_chance, neg_chance, pot):
         if alpha == 1:
             return math.log(x)
         return math.pow(x, 1 - alpha) / (1 - alpha)
-    u = pos_chance * utility_func(pot + (amount * pos_payout) - amount) + \
-        push_chance * utility_func(pot) + \
-        neg_chance * utility_func(pot - amount)
+
+    u = pos_chance * crra_utility(pot + (amount * pos_payout) - amount) + \
+        push_chance * crra_utility(pot) + \
+        neg_chance * crra_utility(pot - amount)
     return -u
 
 
@@ -1099,9 +1081,10 @@ def ats_bets(pot):
                         'Poisson Chance': f'{cover_chance * 100:.3f}' + '%',
                         'Push Chance': f'{push_chance * 100:.3f}' + '%',
                         'Expected Value': expected_favorite_payout,
-                        'Bet Amount': '${:,.2f}'.format(favorite_bet_amount.x),
+                        'Bet Amount': favorite_bet_amount.x,
                         'Expected Return': '${:,.2f}'.format(favorite_bet_amount.x * expected_favorite_payout),
-                        'Expected Profit': '${:,.2f}'.format(favorite_bet_amount.x * expected_favorite_payout - favorite_bet_amount.x)}
+                        'Expected Profit': '${:,.2f}'.format(favorite_bet_amount.x * expected_favorite_payout - favorite_bet_amount.x),
+                        'To Win': favorite_bet_amount.x * favorite_payout - favorite_bet_amount.x}
 
         underdog_row = {'Team': underdog,
                         'Spread': underdog_spread,
@@ -1112,15 +1095,20 @@ def ats_bets(pot):
                         'Poisson Chance': f'{fail_chance * 100:.3f}' + '%',
                         'Push Chance': f'{push_chance * 100:.3f}' + '%',
                         'Expected Value': expected_underdog_payout,
-                        'Bet Amount': '${:,.2f}'.format(underdog_bet_amount.x),
+                        'Bet Amount': underdog_bet_amount.x,
                         'Expected Return': '${:,.2f}'.format(underdog_bet_amount.x * expected_underdog_payout),
-                        'Expected Profit': '${:,.2f}'.format(underdog_bet_amount.x * expected_underdog_payout - underdog_bet_amount.x)}
+                        'Expected Profit': '${:,.2f}'.format(underdog_bet_amount.x * expected_underdog_payout - underdog_bet_amount.x),
+                        'To Win': underdog_bet_amount.x * underdog_payout - underdog_bet_amount.x}
 
         bets.append(favorite_row)
         bets.append(underdog_row)
 
     bet_df = pd.DataFrame(bets)
-    bet_df = bet_df.sort_values(by='Expected Value', ascending=False)
+    bet_df['Importance'] = bet_df.apply(lambda r: r['Bet Amount'] + r['To Win'], axis=1)
+    bet_df = bet_df.sort_values(by='Importance', ascending=False)
+    bet_df = bet_df.drop(columns=['Importance'])
+    bet_df['Bet Amount'] = bet_df.apply(lambda r: '${:,.2f}'.format(r['Bet Amount']), axis=1)
+    bet_df['To Win'] = bet_df.apply(lambda r: '${:,.2f}'.format(r['To Win']), axis=1)
 
     good_bet_df = bet_df.loc[bet_df['Expected Value'] > 1].reset_index(drop=True)
     bad_bet_df = bet_df.loc[bet_df['Expected Value'] <= 1].reset_index(drop=True)
@@ -1192,9 +1180,10 @@ def straight_up_bets(pot):
                     'Payout': round(home_payout, 2),
                     'BT Chance': f'{home_bt_chance * 100:.3f}' + '%',
                     'Expected Value': expected_home_payout,
-                    'Bet Amount': '${:,.2f}'.format(home_bet_amount.x),
+                    'Bet Amount': home_bet_amount.x,
                     'Expected Return': '${:,.2f}'.format(home_bet_amount.x * expected_home_payout),
-                    'Expected Profit': '${:,.2f}'.format(home_bet_amount.x * expected_home_payout - home_bet_amount.x)}
+                    'Expected Profit': '${:,.2f}'.format(home_bet_amount.x * expected_home_payout - home_bet_amount.x),
+                    'To Win': home_bet_amount.x * home_payout - home_bet_amount.x}
 
         away_row = {'Team': away_team,
                     'Opponent': home_team,
@@ -1203,15 +1192,20 @@ def straight_up_bets(pot):
                     'Payout': round(away_payout, 2),
                     'BT Chance': f'{away_bt_chance * 100:.3f}' + '%',
                     'Expected Value': expected_away_payout,
-                    'Bet Amount': '${:,.2f}'.format(away_bet_amount.x),
+                    'Bet Amount': away_bet_amount.x,
                     'Expected Return': '${:,.2f}'.format(away_bet_amount.x * expected_away_payout),
-                    'Expected Profit': '${:,.2f}'.format(away_bet_amount.x * expected_away_payout - away_bet_amount.x)}
+                    'Expected Profit': '${:,.2f}'.format(away_bet_amount.x * expected_away_payout - away_bet_amount.x),
+                    'To Win': away_bet_amount.x * away_payout - away_bet_amount.x}
 
         bets.append(home_row)
         bets.append(away_row)
 
     bet_df = pd.DataFrame(bets)
-    bet_df = bet_df.sort_values(by='Expected Value', ascending=False)
+    bet_df['Importance'] = bet_df.apply(lambda r: r['Bet Amount'] + r['To Win'], axis=1)
+    bet_df = bet_df.sort_values(by='Importance', ascending=False)
+    bet_df = bet_df.drop(columns=['Importance'])
+    bet_df['Bet Amount'] = bet_df.apply(lambda r: '${:,.2f}'.format(r['Bet Amount']), axis=1)
+    bet_df['To Win'] = bet_df.apply(lambda r: '${:,.2f}'.format(r['To Win']), axis=1)
 
     good_bet_df = bet_df.loc[bet_df['Expected Value'] > 1].reset_index(drop=True)
     bad_bet_df = bet_df.loc[bet_df['Expected Value'] <= 1].reset_index(drop=True)
