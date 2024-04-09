@@ -836,8 +836,11 @@ def season(use_nba,
     # fit_neg_bin()
 
     if use_nba:
-        ats_bets(pot)
-        straight_up_bets(pot)
+        all_bets(pot)
+
+        # allocation = pot / 2
+        # ats_bets(allocation)
+        # straight_up_bets(allocation)
 
     if include_schedule_difficulty:
         get_schedule_difficulties(schedule_path, total_games=total_games)
@@ -928,7 +931,7 @@ def predict_score(team1, team2):
 
 def predict_scores(matchups):
     teams = set([matchup[0] for matchup in matchups]).union(set([matchup[1] for matchup in matchups]))
-    justify_width = max([len(t) for t in teams])
+    justify_width = 0
 
     predictions = list()
     for team1, team2 in matchups:
@@ -940,6 +943,10 @@ def predict_scores(matchups):
 
         if team2 == 'Blazers':
             team2 = 'Trail Blazers'
+
+        max_len = max([len(team1), len(team2)])
+        if max_len > justify_width:
+            justify_width = max_len
 
         winner, loser, winner_score, loser_score = predict_score(team1, team2)
         margin = winner_score - loser_score
@@ -953,7 +960,7 @@ def predict_scores(matchups):
 
 def predict_outcomes(matchups):
     teams = set([matchup[0] for matchup in matchups]).union(set([matchup[1] for matchup in matchups]))
-    justify_width = max([len(t) for t in teams])
+    justify_width = 0
 
     predictions = list()
     for team1, team2 in matchups:
@@ -966,6 +973,10 @@ def predict_outcomes(matchups):
         if team2 == 'Blazers':
             team2 = 'Trail Blazers'
 
+        max_len = max([len(team1), len(team2)])
+        if max_len > justify_width:
+            justify_width = max_len
+
         team1_bt = team_df.at[team1, 'BT']
         team2_bt = team_df.at[team2, 'BT']
 
@@ -975,11 +986,11 @@ def predict_outcomes(matchups):
         underdog_bt = team2_bt if team1_bt >= team2_bt else team1_bt
 
         favorite_chance = math.exp(favorite_bt) / (math.exp(favorite_bt) + math.exp(underdog_bt))
-        predictions.append((favorite, underdog,favorite_chance))
+        predictions.append((favorite, underdog, favorite_chance))
 
     for prediction in sorted(predictions, key=lambda t: t[-1], reverse=True):
         winner, loser, chance = prediction
-        print('The', winner.ljust(justify_width), 'have a ' + f'{chance * 100:.3f}' + '%' + ' chance to beat the', loser.ljust(justify_width))
+        print('The', winner.ljust(justify_width), 'have a', f'{chance * 100:.3f}' + '%', 'chance to beat the', loser)
 
 
 def get_spread_chance(favorite, underdog, spread):
@@ -1004,7 +1015,8 @@ def get_spread_chance(favorite, underdog, spread):
 
 
 def utility(amount, pos_chance, pos_payout, push_chance, neg_chance, pot):
-    def crra_utility(x, alpha=1.2):
+    # https://en.wikipedia.org/wiki/Isoelastic_utility
+    def crra_utility(x, alpha=1.5):
         # Risk Averse:
         #   alpha > 1
         # Risk Neutral:
@@ -1013,7 +1025,7 @@ def utility(amount, pos_chance, pos_payout, push_chance, neg_chance, pot):
         #   alpha < 1
         if alpha == 1:
             return math.log(x)
-        return math.pow(x, 1 - alpha) / (1 - alpha)
+        return (math.pow(x, 1 - alpha) - 1) / (1 - alpha)
 
     u = pos_chance * crra_utility(pot + (amount * pos_payout) - amount) + \
         push_chance * crra_utility(pot) + \
@@ -1021,13 +1033,18 @@ def utility(amount, pos_chance, pos_payout, push_chance, neg_chance, pot):
     return -u
 
 
-def ats_bets(pot):
-    odds = Odds.get_fanduel_odds(sport='nba', future_days=1)
+def all_bets(pot):
+    ats_odds = Odds.get_fanduel_odds(sport='nba', future_days=1)
+    h2h_odds = Odds.get_fanduel_odds(sport='nba', future_days=1, bet_type='h2h')
+    omit_teams = {'Clippers', 'Grizzlies'}
 
-    predict_scores([(t[0], t[1]) for t in odds])
+    predict_scores([(t[0], t[1]) for t in ats_odds])
+    print()
+    predict_outcomes([(t[0], t[1]) for t in h2h_odds])
+    print()
 
     bets = list()
-    for game in odds:
+    for game in ats_odds:
         home_team, away_team, home_spread, away_spread, home_american, away_american = game
 
         home_spread = float(home_spread)
@@ -1041,6 +1058,9 @@ def ats_bets(pot):
 
         if away_team == 'Blazers':
             away_team = 'Trail Blazers'
+
+        if home_team in omit_teams or away_team in omit_teams:
+            continue
 
         favorite = home_team if home_spread < 0.0 else away_team
         underdog = away_team if home_spread < 0.0 else home_team
@@ -1063,80 +1083,48 @@ def ats_bets(pot):
         expected_underdog_payout = underdog_payout * fail_chance + push_chance
 
         amount = 1.5
-        favorite_bet_amount = minimize_scalar(utility,
-                                              amount,
-                                              bounds=(0.0, pot),
-                                              args=(cover_chance, favorite_payout, push_chance, fail_chance, pot))
-        underdog_bet_amount = minimize_scalar(utility,
-                                              amount,
-                                              bounds=(0.0, pot),
-                                              args=(fail_chance, underdog_payout, push_chance, cover_chance, pot))
+        favorite_bet_pct = minimize_scalar(utility,
+                                           amount,
+                                           bounds=(0.0, 1),
+                                           args=(cover_chance, favorite_payout, push_chance, fail_chance, 1))
+        underdog_bet_pct = minimize_scalar(utility,
+                                           amount,
+                                           bounds=(0.0, 1),
+                                           args=(fail_chance, underdog_payout, push_chance, cover_chance, 1))
+
+        favorite_bet_amount = favorite_bet_pct.x * pot
+        underdog_bet_amount = underdog_bet_pct.x * pot
 
         favorite_row = {'Team': favorite,
                         'Spread': favorite_spread,
                         'Opponent': underdog,
                         'American Odds': favorite_american,
-                        'Probability': f'{favorite_chance * 100:.3f}' + '%',
-                        'Payout': round(favorite_payout, 2),
-                        'Poisson Chance': f'{cover_chance * 100:.3f}' + '%',
-                        'Push Chance': f'{push_chance * 100:.3f}' + '%',
+                        'Probability': favorite_chance,
+                        'Payout': favorite_payout,
+                        'Model Chance': cover_chance,
+                        'Push Chance': push_chance,
                         'Expected Value': expected_favorite_payout,
-                        'Bet Amount': favorite_bet_amount.x,
-                        'Expected Return': '${:,.2f}'.format(favorite_bet_amount.x * expected_favorite_payout),
-                        'Expected Profit': '${:,.2f}'.format(favorite_bet_amount.x * expected_favorite_payout - favorite_bet_amount.x),
-                        'To Win': favorite_bet_amount.x * favorite_payout - favorite_bet_amount.x}
+                        'Bet Percent': favorite_bet_pct.x,
+                        'Bet Amount': favorite_bet_amount,
+                        'Bet Type': 'ATS'}
 
         underdog_row = {'Team': underdog,
                         'Spread': underdog_spread,
                         'Opponent': favorite,
                         'American Odds': underdog_american,
-                        'Probability': f'{underdog_chance * 100:.3f}' + '%',
-                        'Payout': round(underdog_payout, 2),
-                        'Poisson Chance': f'{fail_chance * 100:.3f}' + '%',
-                        'Push Chance': f'{push_chance * 100:.3f}' + '%',
+                        'Probability': underdog_chance,
+                        'Payout': underdog_payout,
+                        'Model Chance': fail_chance,
+                        'Push Chance': push_chance,
                         'Expected Value': expected_underdog_payout,
-                        'Bet Amount': underdog_bet_amount.x,
-                        'Expected Return': '${:,.2f}'.format(underdog_bet_amount.x * expected_underdog_payout),
-                        'Expected Profit': '${:,.2f}'.format(underdog_bet_amount.x * expected_underdog_payout - underdog_bet_amount.x),
-                        'To Win': underdog_bet_amount.x * underdog_payout - underdog_bet_amount.x}
+                        'Bet Percent': underdog_bet_pct.x,
+                        'Bet Amount': underdog_bet_amount,
+                        'Bet Type': 'ATS'}
 
         bets.append(favorite_row)
         bets.append(underdog_row)
 
-    bet_df = pd.DataFrame(bets)
-    bet_df['Importance'] = bet_df.apply(lambda r: r['Bet Amount'] + r['To Win'], axis=1)
-    bet_df = bet_df.sort_values(by='Importance', ascending=False)
-    bet_df = bet_df.drop(columns=['Importance'])
-    bet_df['Bet Amount'] = bet_df.apply(lambda r: '${:,.2f}'.format(r['Bet Amount']), axis=1)
-    bet_df['To Win'] = bet_df.apply(lambda r: '${:,.2f}'.format(r['To Win']), axis=1)
-
-    good_bet_df = bet_df.loc[bet_df['Expected Value'] > 1].reset_index(drop=True)
-    bad_bet_df = bet_df.loc[bet_df['Expected Value'] <= 1].reset_index(drop=True)
-
-    green = '\033[32m'
-    red = '\033[31m'
-    stop = '\033[0m'
-
-    pd.set_option('display.max_columns', None)
-    pd.set_option('display.max_rows', None)
-    pd.set_option('display.width', None)
-
-    print(green)
-    print(good_bet_df)
-    print(stop)
-
-    print(red)
-    print(bad_bet_df)
-    print(stop)
-
-
-def straight_up_bets(pot):
-    odds = Odds.get_fanduel_odds(sport='nba', future_days=1, bet_type='h2h')
-
-    predict_outcomes([(t[0], t[1]) for t in odds])
-
-    bets = list()
-    for game in odds:
+    for game in h2h_odds:
         home_team, away_team, _, _, home_american, away_american = game
 
         home_team = home_team.split()[-1]
@@ -1147,6 +1135,9 @@ def straight_up_bets(pot):
 
         if away_team == 'Blazers':
             away_team = 'Trail Blazers'
+
+        if home_team in omit_teams or away_team in omit_teams:
+            continue
 
         home_bt = team_df.at[home_team, 'BT']
         away_bt = team_df.at[away_team, 'BT']
@@ -1164,64 +1155,311 @@ def straight_up_bets(pot):
         expected_away_payout = away_payout * away_bt_chance
 
         amount = 1.5
-        home_bet_amount = minimize_scalar(utility,
-                                          amount,
-                                          bounds=(0.0, pot),
-                                          args=(home_bt_chance, home_payout, 0, 1 - home_bt_chance, pot))
-        away_bet_amount = minimize_scalar(utility,
-                                          amount,
-                                          bounds=(0.0, pot),
-                                          args=(away_bt_chance, away_payout, 0, 1 - away_bt_chance, pot))
+        home_bet_pct = minimize_scalar(utility,
+                                       amount,
+                                       bounds=(0.0, 1),
+                                       args=(home_bt_chance, home_payout, 0, 1 - home_bt_chance, 1))
+        away_bet_pct = minimize_scalar(utility,
+                                       amount,
+                                       bounds=(0.0, 1),
+                                       args=(away_bt_chance, away_payout, 0, 1 - away_bt_chance, 1))
+
+        home_bet_amount = home_bet_pct.x * pot
+        away_bet_amount = away_bet_pct.x * pot
 
         home_row = {'Team': home_team,
+                    'Spread': 0,
                     'Opponent': away_team,
                     'American Odds': home_american,
-                    'Probability': f'{home_chance * 100:.3f}' + '%',
-                    'Payout': round(home_payout, 2),
-                    'BT Chance': f'{home_bt_chance * 100:.3f}' + '%',
+                    'Probability': home_chance,
+                    'Payout': home_payout,
+                    'Model Chance': home_bt_chance,
+                    'Push Chance': 0,
                     'Expected Value': expected_home_payout,
-                    'Bet Amount': home_bet_amount.x,
-                    'Expected Return': '${:,.2f}'.format(home_bet_amount.x * expected_home_payout),
-                    'Expected Profit': '${:,.2f}'.format(home_bet_amount.x * expected_home_payout - home_bet_amount.x),
-                    'To Win': home_bet_amount.x * home_payout - home_bet_amount.x}
+                    'Bet Percent': home_bet_pct.x,
+                    'Bet Amount': home_bet_amount,
+                    'Bet Type': 'H2H'}
 
         away_row = {'Team': away_team,
+                    'Spread': 0,
                     'Opponent': home_team,
                     'American Odds': away_american,
-                    'Probability': f'{away_chance * 100:.3f}' + '%',
-                    'Payout': round(away_payout, 2),
-                    'BT Chance': f'{away_bt_chance * 100:.3f}' + '%',
+                    'Probability': away_chance,
+                    'Payout': away_payout,
+                    'Model Chance': away_bt_chance,
+                    'Push Chance': 0,
                     'Expected Value': expected_away_payout,
-                    'Bet Amount': away_bet_amount.x,
-                    'Expected Return': '${:,.2f}'.format(away_bet_amount.x * expected_away_payout),
-                    'Expected Profit': '${:,.2f}'.format(away_bet_amount.x * expected_away_payout - away_bet_amount.x),
-                    'To Win': away_bet_amount.x * away_payout - away_bet_amount.x}
+                    'Bet Percent': away_bet_pct.x,
+                    'Bet Amount': away_bet_amount,
+                    'Bet Type': 'H2H'}
 
         bets.append(home_row)
         bets.append(away_row)
 
     bet_df = pd.DataFrame(bets)
-    bet_df['Importance'] = bet_df.apply(lambda r: r['Bet Amount'] + r['To Win'], axis=1)
-    bet_df = bet_df.sort_values(by='Importance', ascending=False)
-    bet_df = bet_df.drop(columns=['Importance'])
-    bet_df['Bet Amount'] = bet_df.apply(lambda r: '${:,.2f}'.format(r['Bet Amount']), axis=1)
-    bet_df['To Win'] = bet_df.apply(lambda r: '${:,.2f}'.format(r['To Win']), axis=1)
+    bet_df = bet_df.sort_values(by='Bet Percent', ascending=False)
+    remaining_pot = pot
+    for index, row in bet_df.iterrows():
+        bet_amount = bet_df.at[index, 'Bet Percent'] * remaining_pot
+        bet_df.at[index, 'Bet Amount'] = bet_amount
+        remaining_pot = remaining_pot - bet_amount
+
+    bet_df['Expected Return'] = bet_df.apply(lambda r: r['Bet Amount'] * r['Expected Value'], axis=1)
+    bet_df['Expected Profit'] = bet_df.apply(lambda r: r['Expected Return'] - r['Bet Amount'], axis=1)
+    bet_df['To Win'] = bet_df.apply(lambda r: r['Bet Amount'] * r['Payout'] - r['Bet Amount'], axis=1)
+
+    bet_df['Swing'] = bet_df.apply(lambda r: r['Bet Amount'] + r['To Win'], axis=1)
+    bet_df = bet_df.sort_values(by='Swing', ascending=False)
 
     good_bet_df = bet_df.loc[bet_df['Expected Value'] > 1].reset_index(drop=True)
     bad_bet_df = bet_df.loc[bet_df['Expected Value'] <= 1].reset_index(drop=True)
 
     green = '\033[32m'
     red = '\033[31m'
+    print_bet_table(good_bet_df, is_ats=True, color=green)
+    print_bet_table(bad_bet_df, is_ats=True, color=red)
+
+
+# def ats_bets(pot):
+#     odds = Odds.get_fanduel_odds(sport='nba', future_days=1)
+#     omit_teams = {}
+#
+#     predict_scores([(t[0], t[1]) for t in odds])
+#
+#     bets = list()
+#     for game in odds:
+#         home_team, away_team, home_spread, away_spread, home_american, away_american = game
+#
+#         home_spread = float(home_spread)
+#         away_spread = float(away_spread)
+#
+#         home_team = home_team.split()[-1]
+#         away_team = away_team.split()[-1]
+#
+#         if home_team == 'Blazers':
+#             home_team = 'Trail Blazers'
+#
+#         if away_team == 'Blazers':
+#             away_team = 'Trail Blazers'
+#
+#         if home_team in omit_teams or away_team in omit_teams:
+#             continue
+#
+#         favorite = home_team if home_spread < 0.0 else away_team
+#         underdog = away_team if home_spread < 0.0 else home_team
+#
+#         favorite_spread = home_spread if home_spread < 0 else away_spread
+#         underdog_spread = away_spread if home_spread < 0 else home_spread
+#
+#         favorite_american = home_american if home_spread < 0 else away_american
+#         underdog_american = away_american if home_spread < 0 else home_american
+#
+#         cover_chance, push_chance, fail_chance = get_spread_chance(favorite, underdog, favorite_spread)
+#
+#         favorite_chance = Odds.convert_american_to_probability(favorite_american)
+#         underdog_chance = Odds.convert_american_to_probability(underdog_american)
+#
+#         favorite_payout = 1 / favorite_chance
+#         underdog_payout = 1 / underdog_chance
+#
+#         expected_favorite_payout = favorite_payout * cover_chance + push_chance
+#         expected_underdog_payout = underdog_payout * fail_chance + push_chance
+#
+#         amount = 1.5
+#         favorite_bet_pct = minimize_scalar(utility,
+#                                            amount,
+#                                            bounds=(0.0, 1),
+#                                            args=(cover_chance, favorite_payout, push_chance, fail_chance, 1))
+#         underdog_bet_pct = minimize_scalar(utility,
+#                                            amount,
+#                                            bounds=(0.0, 1),
+#                                            args=(fail_chance, underdog_payout, push_chance, cover_chance, 1))
+#
+#         favorite_bet_amount = favorite_bet_pct.x * pot
+#         underdog_bet_amount = underdog_bet_pct.x * pot
+#
+#         favorite_row = {'Team': favorite,
+#                         'Spread': favorite_spread,
+#                         'Opponent': underdog,
+#                         'American Odds': favorite_american,
+#                         'Probability': favorite_chance,
+#                         'Payout': favorite_payout,
+#                         'Poisson Chance': cover_chance,
+#                         'Push Chance': push_chance,
+#                         'Expected Value': expected_favorite_payout,
+#                         'Bet Percent': favorite_bet_pct.x,
+#                         'Bet Amount': favorite_bet_amount}
+#
+#         underdog_row = {'Team': underdog,
+#                         'Spread': underdog_spread,
+#                         'Opponent': favorite,
+#                         'American Odds': underdog_american,
+#                         'Probability': underdog_chance,
+#                         'Payout': underdog_payout,
+#                         'Poisson Chance': fail_chance,
+#                         'Push Chance': push_chance,
+#                         'Expected Value': expected_underdog_payout,
+#                         'Bet Percent': underdog_bet_pct.x,
+#                         'Bet Amount': underdog_bet_amount}
+#
+#         bets.append(favorite_row)
+#         bets.append(underdog_row)
+#
+#     bet_df = pd.DataFrame(bets)
+#     bet_df = bet_df.sort_values(by='Bet Percent', ascending=False)
+#     remaining_pot = pot
+#     for index, row in bet_df.iterrows():
+#         bet_amount = bet_df.at[index, 'Bet Percent'] * remaining_pot
+#         bet_df.at[index, 'Bet Amount'] = bet_amount
+#         remaining_pot = remaining_pot - bet_amount
+#
+#     bet_df['Expected Return'] = bet_df.apply(lambda r: r['Bet Amount'] * r['Expected Value'], axis=1)
+#     bet_df['Expected Profit'] = bet_df.apply(lambda r: r['Expected Return'] - r['Bet Amount'], axis=1)
+#     bet_df['To Win'] = bet_df.apply(lambda r: r['Bet Amount'] * r['Payout'] - r['Bet Amount'], axis=1)
+#
+#     bet_df['Swing'] = bet_df.apply(lambda r: r['Bet Amount'] + r['To Win'], axis=1)
+#     bet_df = bet_df.sort_values(by='Swing', ascending=False)
+#
+#     good_bet_df = bet_df.loc[bet_df['Expected Value'] > 1].reset_index(drop=True)
+#     bad_bet_df = bet_df.loc[bet_df['Expected Value'] <= 1].reset_index(drop=True)
+#
+#     green = '\033[32m'
+#     red = '\033[31m'
+#     print_bet_table(good_bet_df, is_ats=True, color=green)
+#     print_bet_table(bad_bet_df, is_ats=True, color=red)
+#
+#
+# def straight_up_bets(pot):
+#     odds = Odds.get_fanduel_odds(sport='nba', future_days=1, bet_type='h2h')
+#     omit_teams = {}
+#
+#     predict_outcomes([(t[0], t[1]) for t in odds])
+#
+#     bets = list()
+#     for game in odds:
+#         home_team, away_team, _, _, home_american, away_american = game
+#
+#         home_team = home_team.split()[-1]
+#         away_team = away_team.split()[-1]
+#
+#         if home_team == 'Blazers':
+#             home_team = 'Trail Blazers'
+#
+#         if away_team == 'Blazers':
+#             away_team = 'Trail Blazers'
+#
+#         if home_team in omit_teams or away_team in omit_teams:
+#             continue
+#
+#         home_bt = team_df.at[home_team, 'BT']
+#         away_bt = team_df.at[away_team, 'BT']
+#
+#         home_chance = Odds.convert_american_to_probability(home_american)
+#         away_chance = Odds.convert_american_to_probability(away_american)
+#
+#         home_payout = 1 / home_chance
+#         away_payout = 1 / away_chance
+#
+#         home_bt_chance = math.exp(home_bt) / (math.exp(home_bt) + math.exp(away_bt))
+#         away_bt_chance = math.exp(away_bt) / (math.exp(home_bt) + math.exp(away_bt))
+#
+#         expected_home_payout = home_payout * home_bt_chance
+#         expected_away_payout = away_payout * away_bt_chance
+#
+#         amount = 1.5
+#         home_bet_pct = minimize_scalar(utility,
+#                                        amount,
+#                                        bounds=(0.0, 1),
+#                                        args=(home_bt_chance, home_payout, 0, 1 - home_bt_chance, 1))
+#         away_bet_pct = minimize_scalar(utility,
+#                                        amount,
+#                                        bounds=(0.0, 1),
+#                                        args=(away_bt_chance, away_payout, 0, 1 - away_bt_chance, 1))
+#
+#         home_bet_amount = home_bet_pct.x * pot
+#         away_bet_amount = away_bet_pct.x * pot
+#
+#         home_row = {'Team': home_team,
+#                     'Opponent': away_team,
+#                     'American Odds': home_american,
+#                     'Probability': home_chance,
+#                     'Payout': home_payout,
+#                     'BT Chance': home_bt_chance,
+#                     'Expected Value': expected_home_payout,
+#                     'Bet Percent': home_bet_pct.x,
+#                     'Bet Amount': home_bet_amount}
+#
+#         away_row = {'Team': away_team,
+#                     'Opponent': home_team,
+#                     'American Odds': away_american,
+#                     'Probability': away_chance,
+#                     'Payout': away_payout,
+#                     'BT Chance': away_bt_chance,
+#                     'Expected Value': expected_away_payout,
+#                     'Bet Percent': away_bet_pct.x,
+#                     'Bet Amount': away_bet_amount}
+#
+#         bets.append(home_row)
+#         bets.append(away_row)
+#
+#     bet_df = pd.DataFrame(bets)
+#     bet_df = bet_df.sort_values(by='Bet Percent', ascending=False)
+#     remaining_pot = pot
+#     for index, row in bet_df.iterrows():
+#         bet_amount = bet_df.at[index, 'Bet Percent'] * remaining_pot
+#         bet_df.at[index, 'Bet Amount'] = bet_amount
+#         remaining_pot = remaining_pot - bet_amount
+#
+#     bet_df['Expected Return'] = bet_df.apply(lambda r: r['Bet Amount'] * r['Expected Value'], axis=1)
+#     bet_df['Expected Profit'] = bet_df.apply(lambda r: r['Expected Return'] - r['Bet Amount'], axis=1)
+#     bet_df['To Win'] = bet_df.apply(lambda r: r['Bet Amount'] * r['Payout'] - r['Bet Amount'], axis=1)
+#
+#     bet_df['Swing'] = bet_df.apply(lambda r: r['Bet Amount'] + r['To Win'], axis=1)
+#     bet_df = bet_df.sort_values(by='Swing', ascending=False)
+#
+#     good_bet_df = bet_df.loc[bet_df['Expected Value'] > 1].reset_index(drop=True)
+#     bad_bet_df = bet_df.loc[bet_df['Expected Value'] <= 1].reset_index(drop=True)
+#
+#     green = '\033[32m'
+#     red = '\033[31m'
+#     print_bet_table(good_bet_df, color=green)
+#     print_bet_table(bad_bet_df, color=red)
+
+
+def print_bet_table(df, is_ats=False, color=''):
+    columns = ['Num', 'Team', 'Spread', 'Opponent', 'American Odds', 'Probability', 'Payout', 'Model Chance',
+               'Push Chance', 'Bet Amount', 'Expected Value', 'Expected Return', 'Expected Profit', 'To Win']
+
+    table = PrettyTable(columns)
+    table.float_format = '0.3'
+
     stop = '\033[0m'
 
-    pd.set_option('display.max_columns', None)
-    pd.set_option('display.max_rows', None)
-    pd.set_option('display.width', None)
+    row_num = 1
+    for index, row in df.iterrows():
+        table_row = list()
+        table_row.append(color + str(row_num) + stop)
+        row_num = row_num + 1
+        for col in columns[1:]:
+            if col == 'American Odds':
+                val = '+' + str(row[col]) if row[col] > 0 else str(row[col])
+            elif col == 'Spread':
+                val = '--' if row['Bet Type'] == 'H2H' else str(row[col])
+            elif col == 'Payout' or col == 'Expected Value':
+                val = str(round(row[col], 2)) + 'x'
+            elif col == 'Probability' or col == 'Model Chance' or col == 'Push Chance':
+                val = f'{row[col] * 100:.3f}' + '%'
+            elif col == 'Bet Amount' or col == 'Expected Return' or col == 'Expected Profit' or col == 'To Win':
+                val = 0 if col == 'Expected Profit' and -.01 < row[col] < 0 else row[col]
+                val = '${:,.2f}'.format(val)
+            elif col == 'Expected Value':
+                val = str(round(row[col], 2))
+            else:
+                val = str(row[col])
+            table_row.append(color + val + stop)
 
-    print(green)
-    print(good_bet_df)
-    print(stop)
+        table.add_row(table_row)
 
-    print(red)
-    print(bad_bet_df)
-    print(stop)
+    # Print the table
+    print(table)
+    print()
