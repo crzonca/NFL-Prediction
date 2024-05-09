@@ -134,6 +134,7 @@ def set_game_outcome(home_name, away_name, home_points, away_points, home_otl, a
         print(home_name)
         print(away_name)
         i = 0
+        return
 
     team_df.at[home_name, 'Games Played'] = home_games_played + 1
     team_df.at[away_name, 'Games Played'] = away_games_played + 1
@@ -633,9 +634,9 @@ def get_results_df(use_nba):
     all_games.update(x.get('games'))
     total_pages = int(x.get('meta').get('Total_Pages'))
 
-    for page in range(2, total_pages):
+    for page in range(2, total_pages + 1):
         x = get_games(page)
-        all_games.update(x.get('boxscores'))
+        all_games.update(x.get('games'))
 
     all_games_df = pd.DataFrame.from_dict(all_games, orient='index')
     all_games_df = all_games_df.loc[all_games_df['GameStatus'] == 'Final']
