@@ -18,6 +18,7 @@ import statsmodels.formula.api as smf
 from bokeh.models import ColumnDataSource, FixedTicker, NumeralTickFormatter, Whisker
 from bokeh.plotting import figure, show
 from bokeh.transform import factor_cmap, jitter
+from bokeh.layouts import gridplot
 from prettytable import PrettyTable
 from scipy.optimize import minimize
 from scipy.stats import chi2, norm
@@ -26,7 +27,7 @@ domain = 'https://api.natstat.com/v2/'
 api_key = '87ab-ba0b1b'
 
 graph = nx.MultiDiGraph()
-team_df = pd.DataFrame(columns=['Team', 'Games Played', 'Wins', 'Losses',
+team_df = pd.DataFrame(columns=['Team', 'League', 'Division', 'Games Played', 'Wins', 'Losses',
                                 'Preseason BT', 'Bayes BT', 'BT', 'BT Var', 'BT Pct', 'Win Pct',
                                 'Preseason Projected Wins', 'Preseason Projected Win SD',
                                 'Preseason Projected Wins Lower', 'Preseason Projected Wins Upper',
@@ -248,7 +249,7 @@ def get_team_colors(team):
     return color_map.get(team)
 
 
-def run(update=True, include_sp=False):
+def run(update=True, include_sp=False, pct_evidence=0.9):
     global team_df
 
     if update:
@@ -258,7 +259,8 @@ def run(update=True, include_sp=False):
             all_games.update(games.get('games'))
         games_df = pd.DataFrame(all_games).T
         games_df = games_df.loc[games_df['GameStatus'] == 'Final']
-        mistake_ids = ['4711012', '4711026', '3774574', '3774587', '3774686', '3774673', '3774649', '4899395']
+        mistake_ids = ['5063334', '5063586', '5063239', '5063225', '5063411', '5063774', '5063840', '5063432',
+                       '5063447', '5063349', '5102633', '5109903']
         games_df = games_df.loc[~games_df['ID'].isin(mistake_ids)]
 
         games_df['GameDay'] = pd.to_datetime(games_df['GameDay'])
@@ -267,7 +269,9 @@ def run(update=True, include_sp=False):
 
         potential = games_df.duplicated(subset=['Home', 'Visitor', 'ScoreHome', 'ScoreVis', 'Overtime'], keep=False)
         potential_df = games_df.loc[potential]
-        non_mistake_ids = ['3774530', '3774500', '3774481', '3774466', '3774756', '3774741', '3774769', '3774757']
+        potential_df = potential_df.sort_values(by=['Home', 'Visitor', 'ScoreHome', 'ScoreVis'], kind='mergesort')
+        non_mistake_ids = ['5063888', '5063864', '5063524', '5063518', '5063285', '5063251', '5063517', '5063499',
+                           '5063238', '5063224', '5063901', '5063871']
         potential_df = potential_df.loc[~potential_df['ID'].isin(non_mistake_ids)]
 
         if not potential_df.empty:
@@ -298,7 +302,11 @@ def run(update=True, include_sp=False):
             played_home_opponents = [opp for opp in relevant_games['Home'] if opp != team]
             played_opponents = played_road_opponents + played_home_opponents
             for played_opponent in played_opponents:
-                remaining_games.remove(played_opponent)
+                try:
+                    remaining_games.remove(played_opponent)
+                except ValueError as e:
+                    print(team, 'vs.', played_opponent)
+                    print(e)
 
         rows = list()
         for index, row in games_df.iterrows():
@@ -336,6 +344,25 @@ def run(update=True, include_sp=False):
     team_df['Team'] = teams
     team_df['Primary'] = team_df.apply(lambda r: get_team_colors(r['Team'])[0], axis=1)
     team_df['Secondary'] = team_df.apply(lambda r: get_team_colors(r['Team'])[1], axis=1)
+
+    divisions = {'AL East': ['Orioles', 'Red Sox', 'Yankees', 'Rays', 'Blue Jays'],
+                 'AL Central': ['White Sox', 'Guardians', 'Tigers', 'Royals', 'Twins'],
+                 'AL West': ['Astros', 'Angels', 'Athletics', 'Mariners', 'Rangers'],
+                 'NL East': ['Braves', 'Marlins', 'Mets', 'Phillies', 'Nationals'],
+                 'NL Central': ['Cubs', 'Reds', 'Brewers', 'Pirates', 'Cardinals'],
+                 'NL West': ['Diamondbacks', 'Rockies', 'Dodgers', 'Padres', 'Giants']}
+
+
+    team_divs = dict()
+    team_leagues = dict()
+    for div, ts in divisions.items():
+        for team in ts:
+            team_divs[team] = div
+            team_leagues[team] = div.split(' ')[0].strip()
+
+    team_df['Division'] = team_df.apply(lambda r: team_divs.get(r['Team']), axis=1)
+    team_df['League'] = team_df.apply(lambda r: team_leagues.get(r['Team']), axis=1)
+
     team_df = team_df.set_index('Team')
     bts = get_bt()
 
@@ -362,8 +389,12 @@ def run(update=True, include_sp=False):
         team_df.at[team, 'BT'] = bts.at[team, 'BT'] if team in bts.index else preseason_bts.at[team, 'BT']
         team_df.at[team, 'BT Var'] = bts.at[team, 'Var'] if team in bts.index else 1
 
+        pct_evidence = 1e-16 if pct_evidence == 0 else pct_evidence
+        evidence_factor = (162 - pct_evidence * 162) / pct_evidence
+        evidence_factor = 1e-16 if evidence_factor == 0 else evidence_factor
+
         bayes_bt = get_bayes_avg(team_df.at[team, 'Preseason BT'],
-                                 team_df.at[team, 'BT Var'] / 18,
+                                 team_df.at[team, 'BT Var'] / evidence_factor,
                                  team_df.at[team, 'BT'],
                                  team_df.at[team, 'BT Var'],
                                  wins + losses)
@@ -404,12 +435,14 @@ def run(update=True, include_sp=False):
     team_df['Adjusted Points Allowed'] = team_df.apply(lambda r: math.exp(r['Points Intercept'] + r['Points Allowed Coef']), axis=1)
     team_df['Adjusted Point Diff'] = team_df.apply(lambda r: r['Adjusted Points'] - r['Adjusted Points Allowed'], axis=1)
 
+    is_playoff_team('Cubs')
+
     show_off_def()
     show_graph()
     plot_projected_wins()
+    plot_projected_wins_div()
 
     print_table()
-    # print_projected_wins()
 
     if include_sp:
         pitcher_coefs = pitcher_coefs.sort_values(by='Pitching Coef')
@@ -679,7 +712,7 @@ def fit_neg_bin(df, include_sp, verbose=True):
                             data=df,
                             family=sm.families.Poisson(),
                             var_weights=df['Weight']).fit(method="lbfgs",
-                                                          maxiter=1000)
+                                                          maxiter=int(1e5))
 
     pearson_chi2 = chi2(df=poisson_model.df_resid)
     alpha = .05
@@ -799,7 +832,7 @@ def print_table(sort_key='Bayes BT'):
         rank = team_df.index.get_loc(index) + 1
 
         points_pct = .05
-        points_color = get_color(row['Points Coef'], points_var, alpha=points_pct)
+        points_color = get_color(row['Points Coef'], points_var, alpha=points_pct, invert=False)
         points_allowed_color = get_color(row['Points Allowed Coef'], points_allowed_var, alpha=points_pct, invert=True)
         points_diff_color = get_color(row['Adjusted Point Diff'], points_diff_var, alpha=points_pct, invert=False)
 
@@ -832,6 +865,28 @@ def print_table(sort_key='Bayes BT'):
     print()
 
 
+def is_playoff_team(team_name):
+    df = team_df.copy()
+
+    df['Projected Wins'] = pd.to_numeric(df['Projected Wins'])
+
+    division_leaders = df.groupby(by='Division').idxmax(numeric_only=True)['Projected Wins']
+    division_leaders = set(division_leaders)
+
+    if team_name in division_leaders:
+        return True
+
+    non_division_leaders = set(df.index) - division_leaders
+    df = df.loc[list(non_division_leaders)]
+
+    df = df.sort_values(by='Projected Wins', ascending=False)
+
+    wild_card_teams = df.groupby('League').head(3).index
+    wild_card_teams = set(wild_card_teams)
+
+    return team_name in wild_card_teams
+
+
 def print_projected_wins():
     global team_df
 
@@ -842,11 +897,25 @@ def print_projected_wins():
     table = PrettyTable(columns)
     table.float_format = '0.3'
 
+    points_var = statistics.variance(team_df['Points Coef'])
+    points_allowed_var = statistics.variance(team_df['Points Allowed Coef'])
+    points_diff_var = statistics.variance(team_df['Adjusted Point Diff'])
+
     stop = '\033[0m'
 
     for index, row in team_df.iterrows():
         table_row = list()
 
+        wins = row['Wins']
+        losses = row['Losses']
+        record = ' - '.join([str(int(val)).rjust(2) for val in [wins, losses]])
+
+        rank = team_df.index.get_loc(index) + 1
+
+        points_pct = .05
+        points_color = get_color(row['Points Coef'], points_var, alpha=points_pct, invert=False)
+        points_allowed_color = get_color(row['Points Allowed Coef'], points_allowed_var, alpha=points_pct, invert=True)
+        points_diff_color = get_color(row['Adjusted Point Diff'], points_diff_var, alpha=points_pct, invert=False)
 
         rank = team_df.index.get_loc(index) + 1
         table_row.append(rank)
@@ -881,7 +950,6 @@ def print_projected_wins():
     print('Rankings')
     print(table)
     print()
-
 
 
 def show_off_def():
@@ -919,8 +987,7 @@ def show_off_def():
         xa = math.exp(intercept + team_df.at[team, 'Points Coef'])
         ya = math.exp(intercept + team_df.at[team, 'Points Allowed Coef'])
 
-        offset = .2
-        offset = .2
+        offset = .15
         ax.imshow(images.get(team), extent=(xa - offset, xa + offset, ya + offset, ya - offset), alpha=.8)
 
     vert_mean = team_df['Adjusted Points'].mean()
@@ -1005,16 +1072,20 @@ def show_graph():
     plt.show()
 
 
-def plot_projected_wins():
+def plot_projected_wins(absolute_range=False):
     df = team_df.copy()
     df = df.sort_values(by='Projected Wins', ascending=True)
 
     teams = list(df.index)
 
+    min_x = 0 if absolute_range else min(df['Projected Wins Lower']) - 5
+    max_x = 162 if absolute_range else max(df['Projected Wins Upper']) + 5
+    x_range = max_x - min_x
+
     p = figure(y_range=teams,
                width=1000,
                height=1700,
-               x_range=(0, 162),
+               x_range=(min_x, max_x),
                toolbar_location=None)
 
     source_data = dict(base=teams, upper=list(df['Projected Wins Upper']), lower=list(df['Projected Wins Lower']))
@@ -1029,75 +1100,110 @@ def plot_projected_wins():
     images = {team: 'Projects/play/sports/mlb_logos/' + team + '.png' for team in teams}
     image_source = {'Team': list(images.keys()),
                     'Image': list(images.values()),
-                    'Proj': [team_df.at[team, 'Projected Wins'] for team in images.keys()]}
+                    'Proj': [team_df.at[team, 'Projected Wins'] for team in images.keys()],
+                    'Alpha': [1.0 if is_playoff_team(team) else 0.5 for team in images.keys()]}
     image_source = ColumnDataSource(data=image_source)
-    p.image_url(url='Image', x='Proj', y='Team', w=9.5, h=1, anchor='center', source=image_source)
+    height = .75
+    width = height * 9.5 * (x_range / 162)
+    p.image_url(url='Image', x='Proj', y='Team', global_alpha='Alpha',
+                w=width, h=height, anchor='center', source=image_source)
 
     p.xaxis.axis_label = 'Projected Wins'
 
     show(p)
 
 
-def plot_normals(names, means, deviations, primary_colors, secondary_colors, use_log=True):
-    if len(means) != len(deviations) != len(names):
-        pass
+def plot_projected_wins_div(absolute_range=False):
+    df = team_df.copy()
+    df = df.sort_values(by='Projected Wins', ascending=True)
 
-    data = list(zip(names, means, deviations, primary_colors, secondary_colors))
-    data = sorted(data, key=lambda tup: tup[1], reverse=False)
+    min_x = 0 if absolute_range else min(df['Projected Wins Lower']) - 5
+    max_x = 162 if absolute_range else max(df['Projected Wins Upper']) + 5
+    x_range = max_x - min_x
 
-    max_height = .4 / min(deviations)
-    scale = .9 / max_height
+    divisions = {'AL East': ['Orioles', 'Red Sox', 'Yankees', 'Rays', 'Blue Jays'],
+                 'AL Central': ['White Sox', 'Guardians', 'Tigers', 'Royals', 'Twins'],
+                 'AL West': ['Astros', 'Angels', 'Athletics', 'Mariners', 'Rangers'],
+                 'NL East': ['Braves', 'Marlins', 'Mets', 'Phillies', 'Nationals'],
+                 'NL Central': ['Cubs', 'Reds', 'Brewers', 'Pirates', 'Cardinals'],
+                 'NL West': ['Diamondbacks', 'Rockies', 'Dodgers', 'Padres', 'Giants']}
 
-    # min_x = min(means) - 2.576 * max(deviations)
-    # max_x = max(means) + 2.576 * max(deviations)
-    min_x = 32
-    max_x = 130
+    fig_map = dict()
+    for division, teams in divisions.items():
+        div_df = df.loc[teams]
+        div_df = div_df.sort_values(by='Projected Wins', ascending=True)
+        p = figure(y_range=list(div_df.index),
+                   width=267,
+                   height=200,
+                   x_range=(min_x, max_x),
+                   toolbar_location=None)
 
-    x = np.linspace(min_x, max_x, 500)
-    if use_log:
-        source = ColumnDataSource(data={'x': x})
-        x_range_low = min_x
-        x_range_high = max_x
-    else:
-        source = ColumnDataSource(data={'x': np.exp(x)})
-        x_range_low = math.exp(min_x)
-        x_range_high = math.exp(max_x)
+        source_data = dict(base=div_df.index,
+                           upper=list(div_df['Projected Wins Upper']),
+                           lower=list(div_df['Projected Wins Lower']))
+        source = ColumnDataSource(data=source_data)
 
-    p = figure(y_range=[datum[0] for datum in data],
-               width=1000,
-               height=1700,
-               x_range=(x_range_low, x_range_high),
-               toolbar_location=None)
+        error = Whisker(base="base", upper='upper', lower='lower', source=source,
+                        dimension="width", line_width=1)
+        error.upper_head.size = 20
+        error.lower_head.size = 20
+        p.add_layout(error)
 
-    for school, mean, deviation, primary_color, secondary_color in data:
-        dist = norm(loc=mean, scale=deviation)
-        pdf_vals = dist.pdf(x) * scale
-        pdf_vals = np.maximum(np.zeros(500), pdf_vals)
-        source.add(list(zip([school] * len(pdf_vals), pdf_vals)), school)
-        p.patch('x', school,
-                fill_color=primary_color,
-                line_color='black',
-                alpha=.6,
-                hatch_color=secondary_color,
-                hatch_pattern='dot',
-                hatch_alpha=1,
-                hatch_scale=7.5,
-                source=source)
+        images = {team: 'Projects/play/sports/mlb_logos/' + team + '.png' for team in div_df.index}
+        image_source = {'Team': list(images.keys()),
+                        'Image': list(images.values()),
+                        'Proj': [div_df.at[team, 'Projected Wins'] for team in images.keys()],
+                        'Alpha': [1.0 if is_playoff_team(team) else 0.5 for team in images.keys()]}
+        image_source = ColumnDataSource(data=image_source)
+        height = .75
+        width = height * 15 * (x_range / 162)
+        p.image_url(url='Image', x='Proj', y='Team', global_alpha='Alpha',
+                    w=width, h=height, anchor='center', source=image_source)
 
-    p.outline_line_color = None
-    p.background_fill_color = '#efefef'
+        p.xaxis.axis_label = division
+        fig_map[division] = p
 
-    p.xaxis.ticker = FixedTicker(ticks=list(range(int(x_range_low) - 1, int(x_range_high) + 1, 1)))
-    p.xaxis.formatter = NumeralTickFormatter()
+    grid = gridplot([[fig_map.get('AL West'), fig_map.get('AL Central'), fig_map.get('AL East')],
+                     [fig_map.get('NL West'), fig_map.get('NL Central'), fig_map.get('NL East')]],
+                    width=800, height=400)
+    show(grid)
 
-    p.ygrid.grid_line_color = None
-    p.xgrid.grid_line_color = '#dddddd'
-    p.xgrid.ticker = p.xaxis.ticker
 
-    p.axis.minor_tick_line_color = None
-    p.axis.major_tick_line_color = None
-    p.axis.axis_line_color = None
+def plot_projected_wins_div2():
+    df = team_df.copy()
 
-    p.y_range.range_padding = scale * max_height / len(names)
+    min_y = min(df['Projected Wins Lower']) - 5
+    max_y = max(df['Projected Wins Upper']) + 5
 
-    show(p)
+    fig, ((al_west_ax, al_cent_ax, al_east_ax),
+          (nl_west_ax, nl_cent_ax, nl_east_ax)) = plt.subplots(nrows=2, ncols=3, figsize=(20, 10))
+
+    divisions = {'AL East': ['Orioles', 'Red Sox', 'Yankees', 'Rays', 'Blue Jays'],
+                 'AL Central': ['White Sox', 'Guardians', 'Tigers', 'Royals', 'Twins'],
+                 'AL West': ['Astros', 'Angels', 'Athletics', 'Mariners', 'Rangers'],
+                 'NL East': ['Braves', 'Marlins', 'Mets', 'Phillies', 'Nationals'],
+                 'NL Central': ['Cubs', 'Reds', 'Brewers', 'Pirates', 'Cardinals'],
+                 'NL West': ['Diamondbacks', 'Rockies', 'Dodgers', 'Padres', 'Giants']}
+
+    div_axes = {'AL East': al_east_ax,
+                'AL Central': al_cent_ax,
+                'AL West': al_west_ax,
+                'NL East': nl_east_ax,
+                'NL Central': nl_cent_ax,
+                'NL West': nl_west_ax}
+
+    for div, div_ax in div_axes.items():
+        div_ax.set_xlabel(div)
+        div_ax.xaxis.set_label_position('top')
+        div_ax.set_ylim(min_y, max_y)
+
+        div_teams = divisions.get(div)
+        relevant_df = df.loc[div_teams]
+        relevant_df = relevant_df.sort_values(by='Projected Wins', ascending=False)
+        sample_data = {team: norm(loc=df.at[team, 'Projected Wins'],
+                                  scale=df.at[team, 'Projected Win SD']).rvs(size=10_000) for team in relevant_df.index}
+        div_ax.boxplot(sample_data.values(), sym='')
+        div_ax.set_xticklabels(sample_data.keys())
+
+    plt.show()
+
