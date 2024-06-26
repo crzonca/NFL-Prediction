@@ -6,6 +6,7 @@ import warnings
 from datetime import datetime
 
 import PIL
+from scipy.stats import nbinom, binom
 import choix
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -22,6 +23,7 @@ from bokeh.layouts import gridplot
 from prettytable import PrettyTable
 from scipy.optimize import minimize
 from scipy.stats import chi2, norm
+from Projects.play.bracket import Bracket
 
 domain = 'https://api.natstat.com/v2/'
 api_key = '87ab-ba0b1b'
@@ -260,7 +262,7 @@ def run(update=True, include_sp=False, pct_evidence=0.9):
         games_df = pd.DataFrame(all_games).T
         games_df = games_df.loc[games_df['GameStatus'] == 'Final']
         mistake_ids = ['5063334', '5063586', '5063239', '5063225', '5063411', '5063774', '5063840', '5063432',
-                       '5063447', '5063349', '5102633', '5109903']
+                       '5063447', '5063349', '5102633', '5109903', '5240767']
         games_df = games_df.loc[~games_df['ID'].isin(mistake_ids)]
 
         games_df['GameDay'] = pd.to_datetime(games_df['GameDay'])
@@ -271,7 +273,8 @@ def run(update=True, include_sp=False, pct_evidence=0.9):
         potential_df = games_df.loc[potential]
         potential_df = potential_df.sort_values(by=['Home', 'Visitor', 'ScoreHome', 'ScoreVis'], kind='mergesort')
         non_mistake_ids = ['5063888', '5063864', '5063524', '5063518', '5063285', '5063251', '5063517', '5063499',
-                           '5063238', '5063224', '5063901', '5063871']
+                           '5063238', '5063224', '5063901', '5063871', '5064081', '5064063', '5064247', '5064235',
+                           '5064223', '5064182', '5064263', '5064234']
         potential_df = potential_df.loc[~potential_df['ID'].isin(non_mistake_ids)]
 
         if not potential_df.empty:
@@ -435,14 +438,25 @@ def run(update=True, include_sp=False, pct_evidence=0.9):
     team_df['Adjusted Points Allowed'] = team_df.apply(lambda r: math.exp(r['Points Intercept'] + r['Points Allowed Coef']), axis=1)
     team_df['Adjusted Point Diff'] = team_df.apply(lambda r: r['Adjusted Points'] - r['Adjusted Points Allowed'], axis=1)
 
-    is_playoff_team('Cubs')
-
     show_off_def()
     show_graph()
     plot_projected_wins()
     plot_projected_wins_div()
 
-    print_table()
+    playoff_team_df = team_df.copy()
+    playoff_team_df['Team'] = playoff_team_df.index
+    playoff_team_df['Seed'] = playoff_team_df.apply(lambda r: get_playoff_seed(r['Team']), axis=1)
+
+    al_playoff_teams = playoff_team_df.loc[(playoff_team_df['Seed'] > 0) & (playoff_team_df['League'] == 'AL')]
+    nl_playoff_teams = playoff_team_df.loc[(playoff_team_df['Seed'] > 0) & (playoff_team_df['League'] == 'NL')]
+
+    al_playoff_teams = al_playoff_teams.sort_values(by='Seed', ascending=True)['Team']
+    nl_playoff_teams = nl_playoff_teams.sort_values(by='Seed', ascending=True)['Team']
+
+    playoff_chances = get_world_series_chance(list(al_playoff_teams),
+                                              list(nl_playoff_teams))
+
+    print_table(playoff_chances)
 
     if include_sp:
         pitcher_coefs = pitcher_coefs.sort_values(by='Pitching Coef')
@@ -801,17 +815,12 @@ def get_color(value, variance=np.nan, alpha=.05, enabled=True, invert=False):
         return ''
 
 
-def print_table(sort_key='Bayes BT'):
+def print_table(playoff_chances, sort_key='Bayes BT'):
     global team_df
 
-    if sort_key in ['Avg Points Allowed', 'Points Allowed Coef', 'Adjusted Points Allowed',
-                    'YPG Allowed', 'Yards Allowed Coef', 'Adjusted Yards Allowed']:
-        ascending_order = True
-    else:
-        ascending_order = False
-    team_df = team_df.sort_values(by=sort_key, kind='mergesort', ascending=ascending_order)
+    team_df = team_df.sort_values(by=sort_key, kind='mergesort', ascending=False)
     columns = ['Rank', 'Team', 'Record', 'Grade', 'Projected Record', 'Projected Wins 95% CI',
-               'Adj Runs', 'Adj Runs Allowed', 'Adj Run Diff']
+               'Adj Runs', 'Adj Runs Allowed', 'Adj Run Diff', 'Win WS Chance']
 
     table = PrettyTable(columns)
     table.float_format = '0.3'
@@ -857,6 +866,9 @@ def print_table(sort_key='Bayes BT'):
         table_row.append(points_allowed_color + str(round(row['Adjusted Points Allowed'], 1)) + stop)
         table_row.append(points_diff_color + str(round(row['Adjusted Point Diff'], 1)).rjust(5) + stop)
 
+        chance = playoff_chances.at[index, 'Win World Series Chance']
+        table_row.append('{:.2%}'.format(chance))
+
         table.add_row(table_row)
 
     # Print the table
@@ -885,6 +897,189 @@ def is_playoff_team(team_name):
     wild_card_teams = set(wild_card_teams)
 
     return team_name in wild_card_teams
+
+
+def get_playoff_seed(team_name):
+    if not is_playoff_team(team_name):
+        return 0
+
+    df = team_df.copy()
+
+    df['Projected Wins'] = pd.to_numeric(df['Projected Wins'])
+
+    division_leaders = df.groupby(by='Division').idxmax(numeric_only=True)['Projected Wins']
+    division_leaders = set(division_leaders)
+
+    div_leader_df = df.loc[list(division_leaders)]
+
+    al_div_leader_df = div_leader_df.loc[div_leader_df['League'] == 'AL']
+    nl_div_leader_df = div_leader_df.loc[div_leader_df['League'] == 'NL']
+
+    al_div_leader_df = al_div_leader_df.sort_values(by='Projected Wins', ascending=False)
+    nl_div_leader_df = nl_div_leader_df.sort_values(by='Projected Wins', ascending=False)
+
+    try:
+        seed = list(al_div_leader_df.index).index(team_name) + 1
+        return seed
+    except ValueError:
+        try:
+            seed = list(nl_div_leader_df.index).index(team_name) + 1
+            return seed
+        except ValueError:
+            non_division_leaders = set(df.index) - division_leaders
+            wild_card_df = df.loc[list(non_division_leaders)]
+
+            al_wild_card_df = wild_card_df.loc[wild_card_df['League'] == 'AL']
+            nl_wild_card_df = wild_card_df.loc[wild_card_df['League'] == 'NL']
+
+            al_wild_card_df = al_wild_card_df.sort_values(by='Projected Wins', ascending=False)
+            nl_wild_card_df = nl_wild_card_df.sort_values(by='Projected Wins', ascending=False)
+            try:
+                seed = list(al_wild_card_df.index).index(team_name) + 4
+                return seed
+            except ValueError:
+                    seed = list(nl_wild_card_df.index).index(team_name) + 4
+                    return seed
+
+
+def get_best_of(series_length, team1, team2, verbose=False):
+    team1_bt = team_df.at[team1, 'Bayes BT']
+    team2_bt = team_df.at[team2, 'Bayes BT']
+
+    p = math.exp(team1_bt) / (math.exp(team1_bt) + math.exp(team2_bt))
+    required_wins = int(math.ceil(series_length / 2.0))
+
+    l_just = max(len(team1), len(team2))
+    if verbose:
+        for num_games in range(series_length, required_wins - 1, -1):
+            allowed_losses = num_games - required_wins
+            if allowed_losses < 0:
+                continue
+            prob = nbinom.pmf(allowed_losses, required_wins, p)
+            print(team1.ljust(l_just), 'in', str(num_games) + ':', str(round(prob * 100, 1)) + '%')
+        print()
+
+        for num_games in range(required_wins, series_length + 1):
+            allowed_losses = num_games - required_wins
+            if allowed_losses < 0:
+                continue
+            prob = nbinom.pmf(allowed_losses, required_wins, 1 - p)
+            print(team2.ljust(l_just), 'in', str(num_games) + ':', str(round(prob * 100, 1)) + '%')
+        print()
+
+    team1_total = binom.cdf(series_length - required_wins, series_length, 1 - p)
+    team2_total = binom.cdf(series_length - required_wins, series_length, p)
+
+    if verbose:
+        print(team1.ljust(l_just), 'total chance:', str(round(team1_total * 100, 1)) + '%')
+        print(team2.ljust(l_just), 'total chance:', str(round(team2_total * 100, 1)) + '%')
+        print()
+
+    winner, prob = (team1, team1_total) if team1_total >= .5 else (team2, team2_total)
+    return team1_total
+
+
+def get_world_series_chance(al_playoff_teams, nl_playoff_teams):
+    al1, al2, al3, al4, al5, al6 = al_playoff_teams
+    nl1, nl2, nl3, nl4, nl5, nl6 = nl_playoff_teams
+
+    al1_bt = team_df.at[al1, 'Bayes BT']
+    al2_bt = team_df.at[al2, 'Bayes BT']
+    al3_bt = team_df.at[al3, 'Bayes BT']
+    al4_bt = team_df.at[al4, 'Bayes BT']
+    al5_bt = team_df.at[al5, 'Bayes BT']
+    al6_bt = team_df.at[al6, 'Bayes BT']
+
+    nl1_bt = team_df.at[nl1, 'Bayes BT']
+    nl2_bt = team_df.at[nl2, 'Bayes BT']
+    nl3_bt = team_df.at[nl3, 'Bayes BT']
+    nl4_bt = team_df.at[nl4, 'Bayes BT']
+    nl5_bt = team_df.at[nl5, 'Bayes BT']
+    nl6_bt = team_df.at[nl6, 'Bayes BT']
+
+    al_wc1 = Bracket('AL Wildcard 1', Bracket(al4, bt=al4_bt), Bracket(al5, bt=al5_bt), series_length=3)
+    al_wc2 = Bracket('AL Wildcard 2', Bracket(al3, bt=al3_bt), Bracket(al6, bt=al6_bt), series_length=3)
+    nl_wc1 = Bracket('NL Wildcard 1', Bracket(nl4, bt=nl4_bt), Bracket(nl5, bt=nl5_bt), series_length=3)
+    nl_wc2 = Bracket('NL Wildcard 2', Bracket(nl3, bt=nl3_bt), Bracket(nl6, bt=nl6_bt), series_length=3)
+
+    alds1 = Bracket('ALDS 1', Bracket(al1, bt=al1_bt), al_wc1, series_length=5)
+    alds2 = Bracket('ALDS 2', Bracket(al2, bt=al2_bt), al_wc2, series_length=5)
+    nlds1 = Bracket('NLDS 1', Bracket(nl1, bt=nl1_bt), nl_wc1, series_length=5)
+    nlds2 = Bracket('NLDS 2', Bracket(nl2, bt=nl2_bt), nl_wc2, series_length=5)
+
+    alcs = Bracket('ALCS', alds1, alds2, series_length=7)
+    nlcs = Bracket('NLCS', nlds1, nlds2, series_length=7)
+
+    world_series = Bracket('World Series', alcs, nlcs, series_length=7)
+
+    playoff_chances = pd.DataFrame(index=team_df.index, columns=['Reach LDS Chance',
+                                                                 'Reach LCS Chance',
+                                                                 'Reach World Series Chance',
+                                                                 'Win World Series Chance'])
+
+    playoff_chances.at[al1, 'Reach LDS Chance'] = 1
+    playoff_chances.at[al2, 'Reach LDS Chance'] = 1
+    playoff_chances.at[al3, 'Reach LDS Chance'] = al_wc2.get_victory_chance(al3)
+    playoff_chances.at[al4, 'Reach LDS Chance'] = al_wc1.get_victory_chance(al4)
+    playoff_chances.at[al5, 'Reach LDS Chance'] = al_wc1.get_victory_chance(al5)
+    playoff_chances.at[al6, 'Reach LDS Chance'] = al_wc2.get_victory_chance(al6)
+
+    playoff_chances.at[nl1, 'Reach LDS Chance'] = 1
+    playoff_chances.at[nl2, 'Reach LDS Chance'] = 1
+    playoff_chances.at[nl3, 'Reach LDS Chance'] = nl_wc2.get_victory_chance(al3)
+    playoff_chances.at[nl4, 'Reach LDS Chance'] = nl_wc1.get_victory_chance(al4)
+    playoff_chances.at[nl5, 'Reach LDS Chance'] = nl_wc1.get_victory_chance(al5)
+    playoff_chances.at[nl6, 'Reach LDS Chance'] = nl_wc2.get_victory_chance(al6)
+
+    playoff_chances.at[al1, 'Reach LCS Chance'] = alds1.get_victory_chance(al1)
+    playoff_chances.at[al2, 'Reach LCS Chance'] = alds2.get_victory_chance(al2)
+    playoff_chances.at[al3, 'Reach LCS Chance'] = alds2.get_victory_chance(al3)
+    playoff_chances.at[al4, 'Reach LCS Chance'] = alds1.get_victory_chance(al4)
+    playoff_chances.at[al5, 'Reach LCS Chance'] = alds1.get_victory_chance(al5)
+    playoff_chances.at[al6, 'Reach LCS Chance'] = alds2.get_victory_chance(al6)
+
+    playoff_chances.at[nl1, 'Reach LCS Chance'] = nlds1.get_victory_chance(nl1)
+    playoff_chances.at[nl2, 'Reach LCS Chance'] = nlds2.get_victory_chance(nl2)
+    playoff_chances.at[nl3, 'Reach LCS Chance'] = nlds2.get_victory_chance(nl3)
+    playoff_chances.at[nl4, 'Reach LCS Chance'] = nlds1.get_victory_chance(nl4)
+    playoff_chances.at[nl5, 'Reach LCS Chance'] = nlds1.get_victory_chance(nl5)
+    playoff_chances.at[nl6, 'Reach LCS Chance'] = nlds2.get_victory_chance(nl6)
+
+    playoff_chances.at[al1, 'Reach World Series Chance'] = alcs.get_victory_chance(al1)
+    playoff_chances.at[al2, 'Reach World Series Chance'] = alcs.get_victory_chance(al2)
+    playoff_chances.at[al3, 'Reach World Series Chance'] = alcs.get_victory_chance(al3)
+    playoff_chances.at[al4, 'Reach World Series Chance'] = alcs.get_victory_chance(al4)
+    playoff_chances.at[al5, 'Reach World Series Chance'] = alcs.get_victory_chance(al5)
+    playoff_chances.at[al6, 'Reach World Series Chance'] = alcs.get_victory_chance(al6)
+
+    playoff_chances.at[nl1, 'Reach World Series Chance'] = nlcs.get_victory_chance(nl1)
+    playoff_chances.at[nl2, 'Reach World Series Chance'] = nlcs.get_victory_chance(nl2)
+    playoff_chances.at[nl3, 'Reach World Series Chance'] = nlcs.get_victory_chance(nl3)
+    playoff_chances.at[nl4, 'Reach World Series Chance'] = nlcs.get_victory_chance(nl4)
+    playoff_chances.at[nl5, 'Reach World Series Chance'] = nlcs.get_victory_chance(nl5)
+    playoff_chances.at[nl6, 'Reach World Series Chance'] = nlcs.get_victory_chance(nl6)
+
+    playoff_chances.at[al1, 'Win World Series Chance'] = world_series.get_victory_chance(al1)
+    playoff_chances.at[al2, 'Win World Series Chance'] = world_series.get_victory_chance(al2)
+    playoff_chances.at[al3, 'Win World Series Chance'] = world_series.get_victory_chance(al3)
+    playoff_chances.at[al4, 'Win World Series Chance'] = world_series.get_victory_chance(al4)
+    playoff_chances.at[al5, 'Win World Series Chance'] = world_series.get_victory_chance(al5)
+    playoff_chances.at[al6, 'Win World Series Chance'] = world_series.get_victory_chance(al6)
+
+    playoff_chances.at[nl1, 'Win World Series Chance'] = world_series.get_victory_chance(nl1)
+    playoff_chances.at[nl2, 'Win World Series Chance'] = world_series.get_victory_chance(nl2)
+    playoff_chances.at[nl3, 'Win World Series Chance'] = world_series.get_victory_chance(nl3)
+    playoff_chances.at[nl4, 'Win World Series Chance'] = world_series.get_victory_chance(nl4)
+    playoff_chances.at[nl5, 'Win World Series Chance'] = world_series.get_victory_chance(nl5)
+    playoff_chances.at[nl6, 'Win World Series Chance'] = world_series.get_victory_chance(nl6)
+
+    playoff_chances = playoff_chances.fillna(0.0)
+    playoff_chances = playoff_chances.sort_values(by=['Win World Series Chance',
+                                                      'Reach World Series Chance',
+                                                      'Reach LCS Chance',
+                                                      'Reach LDS Chance'],
+                                                  kind='mergesort', ascending=False)
+    return playoff_chances
 
 
 def print_projected_wins():
