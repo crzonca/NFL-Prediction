@@ -86,57 +86,6 @@ def get_starting_pitchers(game_id):
     return sp_dict
 
 
-def get_postseason(row, df):
-    df = df.sort_values(by=['Projected Wins', 'BT'], ascending=False)
-    team_order = list(df['Team'])
-    team = row['Team']
-
-    nl_east = {'Braves', 'Marlins', 'Phillies', 'Mets', 'Nationals'}
-    nl_central = {'Brewers', 'Cubs', 'Cardinals', 'Pirates', 'Reds'}
-    nl_west = {'Diamondbacks', 'Giants', 'Padres', 'Dodgers', 'Rockies'}
-    nl_teams = nl_east.union(nl_central.union(nl_west))
-
-    al_east = {'Orioles', 'Rays', 'Blue Jays', 'Red Sox', 'Yankees'}
-    al_central = {'Twins', 'Guardians', 'White Sox', 'Tigers', 'Royals'}
-    al_west = {'Angels', 'Mariners', 'Astros', 'Rangers', 'Athletics'}
-    al_teams = al_east.union(al_central.union(al_west))
-
-    other_teams = nl_teams.union(al_teams) - {team}
-
-    division_map = {t: 'NL East' for t in nl_east}
-    division_map.update({t: 'NL Central' for t in nl_central})
-    division_map.update({t: 'NL West' for t in nl_west})
-    division_map.update({t: 'AL East' for t in al_east})
-    division_map.update({t: 'AL Central' for t in al_central})
-    division_map.update({t: 'AL West' for t in al_west})
-
-    conference_map = {t: 'NL' for t in nl_teams}
-    conference_map.update({t: 'AL' for t in al_teams})
-
-    teams_ahead = {other_team for other_team in other_teams if team_order.index(other_team) < team_order.index(team)}
-    divisons_ahead = [division_map.get(other_team) for other_team in teams_ahead
-                      if conference_map.get(other_team) == conference_map.get(team)]
-    divisons_ahead_count = {div: divisons_ahead.count(div) for div in divisons_ahead}
-
-    divisional_teams_ahead = {other_team for other_team in teams_ahead
-                              if division_map.get(other_team) == division_map.get(team)}
-
-    if len(divisional_teams_ahead) == 0:
-        return division_map.get(team)
-
-    wild_card_divs_ahead = {div: count for div, count in divisons_ahead_count.items() if count > 1}
-    wild_card_teams_ahead = sum([count - 1 for count in wild_card_divs_ahead.values()])
-
-    if wild_card_teams_ahead == 0:
-        return conference_map.get(team) + ' WC 1'
-    elif wild_card_teams_ahead == 1:
-        return conference_map.get(team) + ' WC 2'
-    elif wild_card_teams_ahead == 2:
-        return conference_map.get(team) + ' WC 3'
-
-    return ''
-
-
 # -----------------------------------------------------------------
 
 
@@ -866,7 +815,7 @@ def print_table(playoff_chances, sort_key='Bayes BT'):
         table_row.append(points_allowed_color + str(round(row['Adjusted Points Allowed'], 1)) + stop)
         table_row.append(points_diff_color + str(round(row['Adjusted Point Diff'], 1)).rjust(5) + stop)
 
-        chance = playoff_chances.at[index, 'Win World Series Chance']
+        chance = playoff_chances.get(index)
         table_row.append('{:.2%}'.format(chance))
 
         table.add_row(table_row)
@@ -979,7 +928,49 @@ def get_best_of(series_length, team1, team2, verbose=False):
     return team1_total
 
 
+def get_playoff_bracket(al_playoff_teams, nl_playoff_teams):
+    al1, al2, al3, al4, al5, al6 = al_playoff_teams
+    nl1, nl2, nl3, nl4, nl5, nl6 = nl_playoff_teams
+
+    al1_bt = team_df.at[al1, 'Bayes BT']
+    al2_bt = team_df.at[al2, 'Bayes BT']
+    al3_bt = team_df.at[al3, 'Bayes BT']
+    al4_bt = team_df.at[al4, 'Bayes BT']
+    al5_bt = team_df.at[al5, 'Bayes BT']
+    al6_bt = team_df.at[al6, 'Bayes BT']
+
+    nl1_bt = team_df.at[nl1, 'Bayes BT']
+    nl2_bt = team_df.at[nl2, 'Bayes BT']
+    nl3_bt = team_df.at[nl3, 'Bayes BT']
+    nl4_bt = team_df.at[nl4, 'Bayes BT']
+    nl5_bt = team_df.at[nl5, 'Bayes BT']
+    nl6_bt = team_df.at[nl6, 'Bayes BT']
+
+    al_wc1 = Bracket('AL Wildcard 1', Bracket(al4, bt=al4_bt), Bracket(al5, bt=al5_bt), series_length=3)
+    al_wc2 = Bracket('AL Wildcard 2', Bracket(al3, bt=al3_bt), Bracket(al6, bt=al6_bt), series_length=3)
+    nl_wc1 = Bracket('NL Wildcard 1', Bracket(nl4, bt=nl4_bt), Bracket(nl5, bt=nl5_bt), series_length=3)
+    nl_wc2 = Bracket('NL Wildcard 2', Bracket(nl3, bt=nl3_bt), Bracket(nl6, bt=nl6_bt), series_length=3)
+
+    alds1 = Bracket('ALDS 1', Bracket(al1, bt=al1_bt), al_wc1, series_length=5)
+    alds2 = Bracket('ALDS 2', Bracket(al2, bt=al2_bt), al_wc2, series_length=5)
+    nlds1 = Bracket('NLDS 1', Bracket(nl1, bt=nl1_bt), nl_wc1, series_length=5)
+    nlds2 = Bracket('NLDS 2', Bracket(nl2, bt=nl2_bt), nl_wc2, series_length=5)
+
+    alcs = Bracket('ALCS', alds1, alds2, series_length=7)
+    nlcs = Bracket('NLCS', nlds1, nlds2, series_length=7)
+
+    world_series = Bracket('World Series', alcs, nlcs, series_length=7)
+    return world_series
+
+
 def get_world_series_chance(al_playoff_teams, nl_playoff_teams):
+    world_series = get_playoff_bracket(al_playoff_teams, nl_playoff_teams)
+
+    world_series_chances = {team: world_series.get_victory_chance(team) for team in team_df.index}
+    return world_series_chances
+
+
+def get_playoff_chances(al_playoff_teams, nl_playoff_teams):
     al1, al2, al3, al4, al5, al6 = al_playoff_teams
     nl1, nl2, nl3, nl4, nl5, nl6 = nl_playoff_teams
 
