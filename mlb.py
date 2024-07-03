@@ -4,7 +4,9 @@ import math
 import statistics
 import warnings
 from datetime import datetime
+import sys
 
+from timeit import default_timer as timer
 import PIL
 from scipy.stats import nbinom, binom
 import choix
@@ -36,7 +38,7 @@ team_df = pd.DataFrame(columns=['Team', 'League', 'Division', 'Games Played', 'W
                                 'Projected Wins', 'Projected Win SD', 'Projected Wins Lower', 'Projected Wins Upper',
                                 'Points Intercept', 'Points Coef', 'Points Allowed Coef',
                                 'Adjusted Points', 'Adjusted Points Allowed', 'Adjusted Point Diff',
-                                'Primary', 'Secondary'])
+                                'Win WS Chance', 'Win Div Chance', 'Primary', 'Secondary'])
 
 
 def get(endpoint, params):
@@ -200,7 +202,7 @@ def get_team_colors(team):
     return color_map.get(team)
 
 
-def run(update=True, include_sp=False, pct_evidence=0.9):
+def run(ws_assumption=False, update=True, include_sp=False, pct_evidence=0.9):
     global team_df
 
     if update:
@@ -211,12 +213,13 @@ def run(update=True, include_sp=False, pct_evidence=0.9):
         games_df = pd.DataFrame(all_games).T
         games_df = games_df.loc[games_df['GameStatus'] == 'Final']
         mistake_ids = ['5063334', '5063586', '5063239', '5063225', '5063411', '5063774', '5063840', '5063432',
-                       '5063447', '5063349', '5102633', '5109903', '5240767']
+                       '5063447', '5063349', '5102633', '5109903', '5240767', '5313501', '5319657']
         games_df = games_df.loc[~games_df['ID'].isin(mistake_ids)]
 
         games_df['GameDay'] = pd.to_datetime(games_df['GameDay'])
-        # today = datetime.strptime('05-01-24', '%m-%d-%y')
-        # games_df = games_df.loc[games_df['GameDay'] < today]
+
+        # cutoff_date = datetime.strptime('05-01-24', '%m-%d-%y')
+        # games_df = games_df.loc[games_df['GameDay'] < cutoff_date]
 
         potential = games_df.duplicated(subset=['Home', 'Visitor', 'ScoreHome', 'ScoreVis', 'Overtime'], keep=False)
         potential_df = games_df.loc[potential]
@@ -396,20 +399,42 @@ def run(update=True, include_sp=False, pct_evidence=0.9):
     playoff_team_df['Team'] = playoff_team_df.index
     playoff_team_df['Seed'] = playoff_team_df.apply(lambda r: get_playoff_seed(r['Team']), axis=1)
 
-    al_playoff_teams = playoff_team_df.loc[(playoff_team_df['Seed'] > 0) & (playoff_team_df['League'] == 'AL')]
-    nl_playoff_teams = playoff_team_df.loc[(playoff_team_df['Seed'] > 0) & (playoff_team_df['League'] == 'NL')]
+    if not ws_assumption:
+        team_df['Projected Win SD'] = pd.to_numeric(team_df['Projected Win SD'])
+        sd_means = team_df.groupby('League').mean(numeric_only=True)['Projected Win SD']
+        al_6seed_wins = playoff_team_df.loc[(playoff_team_df['League'] == 'AL') & (playoff_team_df['Seed'] == 6)]['Projected Wins'].squeeze()
+        nl_6seed_wins = playoff_team_df.loc[(playoff_team_df['League'] == 'NL') & (playoff_team_df['Seed'] == 6)]['Projected Wins'].squeeze()
+        al_sd = math.sqrt(math.pow(sd_means['AL'], 2) * 2)
+        nl_sd = math.sqrt(math.pow(sd_means['NL'], 2) * 2)
 
-    al_playoff_teams = al_playoff_teams.sort_values(by='Seed', ascending=True)['Team']
-    nl_playoff_teams = nl_playoff_teams.sort_values(by='Seed', ascending=True)['Team']
+        al_win_cutoff = norm(al_6seed_wins, al_sd).ppf(.25)
+        nl_win_cutoff = norm(nl_6seed_wins, nl_sd).ppf(.25)
 
-    playoff_chances = get_world_series_chance(list(al_playoff_teams),
-                                              list(nl_playoff_teams))
+        al_win_cutoff = min([al_win_cutoff, al_6seed_wins])
+        nl_win_cutoff = min([nl_win_cutoff, nl_6seed_wins])
 
-    print_table(playoff_chances)
+        ws_win_chances = get_world_series_chance(al_win_cutoff, nl_win_cutoff)
+    else:
+        al_playoff_teams = playoff_team_df.loc[(playoff_team_df['Seed'] > 0) & (playoff_team_df['League'] == 'AL')]
+        nl_playoff_teams = playoff_team_df.loc[(playoff_team_df['Seed'] > 0) & (playoff_team_df['League'] == 'NL')]
+
+        al_playoff_teams = al_playoff_teams.sort_values(by='Seed', ascending=True)['Team']
+        nl_playoff_teams = nl_playoff_teams.sort_values(by='Seed', ascending=True)['Team']
+
+        ws_win_chances = get_world_series_chance_assumption(list(al_playoff_teams),
+                                                            list(nl_playoff_teams))
+
+    for team in team_df.index:
+        team_df.at[team, 'Win WS Chance'] = ws_win_chances.get(team, 0.0)
+        team_df.at[team, 'Win Div Chance'] = get_win_division_chance(team)
+
+    print_table()
 
     if include_sp:
         pitcher_coefs = pitcher_coefs.sort_values(by='Pitching Coef')
         print(pitcher_coefs)
+
+    return team_df
 
 
 def load_schedule():
@@ -764,12 +789,12 @@ def get_color(value, variance=np.nan, alpha=.05, enabled=True, invert=False):
         return ''
 
 
-def print_table(playoff_chances, sort_key='Bayes BT'):
+def print_table(sort_key='Bayes BT'):
     global team_df
 
     team_df = team_df.sort_values(by=sort_key, kind='mergesort', ascending=False)
     columns = ['Rank', 'Team', 'Record', 'Grade', 'Projected Record', 'Projected Wins 95% CI',
-               'Adj Runs', 'Adj Runs Allowed', 'Adj Run Diff', 'Win WS Chance']
+               'Adj Runs', 'Adj Runs Allowed', 'Adj Run Diff', 'Win Div Chance', 'Win WS Chance']
 
     table = PrettyTable(columns)
     table.float_format = '0.3'
@@ -815,7 +840,10 @@ def print_table(playoff_chances, sort_key='Bayes BT'):
         table_row.append(points_allowed_color + str(round(row['Adjusted Points Allowed'], 1)) + stop)
         table_row.append(points_diff_color + str(round(row['Adjusted Point Diff'], 1)).rjust(5) + stop)
 
-        chance = playoff_chances.get(index)
+        chance = row['Win Div Chance']
+        table_row.append('{:.2%}'.format(chance))
+
+        chance = row['Win WS Chance']
         table_row.append('{:.2%}'.format(chance))
 
         table.add_row(table_row)
@@ -891,43 +919,6 @@ def get_playoff_seed(team_name):
                     return seed
 
 
-def get_best_of(series_length, team1, team2, verbose=False):
-    team1_bt = team_df.at[team1, 'Bayes BT']
-    team2_bt = team_df.at[team2, 'Bayes BT']
-
-    p = math.exp(team1_bt) / (math.exp(team1_bt) + math.exp(team2_bt))
-    required_wins = int(math.ceil(series_length / 2.0))
-
-    l_just = max(len(team1), len(team2))
-    if verbose:
-        for num_games in range(series_length, required_wins - 1, -1):
-            allowed_losses = num_games - required_wins
-            if allowed_losses < 0:
-                continue
-            prob = nbinom.pmf(allowed_losses, required_wins, p)
-            print(team1.ljust(l_just), 'in', str(num_games) + ':', str(round(prob * 100, 1)) + '%')
-        print()
-
-        for num_games in range(required_wins, series_length + 1):
-            allowed_losses = num_games - required_wins
-            if allowed_losses < 0:
-                continue
-            prob = nbinom.pmf(allowed_losses, required_wins, 1 - p)
-            print(team2.ljust(l_just), 'in', str(num_games) + ':', str(round(prob * 100, 1)) + '%')
-        print()
-
-    team1_total = binom.cdf(series_length - required_wins, series_length, 1 - p)
-    team2_total = binom.cdf(series_length - required_wins, series_length, p)
-
-    if verbose:
-        print(team1.ljust(l_just), 'total chance:', str(round(team1_total * 100, 1)) + '%')
-        print(team2.ljust(l_just), 'total chance:', str(round(team2_total * 100, 1)) + '%')
-        print()
-
-    winner, prob = (team1, team1_total) if team1_total >= .5 else (team2, team2_total)
-    return team1_total
-
-
 def get_playoff_bracket(al_playoff_teams, nl_playoff_teams):
     al1, al2, al3, al4, al5, al6 = al_playoff_teams
     nl1, nl2, nl3, nl4, nl5, nl6 = nl_playoff_teams
@@ -963,7 +954,227 @@ def get_playoff_bracket(al_playoff_teams, nl_playoff_teams):
     return world_series
 
 
-def get_world_series_chance(al_playoff_teams, nl_playoff_teams):
+def get_win_breakdown(team):
+    team_proj_wins = team_df.at[team, 'Projected Wins']
+    team_proj_win_sd = team_df.at[team, 'Projected Win SD']
+    team_normal = norm(team_proj_wins, team_proj_win_sd)
+
+    total_wins_chances = {wins: team_normal.cdf(wins + .5) - team_normal.cdf(wins - .5) for wins in range(163)}
+    total_wins_chances = {wins: 0.0 if wins < team_df.at[team, 'Wins'] else chance for wins, chance in total_wins_chances.items()}
+    total_wins_chances = {wins: 0.0 if wins > 162 - team_df.at[team, 'Losses'] else chance for wins, chance in total_wins_chances.items()}
+
+    return total_wins_chances
+
+
+def get_first_in_group_chance(team, opponents, fast_approx=False):
+    if fast_approx:
+        return get_first_in_group_chance_fast(team, opponents)
+    else:
+        return get_first_in_group_chance_slow(team, opponents)
+
+
+def get_first_in_group_chance_slow(team, opponents):
+    total_wins_chances = get_win_breakdown(team)
+
+    all_opp_wins_chances = dict()
+    for opponent in opponents:
+        opp_wins_chances = get_win_breakdown(opponent)
+        all_opp_wins_chances[opponent] = opp_wins_chances
+
+    win_chances = list()
+    for win_total, chance in total_wins_chances.items():
+        if chance == 0:
+            continue
+
+        all_opponent_chances = list()
+        for opponent, opp_chances in all_opp_wins_chances.items():
+            if team_df.at[team, 'Bayes BT'] > team_df.at[opponent, 'Bayes BT']:
+                opponent_chances = {k: v for k, v in opp_chances.items() if k <= win_total}
+            else:
+                opponent_chances = {k: v for k, v in opp_chances.items() if k < win_total}
+
+            opponent_chance = sum(opponent_chances.values())
+            all_opponent_chances.append(opponent_chance)
+
+        win_chances.append(chance * np.prod(all_opponent_chances))
+
+    first_place_chance = sum(win_chances)
+    first_place_chance = min([first_place_chance, 1])
+    first_place_chance = max([first_place_chance, 0])
+    return first_place_chance
+
+
+def get_first_in_group_chance_fast(team, opponents):
+    team_proj_wins = team_df.at[team, 'Projected Wins']
+    team_proj_win_sd = team_df.at[team, 'Projected Win SD']
+    win_chances = list()
+    for opponent in opponents:
+        opp_proj_wins = team_df.at[opponent, 'Projected Wins']
+        opp_proj_win_sd = team_df.at[opponent, 'Projected Win SD']
+
+        diff_norm = norm(team_proj_wins - opp_proj_wins, math.sqrt(math.pow(team_proj_win_sd, 2) +
+                                                                   math.pow(opp_proj_win_sd, 2)))
+
+        win_chances.append(diff_norm.sf(0))
+
+    first_place_chance = np.prod(win_chances)
+    first_place_chance = min([first_place_chance, 1])
+    first_place_chance = max([first_place_chance, 0])
+    return first_place_chance
+
+
+def get_win_division_chance(team):
+    division = team_df.at[team, 'Division']
+
+    division_teams = team_df.loc[team_df['Division'] == division].index
+    division_opponents = set(division_teams) - {team}
+
+    return get_first_in_group_chance(team, division_opponents)
+
+
+def get_cs_win_chances(playoff_teams):
+    seed1, seed2, seed3, seed4, seed5, seed6 = playoff_teams
+
+    bt1 = team_df.at[seed1, 'Bayes BT']
+    bt2 = team_df.at[seed2, 'Bayes BT']
+    bt3 = team_df.at[seed3, 'Bayes BT']
+    bt4 = team_df.at[seed4, 'Bayes BT']
+    bt5 = team_df.at[seed5, 'Bayes BT']
+    bt6 = team_df.at[seed6, 'Bayes BT']
+
+    wc1 = Bracket('Wildcard 1', Bracket(seed4, bt=bt4), Bracket(seed5, bt=bt5), series_length=3)
+    wc2 = Bracket('Wildcard 2', Bracket(seed3, bt=bt3), Bracket(seed6, bt=bt6), series_length=3)
+
+    lds1 = Bracket('LDS 1', Bracket(seed1, bt=bt1), wc1, series_length=5)
+    lds2 = Bracket('LDS 2', Bracket(seed2, bt=bt2), wc2, series_length=5)
+
+    lcs = Bracket('LCS', lds1, lds2, series_length=7)
+
+    playoff_chances = pd.DataFrame(index=team_df.index, columns=['Reach LDS Chance',
+                                                                 'Reach LCS Chance',
+                                                                 'Reach World Series Chance'])
+
+    playoff_chances.at[seed1, 'Reach LDS Chance'] = 1
+    playoff_chances.at[seed2, 'Reach LDS Chance'] = 1
+    playoff_chances.at[seed3, 'Reach LDS Chance'] = wc2.get_victory_chance(seed3)
+    playoff_chances.at[seed4, 'Reach LDS Chance'] = wc1.get_victory_chance(seed4)
+    playoff_chances.at[seed5, 'Reach LDS Chance'] = wc1.get_victory_chance(seed5)
+    playoff_chances.at[seed6, 'Reach LDS Chance'] = wc2.get_victory_chance(seed6)
+
+    playoff_chances.at[seed1, 'Reach LCS Chance'] = lds1.get_victory_chance(seed1)
+    playoff_chances.at[seed2, 'Reach LCS Chance'] = lds2.get_victory_chance(seed2)
+    playoff_chances.at[seed3, 'Reach LCS Chance'] = lds2.get_victory_chance(seed3)
+    playoff_chances.at[seed4, 'Reach LCS Chance'] = lds1.get_victory_chance(seed4)
+    playoff_chances.at[seed5, 'Reach LCS Chance'] = lds1.get_victory_chance(seed5)
+    playoff_chances.at[seed6, 'Reach LCS Chance'] = lds2.get_victory_chance(seed6)
+
+    playoff_chances.at[seed1, 'Reach World Series Chance'] = lcs.get_victory_chance(seed1)
+    playoff_chances.at[seed2, 'Reach World Series Chance'] = lcs.get_victory_chance(seed2)
+    playoff_chances.at[seed3, 'Reach World Series Chance'] = lcs.get_victory_chance(seed3)
+    playoff_chances.at[seed4, 'Reach World Series Chance'] = lcs.get_victory_chance(seed4)
+    playoff_chances.at[seed5, 'Reach World Series Chance'] = lcs.get_victory_chance(seed5)
+    playoff_chances.at[seed6, 'Reach World Series Chance'] = lcs.get_victory_chance(seed6)
+
+    playoff_chances = playoff_chances.fillna(0.0)
+    playoff_chances = playoff_chances.sort_values(by=['Reach World Series Chance',
+                                                      'Reach LCS Chance',
+                                                      'Reach LDS Chance'],
+                                                  kind='mergesort', ascending=False)
+    return playoff_chances
+
+
+def get_world_series_chance(al_win_cutoff, nl_win_cutoff, fast=False):
+    al_teams = team_df.loc[(team_df['League'] == 'AL') & (team_df['Projected Wins'] >= al_win_cutoff)]
+    al_teams = set(al_teams.index)
+    print('Potential AL Playoff Teams:', ', '.join(al_teams))
+
+    total_alcs_win_chance = pd.Series(0, index=al_teams)
+    al_playoff_perms = list(itertools.permutations(al_teams, 6))
+    i = 0
+    n = len(al_playoff_perms)
+    for possible_al_playoff_teams in al_playoff_perms:
+        sys.stdout.write('\r')
+        sys.stdout.write('Getting AL Playoff Permutation Chances {:.2%}'.format(i / n))
+        sys.stdout.flush()
+        i = i + 1
+
+        other_al_teams = al_teams - {possible_al_playoff_teams[0]}
+        first_seed_chance = get_first_in_group_chance(possible_al_playoff_teams[0], other_al_teams, fast_approx=fast)
+        other_al_teams.remove(possible_al_playoff_teams[1])
+        second_seed_chance = get_first_in_group_chance(possible_al_playoff_teams[1], other_al_teams, fast_approx=fast)
+        other_al_teams.remove(possible_al_playoff_teams[2])
+        third_seed_chance = get_first_in_group_chance(possible_al_playoff_teams[2], other_al_teams, fast_approx=fast)
+        other_al_teams.remove(possible_al_playoff_teams[3])
+        fourth_seed_chance = get_first_in_group_chance(possible_al_playoff_teams[3], other_al_teams, fast_approx=fast)
+        other_al_teams.remove(possible_al_playoff_teams[4])
+        fifth_seed_chance = get_first_in_group_chance(possible_al_playoff_teams[4], other_al_teams, fast_approx=fast)
+        other_al_teams.remove(possible_al_playoff_teams[5])
+        sixth_seed_chance = get_first_in_group_chance(possible_al_playoff_teams[5], other_al_teams, fast_approx=fast)
+
+        permutation_chance = np.prod([first_seed_chance, second_seed_chance, third_seed_chance,
+                                      fourth_seed_chance, fifth_seed_chance, sixth_seed_chance])
+
+        win_chances = get_cs_win_chances(possible_al_playoff_teams)
+        win_chances = win_chances * permutation_chance
+        total_alcs_win_chance = total_alcs_win_chance + win_chances['Reach World Series Chance']
+
+    print()
+    nl_teams = team_df.loc[(team_df['League'] == 'NL') & (team_df['Projected Wins'] >= nl_win_cutoff)]
+    nl_teams = set(nl_teams.index)
+    print('Potential NL Playoff Teams:', ', '.join(nl_teams))
+
+    total_nlcs_win_chance = pd.Series(0, index=nl_teams)
+    nl_playoff_perms = list(itertools.permutations(nl_teams, 6))
+    i = 0
+    n = len(nl_playoff_perms)
+    for possible_nl_playoff_teams in nl_playoff_perms:
+        sys.stdout.write('\r')
+        sys.stdout.write('Getting NL Playoff Permutation Chances {:.2%}'.format(i / n))
+        sys.stdout.flush()
+        i = i + 1
+
+        other_nl_teams = nl_teams - {possible_nl_playoff_teams[0]}
+        first_seed_chance = get_first_in_group_chance(possible_nl_playoff_teams[0], other_nl_teams, fast_approx=fast)
+        other_nl_teams.remove(possible_nl_playoff_teams[1])
+        second_seed_chance = get_first_in_group_chance(possible_nl_playoff_teams[1], other_nl_teams, fast_approx=fast)
+        other_nl_teams.remove(possible_nl_playoff_teams[2])
+        third_seed_chance = get_first_in_group_chance(possible_nl_playoff_teams[2], other_nl_teams, fast_approx=fast)
+        other_nl_teams.remove(possible_nl_playoff_teams[3])
+        fourth_seed_chance = get_first_in_group_chance(possible_nl_playoff_teams[3], other_nl_teams, fast_approx=fast)
+        other_nl_teams.remove(possible_nl_playoff_teams[4])
+        fifth_seed_chance = get_first_in_group_chance(possible_nl_playoff_teams[4], other_nl_teams, fast_approx=fast)
+        other_nl_teams.remove(possible_nl_playoff_teams[5])
+        sixth_seed_chance = get_first_in_group_chance(possible_nl_playoff_teams[5], other_nl_teams, fast_approx=fast)
+
+        permutation_chance = np.prod([first_seed_chance, second_seed_chance, third_seed_chance,
+                                      fourth_seed_chance, fifth_seed_chance, sixth_seed_chance])
+
+        win_chances = get_cs_win_chances(possible_nl_playoff_teams)
+        win_chances = win_chances * permutation_chance
+        total_nlcs_win_chance = total_nlcs_win_chance + win_chances['Reach World Series Chance']
+
+    print()
+
+    total_ws_win_chance = pd.Series(0, index=al_teams.union(nl_teams))
+    for al_team, nl_team in itertools.product(al_teams, nl_teams):
+        nl_chance = total_nlcs_win_chance[nl_team]
+        al_chance = total_alcs_win_chance[al_team]
+        matchup_chance = al_chance * nl_chance
+
+        al_bt = team_df.at[al_team, 'Bayes BT']
+        nl_bt = team_df.at[nl_team, 'Bayes BT']
+
+        world_series = Bracket('World Series', Bracket(al_team, bt=al_bt), Bracket(nl_team, bt=nl_bt), series_length=7)
+        total_ws_win_chance[al_team] = total_ws_win_chance[al_team] + world_series.get_victory_chance(al_team) * matchup_chance
+        total_ws_win_chance[nl_team] = total_ws_win_chance[nl_team] + world_series.get_victory_chance(nl_team) * matchup_chance
+
+    total_ws_win_chance = total_ws_win_chance.fillna(0)
+
+    world_series_chances = {team: chance for team, chance in total_ws_win_chance.items()}
+    return world_series_chances
+
+
+def get_world_series_chance_assumption(al_playoff_teams, nl_playoff_teams):
     world_series = get_playoff_bracket(al_playoff_teams, nl_playoff_teams)
 
     world_series_chances = {team: world_series.get_victory_chance(team) for team in team_df.index}
