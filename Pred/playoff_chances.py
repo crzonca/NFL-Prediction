@@ -369,7 +369,9 @@ class PlayoffPredictor:
         team_total_wins = 0
         team_total_losses = 0
         team_total_ties = 0
-        for loser, winner in teams_games:
+        for loser, winner, weight in teams_games:
+            if weight != 0:
+                i = 0
             if winner == team:
                 other_team = loser
             else:
@@ -381,7 +383,7 @@ class PlayoffPredictor:
         opponent_total_wins = 0
         opponent_total_losses = 0
         opponent_total_ties = 0
-        for loser, winner in opponents_games:
+        for loser, winner, weight in opponents_games:
             if winner == opponent:
                 other_team = loser
             else:

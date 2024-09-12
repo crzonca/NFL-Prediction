@@ -6,6 +6,7 @@ from scipy.optimize import minimize_scalar
 from scipy.stats import skellam
 
 import Projects.nfl.NFL_Prediction.OddsHelper as Odds
+from Projects.nfl.NFL_Prediction.Pred.helper import Helper
 
 
 class Bettor:
@@ -29,16 +30,16 @@ class Bettor:
             return
 
         intercept = self.team_df.at[favorite, 'Points Intercept']
-        favorite_off_coef = self.team_df.at[favorite, 'Points Coef']
-        underdog_off_coef = self.team_df.at[underdog, 'Points Coef']
-        favorite_def_coef = self.team_df.at[favorite, 'Points Allowed Coef']
-        underdog_def_coef = self.team_df.at[underdog, 'Points Allowed Coef']
+        favorite_off_coef = self.team_df.at[favorite, 'Bayes Points Coef']
+        underdog_off_coef = self.team_df.at[underdog, 'Bayes Points Coef']
+        favorite_def_coef = self.team_df.at[favorite, 'Bayes Points Allowed Coef']
+        underdog_def_coef = self.team_df.at[underdog, 'Bayes Points Allowed Coef']
 
         favorite_lambda = math.exp(intercept + favorite_off_coef + underdog_def_coef)
         underdog_lambda = math.exp(intercept + underdog_off_coef + favorite_def_coef)
 
-        average_drives = self.individual_df['Drives'].mean()
-        average_drives = 12 if pd.isna(average_drives) else average_drives
+        helper = Helper(self.team_df, self.individual_df, self.graph)
+        average_drives = helper.predict_drives(favorite, underdog)
         favorite_lambda = favorite_lambda * average_drives
         underdog_lambda = underdog_lambda * average_drives
 

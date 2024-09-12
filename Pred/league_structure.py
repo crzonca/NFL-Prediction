@@ -1,9 +1,9 @@
 import json
+import time
 
 import pandas as pd
 from sportsipy.nfl.schedule import Schedule
 from sportsipy.nfl.teams import Teams
-import time
 
 
 def get_division(team_name):
@@ -107,15 +107,13 @@ def create_sch_json():
             week_list.append(game)
         weeks.append(week_list)
     sch_dict['weeks'] = weeks
-    path = 'D:\\Colin\\Documents\\Programming\\Python\\PythonProjects\\Projects\\nfl\\' \
-           'NFL_Prediction\\Pred\\2024Schedule.json'
+    path = 'Projects/nfl/NFL_Prediction/Pred/resources/2024Schedule.json'
     with open(path, 'w') as out:
         json.dump(sch_dict, out, indent=4)
 
 
 def load_schedule():
-    schedule_path = 'D:\\Colin\\Documents\\Programming\\Python\\' \
-                    'PythonProjects\\Projects\\nfl\\NFL_Prediction\\Pred\\2024Schedule.json'
+    schedule_path = 'Projects/nfl/NFL_Prediction/Pred/resources/2024Schedule.json'
     with open(schedule_path, 'r') as f:
         schedule = json.load(f)
         return schedule
@@ -123,7 +121,7 @@ def load_schedule():
 
 def get_games_before_week(week, use_persisted=True):
     if use_persisted:
-        week_results = pd.read_csv('Projects/nfl/NFL_Prediction/Pred/2024games.csv')
+        week_results = pd.read_csv('Projects/nfl/NFL_Prediction/Pred/resources/2024games.csv')
         week_results = week_results.dropna()
     else:
         teams = Teams()
@@ -141,38 +139,3 @@ def get_games_before_week(week, use_persisted=True):
         else:
             week_results = pd.DataFrame()
     return week_results
-
-
-def get_common_score_map():
-    common_map = {2: 3,
-                  5: 6,
-                  8: 7,
-                  9: 10,
-                  11: 10,
-                  12: 13,
-                  15: 14,
-                  16: 17,
-                  18: 17,
-                  19: 20,
-                  21: 20,
-                  22: 23,
-                  25: 24,
-                  26: 27,
-                  28: 27,
-                  29: 30,
-                  32: 31,
-                  33: 34,
-                  35: 34,
-                  36: 37,
-                  39: 38,
-                  40: 41,
-                  43: 42,
-                  46: 45,
-                  47: 48,
-                  50: 49,
-                  53: 52,
-                  57: 56,
-                  58: 59,
-                  62: 59}
-
-    return common_map
