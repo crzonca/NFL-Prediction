@@ -1,6 +1,8 @@
 import json
 import time
 
+import scipy
+import math
 import pandas as pd
 from sportsipy.nfl.schedule import Schedule
 from sportsipy.nfl.teams import Teams
@@ -139,3 +141,109 @@ def get_games_before_week(week, use_persisted=True):
         else:
             week_results = pd.DataFrame()
     return week_results
+
+
+def simulate_season():
+    intecept = .7102
+    off_coefs = {'49ers': .2828,
+                 'Bears': -.0276,
+                 'Bengals': -.011,
+                 'Bills': .1978,
+                 'Broncos': -.0359,
+                 'Browns': .0678,
+                 'Buccaneers': -.0615,
+                 'Cardinals': -.1146,
+                 'Chargers': -.0672,
+                 'Chiefs': .0025,
+                 'Colts': .0678,
+                 'Commanders': -.1176,
+                 'Cowboys': .3188,
+                 'Dolphins': .2929,
+                 'Eagles': .1571,
+                 'Falcons': -.1422,
+                 'Giants': -.3302,
+                 'Jaguars': .0186,
+                 'Jets': -.3227,
+                 'Lions': .2197,
+                 'Packers': .0344,
+                 'Panthers': -.4498,
+                 'Patriots': -.4498,
+                 'Raiders': -.1085,
+                 'Rams': .0878,
+                 'Ravens': .2664,
+                 'Saints': .0828,
+                 'Seahawks': -.0165,
+                 'Steelers': -.1966,
+                 'Texans': .0186,
+                 'Titans': -.1933,
+                 'Vikings': -.073}
+    def_coefs = {'49ers': -.2166,
+                 'Bears': .0239,
+                 'Bengals': .037,
+                 'Bills': -.1739,
+                 'Broncos': .1098,
+                 'Browns': -.022,
+                 'Buccaneers': -.1298,
+                 'Cardinals': .2066,
+                 'Chargers': .0728,
+                 'Chiefs': -.2301,
+                 'Colts': .1146,
+                 'Commanders': .3363,
+                 'Cowboys': -.1611,
+                 'Dolphins': .0551,
+                 'Eagles': .1455,
+                 'Falcons': .0079,
+                 'Giants': .0952,
+                 'Jaguars': .0025,
+                 'Jets': -.0415,
+                 'Lions': .0652,
+                 'Packers': -.0557,
+                 'Panthers': .117,
+                 'Patriots': -.011,
+                 'Raiders': -.1115,
+                 'Rams': .0186,
+                 'Ravens': -.2789,
+                 'Saints': -.1237,
+                 'Seahawks': .0828,
+                 'Steelers': -.1329,
+                 'Texans': -.0529,
+                 'Titans': -.0083,
+                 'Vikings': -.022}
+
+    schedule_df = pd.read_csv(
+        'D:\\Colin\\Documents\\Programming\\Python\\PythonProjects\\Projects\\nfl\\NFL_Prediction\\Pred\\resources\\2024games.csv')
+    drives_norm = scipy.stats.norm(10.7, 1.6)
+    drives = [round(x) for x in drives_norm.rvs(240) for _ in (0, 1)]
+    schedule_df['drives'] = pd.Series(list(schedule_df['drives'].head(64)) + drives)
+
+    for index, row in schedule_df.iterrows():
+        if not pd.isna(row['points_scored']):
+            continue
+        team = row['team']
+        drives = row['drives']
+        game_id = row['boxscore_index']
+        relevant_obs = schedule_df.loc[schedule_df['boxscore_index'] == game_id]
+        opp = set(relevant_obs['team']) - set([team])
+        opp = opp.pop()
+
+        proj_ppd = math.exp(intecept + off_coefs.get(team) + def_coefs.get(opp))
+        lamb = proj_ppd * drives
+        pois = scipy.stats.poisson(lamb)
+        proj_score = pois.rvs(1)[0]
+
+        opp_obs = schedule_df.loc[(schedule_df['boxscore_index'] == game_id) & (schedule_df['team'] == opp)].squeeze()
+        if not pd.isna(opp_obs['points_scored']) and opp_obs['points_scored'] == proj_score:
+            proj_score = proj_score + 1
+
+        print(team.ljust(15), 'vs', opp.ljust(15), proj_score, 'points')
+
+        schedule_df.at[index, 'points_scored'] = proj_score
+
+    ties = schedule_df.loc[schedule_df.duplicated(subset=['boxscore_index', 'points_scored'])]
+    if not ties.empty:
+        print(ties)
+    schedule_df.to_csv(
+        'D:\\Colin\\Documents\\Programming\\Python\\PythonProjects\\Projects\\nfl\\NFL_Prediction\\Pred\\resources\\2024games_simulated.csv',
+        index=False)
+
+    print('Average PPG:', schedule_df['points_scored'].mean())

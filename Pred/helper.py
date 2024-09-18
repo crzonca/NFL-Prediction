@@ -35,7 +35,7 @@ class Helper:
 
     def get_bayes_avg(self, prior_avg, prior_var, sample_avg, sample_var, n):
         k_0 = sample_var / prior_var
-        if k_0 + n == 0:
+        if k_0 == 0 or n == 0:
             return prior_avg
         posterior_avg = ((k_0 / (k_0 + n)) * prior_avg) + ((n / (k_0 + n)) * sample_avg)
         return posterior_avg
@@ -71,7 +71,7 @@ class Helper:
 
         return self.get_bayes_avg(prior_avg, prior_var, avg_points, points_var, len(points))
 
-    def get_color(self, value, variance=np.nan, alpha=.05, enabled=True, invert=False):
+    def get_color(self, value, mean=0, variance=np.nan, alpha=.05, enabled=True, invert=False):
         if not enabled:
             return value
 
@@ -85,11 +85,11 @@ class Helper:
         elif variance == 0:
             return ''
         else:
-            normal = norm(value, math.sqrt(variance))
-            if (not invert and normal.ppf(alpha) > 0) or (invert and normal.ppf(1 - alpha) < 0):
-                return green
-            if (not invert and normal.ppf(1 - alpha) < 0) or (invert and normal.ppf(alpha) > 0):
+            normal = norm(mean, math.sqrt(variance))
+            if (not invert and normal.ppf(alpha) > value) or (invert and normal.ppf(1 - alpha) < value):
                 return red
+            if (not invert and normal.ppf(1 - alpha) < value) or (invert and normal.ppf(alpha) > value):
+                return green
             return ''
 
     def get_common_score(self, expected):

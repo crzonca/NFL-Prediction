@@ -1,3 +1,4 @@
+import itertools
 import math
 import statistics
 import warnings
@@ -9,9 +10,11 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import uuid
 from prettytable import PrettyTable
 from scipy.optimize import minimize
-from scipy.stats import rankdata
+from scipy.stats import rankdata, kendalltau
+from bokeh.models import HoverTool
 from scipy.stats import skellam, poisson
 
 from Projects.nfl.NFL_Prediction.Pred import league_structure
@@ -134,7 +137,26 @@ class LeagueEvaluator:
 
         return team_bts
 
-    def parity_clock(self):
+    def parity_clock(self, verbose=False):
+        # def rotate(l, n):
+        #     return l[n:] + l[:n]
+        #
+        # cycles = {str(uuid.uuid4()): simple_cycle for simple_cycle in nx.simple_cycles(self.graph)}
+        # if not cycles:
+        #     return
+        # cycle_lengths = {guid: len(simple_cycle) for guid, simple_cycle in cycles.items()}
+        # max_cycle_len = max(cycle_lengths.values())
+        # cycle_bts = {guid: [self.team_df.at[team, 'Bayes BT'] for team in simple_cycle]
+        #              for guid, simple_cycle in cycles.items() if cycle_lengths.get(guid) == max_cycle_len}
+        # cycle_bt_ranks = {guid: rankdata(simple_cycle, method='max') for guid, simple_cycle in cycle_bts.items()}
+        # cycle_bt_ranks = {guid: rotate(list(simple_cycle), list(simple_cycle).index(1))
+        #                   for guid, simple_cycle in cycle_bt_ranks.items()}
+        # cycle_taus = {guid: abs(kendalltau(range(1, max_cycle_len + 1), simple_cycle).statistic)
+        #               for guid, simple_cycle in cycle_bt_ranks.items()}
+        # cycle_taus = {guid: tau for guid, tau in sorted(cycle_taus.items(), key=lambda t: t[1], reverse=True)}
+        # cycle_guid = list(cycle_taus.items())[0][0]
+        # cycle = cycles.get(cycle_guid)
+
         # Iterate over all cycles and find the one with the longest length
         longest_cycle_length = 0
         cycle = None
@@ -155,22 +177,74 @@ class LeagueEvaluator:
             # Add the starting team to the end to complete the loop
             cycle.append(cycle[0])
 
-            # Format new lines if the length of the cycle is too long to print in one line
-            if len(cycle) > 8:
-                cycle[8] = '\n' + cycle[8]
-            if len(cycle) > 16:
-                cycle[16] = '\n' + cycle[16]
-            if len(cycle) > 24:
-                cycle[24] = '\n' + cycle[24]
+            parity_graph = nx.DiGraph()
+            bts = {team: row['Bayes BT'] for team, row in self.team_df.iterrows() if team in cycle}
+            images = {team: PIL.Image.open('Projects/nfl/NFL_Prediction/Pred/resources/logos/' + team + '.png')
+                      for team, row in self.team_df.iterrows() if team in cycle}
+            for team in cycle:
+                parity_graph.add_node(team)
 
-            # Print the cycle
-            print(' -> '.join(cycle))
-            print()
+            edge_list = list(itertools.pairwise(cycle))
+            parity_graph.add_edges_from(edge_list)
 
-            print('Still missing:')
-            missing = set(self.team_df.index) - {team.strip() for team in cycle}
-            print(' | '.join(missing))
-            print()
+            nx.set_node_attributes(parity_graph, bts, 'Bayes BT')
+            nx.set_node_attributes(parity_graph, images, 'Image')
+
+            pos = nx.circular_layout(parity_graph, scale=1)
+
+            # Format and title the graph
+            fig, ax = plt.subplots(figsize=(20, 10))
+            ax.set_aspect('auto')
+            ax.set_title('Parity Clock')
+            ax.set_facecolor('#FAFAFA')
+
+            # Draw the edges in the graph
+            for source, target in edge_list:
+                target_bt = bts.get(target)
+                target_margin = math.exp(target_bt) * 18
+
+                nx.draw_networkx_edges(parity_graph,
+                                       pos,
+                                       edgelist=[(source, target)],
+                                       width=1,
+                                       alpha=0.1,
+                                       edge_color='black',
+                                       connectionstyle="Arc3, rad=0.05",
+                                       arrowsize=10,
+                                       min_target_margin=target_margin)
+
+            # Select the size of the image (relative to the X axis)
+            icon_size = {team: (ax.get_xlim()[1] - ax.get_xlim()[0]) * 0.025 * math.exp(bt) for team, bt in bts.items()}
+            icon_size['Bears'] = icon_size.get('Bears') * .8
+            icon_center = {team: size / 2.0 for team, size in icon_size.items()}
+
+            for n in parity_graph.nodes:
+                xa, ya = fig.transFigure.inverted().transform(ax.transData.transform(pos[n]))
+                a = plt.axes([xa - icon_center.get(n), ya - icon_center.get(n), icon_size.get(n), icon_size.get(n)])
+                a.set_aspect('auto')
+                a.imshow(parity_graph.nodes[n]['Image'], alpha=1.0)
+                a.axis("off")
+
+            # Show the graph
+            plt.show()
+
+            if verbose:
+                # Format new lines if the length of the cycle is too long to print in one line
+                if len(cycle) > 8:
+                    cycle[8] = '\n' + cycle[8]
+                if len(cycle) > 16:
+                    cycle[16] = '\n' + cycle[16]
+                if len(cycle) > 24:
+                    cycle[24] = '\n' + cycle[24]
+
+                # Print the cycle
+                print(' -> '.join(cycle))
+                print()
+
+                print('Still missing:')
+                missing = set(self.team_df.index) - {team.strip() for team in cycle}
+                print(' | '.join(missing))
+                print()
 
     def show_off_def(self):
         # playoff_teams = ['49ers', 'Chiefs']
@@ -226,6 +300,96 @@ class LeagueEvaluator:
 
         # Show the graph
         plt.show()
+
+    def show_off_def_interactive(self, use_screen=True):
+        images = {team: 'Projects/nfl/NFL_Prediction/Pred/resources/logos/' + team + '.png'
+                  for team, row in self.team_df.iterrows()}
+
+        margin = 1
+        min_x = self.team_df['Bayes Adjusted Points'].min() - margin
+        max_x = self.team_df['Bayes Adjusted Points'].max() + margin
+        mid_x = (min_x + max_x) / 2
+
+        min_y = self.team_df['Bayes Adjusted Points Allowed'].min() - margin
+        max_y = self.team_df['Bayes Adjusted Points Allowed'].max() + margin
+
+        from bokeh.plotting import figure, show, output_file
+
+        output_file('image.html')
+
+        fig_width = 2400
+        fig_height = 900
+
+        y_range = max_y - min_y
+        x_range = max_x - min_x
+        angle_aspect = (x_range / (fig_width - 33)) / (y_range / (fig_height - 33))
+
+        p = figure(width=fig_width,
+                   height=fig_height,
+                   x_range=(min_x, max_x),
+                   y_range=(max_y, min_y))
+        if use_screen:
+            height = width = 75
+            image_unit = 'screen'
+        else:
+            height = y_range / 15
+            fig_aspect = fig_height / (fig_width - 165)
+            width = x_range / 15 * fig_aspect
+            image_unit = 'data'
+        for team in self.team_df.index:
+            xa = self.team_df.at[team, 'Bayes Adjusted Points']
+            ya = self.team_df.at[team, 'Bayes Adjusted Points Allowed']
+            if team == 'Bears':
+                height = height * .8
+                width = width * .8
+            if team == 'Ravens':
+                height = height * 1.4
+                width = width * 1.4
+            if team == 'Patriots':
+                height = height * 1.1
+                width = width * 1.1
+            p.image_url(url=[images.get(team)],
+                        x=xa, y=ya,
+                        w=width, h=height,
+                        name=team,
+                        anchor='center',
+                        h_units=image_unit, w_units=image_unit,
+                        alpha=.7)
+
+        vert_mean = self.team_df['Bayes Adjusted Points'].mean()
+        horiz_mean = self.team_df['Bayes Adjusted Points Allowed'].mean()
+        for ray_angle in range(0, 360, 90):
+            p.ray(x=[vert_mean],
+                  y=[horiz_mean],
+                  length=0,
+                  angle=ray_angle,
+                  angle_units='deg',
+                  line_width=1,
+                  line_color='red',
+                  line_dash='dashed',
+                  line_alpha=.5)
+
+        offset_dist = 3 * math.sqrt(2)
+        offsets = set(np.arange(0, 75, offset_dist))
+        offsets = offsets.union({-offset for offset in offsets})
+
+        for offset in [horiz_mean + offset for offset in offsets]:
+            for rotation in range(2):
+                angle = -math.atan(angle_aspect) + math.pi * rotation
+                p.ray(x=[vert_mean],
+                      y=[offset],
+                      length=0,
+                      angle=angle,
+                      angle_units='rad',
+                      line_width=1,
+                      line_color='black',
+                      line_alpha=.1)
+
+        p.xgrid.grid_line_color = None
+        p.ygrid.grid_line_color = None
+        p.xaxis.axis_label = 'Adjusted Points For'
+        p.yaxis.axis_label = 'Adjusted Points Against'
+        show(p)
 
     def show_graph(self, divisional_edges_only=True):
         warnings.filterwarnings("ignore")
@@ -521,16 +685,21 @@ class LeagueEvaluator:
         # Projected score
         common_team1_points = helper.get_common_score(team1_lambda)
         common_team2_points = helper.get_common_score(team2_lambda)
+        is_ot = False
         if common_team1_points == common_team2_points:
+            is_ot = True
             if team1_lambda >= team2_lambda:
-                common_team1_points = common_team1_points + 1
+                common_team1_points = common_team1_points + 3
             else:
-                common_team2_points = common_team2_points + 1
+                common_team2_points = common_team2_points + 3
         winner = team1 if common_team1_points > common_team2_points else team2
         winner_common_points = common_team1_points if common_team1_points > common_team2_points else common_team2_points
         loser_common_points = common_team2_points if common_team1_points > common_team2_points else common_team1_points
+
+        end = '(OT)' if is_ot else ''
         expected_score = str(winner_common_points) + ' - ' + str(loser_common_points)
-        ax.set_title('Projected Score: ' + expected_score + ' ' + winner, fontsize=35)
+        title = 'Projected Score: ' + expected_score + ' ' + winner + ' ' + end
+        ax.set_title(title.strip(), fontsize=35)
 
         # Fill PMF
         def add_pct_text(range_start, range_end, chance):
@@ -625,19 +794,19 @@ class LeagueEvaluator:
 
         team1_bt = self.team_df.at[team1, 'Bayes BT']
         team1_bt_pct = self.team_df.at[team1, 'BT Pct'] * 100
-        team1_off = self.team_df.at[team1, 'Adjusted Points']
-        team1_def = self.team_df.at[team1, 'Adjusted Points Allowed']
+        team1_off = self.team_df.at[team1, 'Bayes Adjusted Points']
+        team1_def = self.team_df.at[team1, 'Bayes Adjusted Points Allowed']
 
         team1_bt_index = list(self.team_df['Bayes BT']).index(team1_bt)
         team1_bt_rank = rankdata(self.team_df['Bayes BT'], method='max')[team1_bt_index]
         team1_bt_rank = 33 - team1_bt_rank
 
-        team1_off_index = list(self.team_df['Adjusted Points']).index(team1_off)
-        team1_off_rank = rankdata(self.team_df['Adjusted Points'], method='max')[team1_off_index]
+        team1_off_index = list(self.team_df['Bayes Adjusted Points']).index(team1_off)
+        team1_off_rank = rankdata(self.team_df['Bayes Adjusted Points'], method='max')[team1_off_index]
         team1_off_rank = 33 - team1_off_rank
 
-        team1_def_index = list(self.team_df['Adjusted Points Allowed']).index(team1_def)
-        team1_def_rank = rankdata(self.team_df['Adjusted Points Allowed'], method='max')[team1_def_index]
+        team1_def_index = list(self.team_df['Bayes Adjusted Points Allowed']).index(team1_def)
+        team1_def_rank = rankdata(self.team_df['Bayes Adjusted Points Allowed'], method='max')[team1_def_index]
 
         team1_stats = 'Rec: ' + team1_record + ' (Proj ' + team1_proj_record + ')\n' + \
                       'Ovr: ' + str(round(team1_bt_pct, 1)).rjust(4) + ' (' + str(
@@ -667,19 +836,19 @@ class LeagueEvaluator:
 
         team2_bt = self.team_df.at[team2, 'Bayes BT']
         team2_bt_pct = self.team_df.at[team2, 'BT Pct'] * 100
-        team2_off = self.team_df.at[team2, 'Adjusted Points']
-        team2_def = self.team_df.at[team2, 'Adjusted Points Allowed']
+        team2_off = self.team_df.at[team2, 'Bayes Adjusted Points']
+        team2_def = self.team_df.at[team2, 'Bayes Adjusted Points Allowed']
 
         team2_bt_index = list(self.team_df['Bayes BT']).index(team2_bt)
         team2_bt_rank = rankdata(self.team_df['Bayes BT'], method='max')[team2_bt_index]
         team2_bt_rank = 33 - team2_bt_rank
 
-        team2_off_index = list(self.team_df['Adjusted Points']).index(team2_off)
-        team2_off_rank = rankdata(self.team_df['Adjusted Points'], method='max')[team2_off_index]
+        team2_off_index = list(self.team_df['Bayes Adjusted Points']).index(team2_off)
+        team2_off_rank = rankdata(self.team_df['Bayes Adjusted Points'], method='max')[team2_off_index]
         team2_off_rank = 33 - team2_off_rank
 
-        team2_def_index = list(self.team_df['Adjusted Points Allowed']).index(team2_def)
-        team2_def_rank = rankdata(self.team_df['Adjusted Points Allowed'], method='max')[team2_def_index]
+        team2_def_index = list(self.team_df['Bayes Adjusted Points Allowed']).index(team2_def)
+        team2_def_rank = rankdata(self.team_df['Bayes Adjusted Points Allowed'], method='max')[team2_def_index]
 
         team2_stats = 'Rec: ' + team2_record + ' (Proj ' + team2_proj_record + ')\n' + \
                       'Ovr: ' + str(round(team2_bt_pct, 1)).rjust(4) + ' (' + str(

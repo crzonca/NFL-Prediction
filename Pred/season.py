@@ -196,9 +196,9 @@ def fit_poisson(verbose=False):
         team_df.at[team, 'Points Allowed Coef SE'] = def_coef_sds.get(team, statistics.mean(def_coef_sds.values()))
 
     team_df['Adjusted Points'] = team_df.apply(
-        lambda r: math.exp(r['Points Intercept'] + r['Points Coef']) * average_drives, axis=1)
+        lambda r: math.exp(r['Points Intercept'] + r['Points Coef'] + team_df['Points Allowed Coef'].mean()) * average_drives, axis=1)
     team_df['Adjusted Points Allowed'] = team_df.apply(
-        lambda r: math.exp(r['Points Intercept'] + r['Points Allowed Coef']) * average_drives, axis=1)
+        lambda r: math.exp(r['Points Intercept'] + r['Points Allowed Coef'] + team_df['Points Coef'].mean()) * average_drives, axis=1)
     team_df['Adjusted Point Diff'] = team_df.apply(lambda r: r['Adjusted Points'] - r['Adjusted Points Allowed'],
                                                    axis=1)
 
@@ -210,9 +210,9 @@ def fit_poisson(verbose=False):
                                        r['Games Played']), axis=1)
 
     team_df['Bayes Adjusted Points'] = team_df.apply(
-        lambda r: math.exp(r['Points Intercept'] + r['Bayes Points Coef']) * average_drives, axis=1)
+        lambda r: math.exp(r['Points Intercept'] + r['Bayes Points Coef'] + team_df['Bayes Points Allowed Coef'].mean()) * average_drives, axis=1)
     team_df['Bayes Adjusted Points Allowed'] = team_df.apply(
-        lambda r: math.exp(r['Points Intercept'] + r['Bayes Points Allowed Coef']) * average_drives, axis=1)
+        lambda r: math.exp(r['Points Intercept'] + r['Bayes Points Allowed Coef'] + team_df['Bayes Points Coef'].mean()) * average_drives, axis=1)
     team_df['Bayes Adjusted Point Diff'] = team_df.apply(
         lambda r: r['Bayes Adjusted Points'] - r['Bayes Adjusted Points Allowed'], axis=1)
 
@@ -366,9 +366,11 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
             pts = 'points' if round(winner_points - loser_points, 1) != 1.0 else 'point'
             common_winner_points = helper.get_common_score(winner_points)
             common_loser_points = helper.get_common_score(loser_points)
+            is_ot = common_winner_points == common_loser_points
             if common_winner_points == common_loser_points:
-                common_winner_points = common_winner_points + 1
-            expected_score = '(Projected Score: ' + str(common_winner_points) + ' - ' + str(common_loser_points) + ')'
+                common_winner_points = common_winner_points + 3
+            end = ' OT)' if is_ot else ')'
+            expected_score = '(Projected Score: ' + str(common_winner_points) + ' - ' + str(common_loser_points) + end
 
             print('The', pois_winner.ljust(justify_width), 'are expected to win by an average of',
                   str(round(winner_points - loser_points, 1)).ljust(4), pts.ljust(7), expected_score)
@@ -425,12 +427,16 @@ def print_table(week, sort_key='Bayes BT', sort_by_division=False):
     table = PrettyTable(columns)
     table.float_format = '0.3'
 
-    points_coefs = team_df['Points Coef']
-    points_allowed_coefs = team_df['Points Allowed Coef']
+    points_coefs = team_df['Bayes Points Coef']
+    points_allowed_coefs = team_df['Bayes Points Allowed Coef']
+
+    points_avg = statistics.mean(points_coefs)
+    points_allowed_avg = statistics.mean(points_allowed_coefs)
+    points_diff_avg = statistics.mean(team_df['Bayes Adjusted Point Diff'])
 
     points_var = statistics.variance(points_coefs)
     points_allowed_var = statistics.variance(points_allowed_coefs)
-    points_diff_var = statistics.variance(team_df['Adjusted Point Diff'])
+    points_diff_var = statistics.variance(team_df['Bayes Adjusted Point Diff'])
 
     stop = '\033[0m'
     pp = PlayoffPredictor(team_df, graph)
@@ -447,10 +453,10 @@ def print_table(week, sort_key='Bayes BT', sort_by_division=False):
         rank = team_df.index.get_loc(index) + 1
 
         points_pct = .1
-        points_color = helper.get_color(row['Bayes Points Coef'], points_var, alpha=points_pct)
-        points_allowed_color = helper.get_color(row['Bayes Points Allowed Coef'], points_allowed_var, alpha=points_pct,
+        points_color = helper.get_color(row['Bayes Points Coef'], points_avg, points_var, alpha=points_pct)
+        points_allowed_color = helper.get_color(row['Bayes Points Allowed Coef'], points_allowed_avg, points_allowed_var, alpha=points_pct,
                                                 invert=True)
-        points_diff_color = helper.get_color(row['Bayes Adjusted Point Diff'], points_diff_var, alpha=points_pct,
+        points_diff_color = helper.get_color(row['Bayes Adjusted Point Diff'], points_diff_avg, points_diff_var, alpha=points_pct,
                                              invert=False)
 
         if sort_by_division:
@@ -461,7 +467,7 @@ def print_table(week, sort_key='Bayes BT', sort_by_division=False):
         table_row.append(record)
         table_row.append((f"{row['Bayes Win Pct'] * 100:.1f}" + '%').rjust(5))
 
-        bt_color = helper.get_color(row['BT'], row['BT Var'])
+        bt_color = helper.get_color(row['BT'], 0, row['BT Var'])
         table_row.append(bt_color + f"{row['BT Pct'] * 100:.1f}".rjust(5) + stop)
 
         if week < 18:
@@ -603,14 +609,15 @@ def season(week_num,
             print_table(week, sort_by_division=False)
 
     le = LeagueEvaluator(team_df, individual_df, graph)
-    le.show_off_def()
+    # le.show_off_def()
+    le.show_off_def_interactive()
     le.show_graph(divisional_edges_only=week_num > 5)
+    le.parity_clock()
 
-    if week_num <= 18:
+    if 5 < week_num <= 18:
         le.surprises()
         le.get_schedule_difficulties()
 
-    if not manual_odds:
+    if not manual_odds and week_num > 5:
         bets = Bettor(team_df, individual_df, graph)
-        # bets.ats_bets()
         bets.all_bets(100)
