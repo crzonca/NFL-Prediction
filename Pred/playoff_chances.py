@@ -2,10 +2,12 @@ import itertools
 import math
 
 import numpy as np
+import pandas as pd
 from scipy.stats import rankdata
 
 from Projects.nfl.NFL_Prediction.Pred import league_structure
 from Projects.nfl.NFL_Prediction.Redo.poibin import PoiBin
+from Projects.play.bracket import Bracket
 
 
 class PlayoffPredictor:
@@ -519,3 +521,126 @@ class PlayoffPredictor:
             return team > opponent
         else:
             return team_bt > opponent_bt
+
+    def win_conference_title_chance(self, playoff_teams):
+        seed1, seed2, seed3, seed4, seed5, seed6, seed7 = playoff_teams
+
+        bt1 = self.team_df.at[seed1, 'Bayes BT']
+        bt2 = self.team_df.at[seed2, 'Bayes BT']
+        bt3 = self.team_df.at[seed3, 'Bayes BT']
+        bt4 = self.team_df.at[seed4, 'Bayes BT']
+        bt5 = self.team_df.at[seed5, 'Bayes BT']
+        bt6 = self.team_df.at[seed6, 'Bayes BT']
+        bt7 = self.team_df.at[seed7, 'Bayes BT']
+
+        bt_mapping = {team: self.team_df.at[team, 'Bayes BT'] for team in playoff_teams}
+
+        playoff_chances = pd.DataFrame(index=playoff_teams, columns=['Reach Divisional Round Chance',
+                                                                     'Reach Conference Round Chance',
+                                                                     'Reach Superbowl Chance'])
+
+        wc1 = Bracket('Wildcard 1', Bracket(seed2, bt=bt2), Bracket(seed7, bt=bt7), series_length=1)
+        wc2 = Bracket('Wildcard 2', Bracket(seed3, bt=bt3), Bracket(seed6, bt=bt6), series_length=1)
+        wc3 = Bracket('Wildcard 3', Bracket(seed4, bt=bt4), Bracket(seed5, bt=bt5), series_length=1)
+
+        playoff_chances.at[seed1, 'Reach Divisional Round Chance'] = 1
+        playoff_chances.at[seed2, 'Reach Divisional Round Chance'] = wc1.get_victory_chance(seed2)
+        playoff_chances.at[seed3, 'Reach Divisional Round Chance'] = wc2.get_victory_chance(seed3)
+        playoff_chances.at[seed4, 'Reach Divisional Round Chance'] = wc3.get_victory_chance(seed4)
+        playoff_chances.at[seed5, 'Reach Divisional Round Chance'] = wc3.get_victory_chance(seed5)
+        playoff_chances.at[seed6, 'Reach Divisional Round Chance'] = wc2.get_victory_chance(seed6)
+        playoff_chances.at[seed7, 'Reach Divisional Round Chance'] = wc1.get_victory_chance(seed7)
+
+        conf_chances = dict()
+        sb_chances = dict()
+        for wc_winner1, wc_winner2, wc_winner3 in itertools.product(*[(seed2, seed7), (seed3, seed6), (seed4, seed5)]):
+            perm_chance = np.prod([playoff_chances.at[wc_winner1, 'Reach Divisional Round Chance'],
+                                   playoff_chances.at[wc_winner2, 'Reach Divisional Round Chance'],
+                                   playoff_chances.at[wc_winner3, 'Reach Divisional Round Chance']])
+            lowest_seed = seed7 if wc_winner1 == seed7 else seed6 if wc_winner2 == seed6 else wc_winner3
+            lowest_bt = bt_mapping.get(lowest_seed)
+
+            other_seeds = list(set([wc_winner1, wc_winner2, wc_winner3]) - set([lowest_seed]))
+            other_seed1, other_seed2 = other_seeds
+            other_bt1 = bt_mapping.get(other_seed1)
+            other_bt2 = bt_mapping.get(other_seed2)
+
+            div1 = Bracket('Divisional 1', Bracket(seed1, bt=bt1), Bracket(lowest_seed, bt=lowest_bt), series_length=1)
+            div2 = Bracket('Divisional 2', Bracket(other_seed1, bt=other_bt1), Bracket(other_seed2, bt=other_bt2),
+                           series_length=1)
+
+            conf = Bracket('Conference', div1, div2, series_length=1)
+
+            for team in playoff_teams:
+                reach_conf_chance = (div1.get_victory_chance(team) + div2.get_victory_chance(team)) * perm_chance
+                conf_chances[team] = conf_chances.get(team, []) + [reach_conf_chance]
+
+            for team in playoff_teams:
+                reach_sb_chance = conf.get_victory_chance(team) * perm_chance
+                sb_chances[team] = sb_chances.get(team, []) + [reach_sb_chance]
+
+        for team, win_chances in conf_chances.items():
+            playoff_chances.at[team, 'Reach Conference Round Chance'] = sum(win_chances)
+
+        for team, win_chances in sb_chances.items():
+            playoff_chances.at[team, 'Reach Superbowl Chance'] = sum(win_chances)
+
+        return playoff_chances
+
+    def get_win_super_bowl_chances(self, afc_teams, nfc_teams):
+        afc_playoff_chances = self.win_conference_title_chance(afc_teams)
+        nfc_playoff_chances = self.win_conference_title_chance(nfc_teams)
+        playoff_chances = pd.concat([afc_playoff_chances, nfc_playoff_chances])
+
+        bt_mapping = {team: self.team_df.at[team, 'Bayes BT'] for team in playoff_chances.index}
+
+        win_sb_chances = dict()
+        for afc_winner, nfc_winner in itertools.product(*[afc_teams, nfc_teams]):
+            perm_chance = np.prod([playoff_chances.at[afc_winner, 'Reach Superbowl Chance'],
+                                   playoff_chances.at[nfc_winner, 'Reach Superbowl Chance']])
+
+            afc_bt = bt_mapping.get(afc_winner)
+            nfc_bt = bt_mapping.get(nfc_winner)
+
+            sb = Bracket('Superbowl', Bracket(afc_winner, bt=afc_bt), Bracket(nfc_winner, bt=nfc_bt), series_length=1)
+            afc_win_sb_chance = sb.get_victory_chance(afc_winner) * perm_chance
+            nfc_win_sb_chance = sb.get_victory_chance(nfc_winner) * perm_chance
+            win_sb_chances[afc_winner] = win_sb_chances.get(afc_winner, []) + [afc_win_sb_chance]
+            win_sb_chances[nfc_winner] = win_sb_chances.get(nfc_winner, []) + [nfc_win_sb_chance]
+
+        for team, win_chances in win_sb_chances.items():
+            playoff_chances.at[team, 'Win Superbowl Chance'] = sum(win_chances)
+
+        playoff_chances = playoff_chances.fillna(0.0)
+        playoff_chances = playoff_chances.sort_values(by=['Win Superbowl Chance',
+                                                          'Reach Superbowl Chance',
+                                                          'Reach Conference Round Chance',
+                                                          'Reach Divisional Round Chance'],
+                                                      kind='mergesort', ascending=False)
+        return playoff_chances
+
+    def get_conf_playoff_seeding(self, is_afc):
+        conf = 'AFC' if is_afc else 'NFC'
+        conf_teams = self.team_df.loc[self.team_df['Division'].str.contains(conf)]
+
+        first_round_bye = conf_teams.sort_values(by='First Round Bye', ascending=False)
+        first_round_bye = first_round_bye['First Round Bye'].idxmax()
+
+        division_winners = conf_teams.sort_values(by='Win Division', ascending=False).head(4)
+        for division_winner in division_winners.index:
+            division_winners.at[division_winner, 'Projected Wins'] = self.get_proj_record(division_winner)[0]
+        division_winners = division_winners.sort_values(by=['Projected Wins', 'Bayes BT'], ascending=[False, False])
+        division_winners = list(division_winners.index)
+        division_winners.remove(first_round_bye)
+
+        wild_cards = conf_teams.sort_values(by='Make Playoffs', ascending=False).head(7)
+        for wild_card in wild_cards.index:
+            wild_cards.at[wild_card, 'Projected Wins'] = self.get_proj_record(wild_card)[0]
+        wild_cards = wild_cards.sort_values(by=['Projected Wins', 'Bayes BT'], ascending=[False, False])
+        wild_cards = list(wild_cards.index)
+        wild_cards.remove(first_round_bye)
+        for division_winner in division_winners:
+            wild_cards.remove(division_winner)
+
+        seeding = [first_round_bye] + division_winners + wild_cards
+        return seeding

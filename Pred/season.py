@@ -158,7 +158,7 @@ def fit_poisson(verbose=False):
     poisson_model = smf.glm(formula="PPD ~ Team + Opponent",
                             data=individual_df,
                             family=sm.families.Poisson(),
-                            var_weights=individual_df['Weight']).fit()
+                            var_weights=individual_df['Weight']).fit()  # method='lbfgs'
 
     pearson_chi2 = chi2(df=poisson_model.df_resid)
     p_value = pearson_chi2.sf(poisson_model.pearson_chi2)
@@ -393,7 +393,7 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
                   str(round(higher_wp * 17)).ljust(2), 'win team, the', lower_name.ljust(justify_width),
                   'are on pace to be a', str(round(lower_wp * 17)), 'win team')
 
-        le.plot_matchup(favored_team, underdog, prob, rounded_line if location == 'at home' else -rounded_line)
+        # le.plot_matchup(favored_team, underdog, prob, rounded_line if location == 'at home' else -rounded_line)
         print()
 
     print()
@@ -423,6 +423,7 @@ def print_table(week, sort_key='Bayes BT', sort_by_division=False):
             columns.append('Make Wild Card')
             columns.append('Make Playoffs')
             columns.append('First Round Bye')
+            columns.append('Win Superbowl')
 
     table = PrettyTable(columns)
     table.float_format = '0.3'
@@ -481,11 +482,11 @@ def print_table(week, sort_key='Bayes BT', sort_by_division=False):
         table_row.append(points_diff_color + str(round(row['Bayes Adjusted Point Diff'], 1)).rjust(5) + stop)
 
         if 10 <= week < 18:
-            table_row.append((f'{pp.get_division_winner_chance(index) * 100:.1f}' + '%').rjust(6))
-            table_row.append((f'{pp.get_wildcard_chance(index) * 100:.1f}' + '%').rjust(6))
-            table_row.append(
-                (f'{(pp.get_division_winner_chance(index) + pp.get_wildcard_chance(index)) * 100:.1f}' + '%').rjust(6))
-            table_row.append((f'{pp.get_first_round_bye_chance(index) * 100:.1f}' + '%').rjust(6))
+            table_row.append((f'{row["Win Division"] * 100:.1f}' + '%').rjust(6))
+            table_row.append((f'{row["Make Wild Card"] * 100:.1f}' + '%').rjust(6))
+            table_row.append((f'{row["Make Playoffs"] * 100:.1f}' + '%').rjust(6))
+            table_row.append((f'{row["First Round Bye"] * 100:.1f}' + '%').rjust(6))
+            table_row.append((f'{row["Win Superbowl"] * 100:.1f}' + '%').rjust(5))
 
         table.add_row(table_row)
 
@@ -495,12 +496,9 @@ def print_table(week, sort_key='Bayes BT', sort_by_division=False):
     print()
 
 
-def set_bayes_bt(team, pct_evidence=.9):
+def set_bayes_bt(team):
     global team_df
 
-    pct_evidence = 1e-16 if pct_evidence == 0 else pct_evidence
-    evidence_factor = (17 - pct_evidence * 17) / pct_evidence
-    evidence_factor = 1e-16 if evidence_factor <= 0 else evidence_factor
     games_played = team_df.at[team, 'Wins'] + team_df.at[team, 'Losses'] + team_df.at[team, 'Ties']
 
     bt_var = team_df.at[team, 'BT Var']
@@ -511,7 +509,7 @@ def set_bayes_bt(team, pct_evidence=.9):
 
     helper = Helper(team_df, individual_df, graph)
     bayes_bt = helper.get_bayes_avg(team_df.at[team, 'Preseason BT'],
-                                    bt_var / evidence_factor,
+                                    .275,
                                     sample_avg,
                                     bt_var,
                                     games_played)
@@ -605,6 +603,24 @@ def season(week_num,
             if include_parity:
                 le = LeagueEvaluator(team_df, individual_df, graph)
                 le.parity_clock()
+
+            if week >= 10:
+                pp = PlayoffPredictor(team_df, graph)
+                for team in team_df.index:
+                    team_df.at[team, 'Win Division'] = pp.get_division_winner_chance(team)
+                    team_df.at[team, 'Make Wild Card'] = pp.get_wildcard_chance(team)
+                    team_df.at[team, 'Make Playoffs'] = team_df.at[team, 'Win Division'] + \
+                                                        team_df.at[team, 'Make Wild Card']
+                    team_df.at[team, 'First Round Bye'] = pp.get_first_round_bye_chance(team)
+
+                afc_playoff_teams = pp.get_conf_playoff_seeding(is_afc=True)
+                nfc_playoff_teams = pp.get_conf_playoff_seeding(is_afc=False)
+                playoff_chances = pp.get_win_super_bowl_chances(afc_playoff_teams, nfc_playoff_teams)
+                for team in team_df.index:
+                    if team in playoff_chances.index:
+                        team_df.at[team, 'Win Superbowl'] = playoff_chances.at[team, 'Win Superbowl Chance']
+                    else:
+                        team_df.at[team, 'Win Superbowl'] = 0.0
 
             print_table(week, sort_by_division=False)
 
