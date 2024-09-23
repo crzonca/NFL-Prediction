@@ -411,8 +411,7 @@ class LeagueEvaluator:
         max_bt = self.team_df['Bayes BT'].max()
         min_bt = self.team_df['Bayes BT'].min()
         bt_dev = statistics.stdev(self.team_df['Bayes BT'])
-        subset = {team: np.digitize(row['Bayes BT'], np.arange(min_bt, max_bt, bt_dev / 2)) for team, row in
-                  self.team_df.iterrows()}
+        subset = {team: row['Tier'] for team, row in self.team_df.iterrows()}
 
         nx.set_node_attributes(nfl, bts, 'Bayes BT')
         nx.set_node_attributes(nfl, primary, 'Primary')

@@ -6,7 +6,7 @@ import pandas as pd
 from scipy.stats import rankdata
 
 from Projects.nfl.NFL_Prediction.Pred import league_structure
-from Projects.nfl.NFL_Prediction.Redo.poibin import PoiBin
+from Projects.nfl.NFL_Prediction.Pred.poibin import PoiBin
 from Projects.play.bracket import Bracket
 
 

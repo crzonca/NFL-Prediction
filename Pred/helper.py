@@ -10,6 +10,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 from scipy.stats import poisson
+from sklearn.cluster import KMeans
+from sklearn.metrics import calinski_harabasz_score
 
 
 class Helper:
@@ -153,3 +155,28 @@ class Helper:
         coef_df.index = [index_to_teams.get(index) for index in coef_df.index]
         coef_df = coef_df.sort_values(by='BT', ascending=False)
         return coef_df
+
+    def get_tiers(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+
+            bts = self.team_df['Bayes BT']
+            X = bts.values.reshape(-1, 1)
+
+            tier_count_dict = dict()
+            for potential_num_tiers in range(4, 9):
+                k_means = KMeans(n_clusters=potential_num_tiers).fit(X)
+                tier_count_dict[potential_num_tiers] = calinski_harabasz_score(X, k_means.labels_)
+
+            sorted_tier_counts = list(sorted(tier_count_dict.items(), key=lambda t: t[1], reverse=True))
+            num_tiers = sorted_tier_counts[0][0]
+            k_means = KMeans(n_clusters=num_tiers).fit(X)
+
+            self.team_df['Cluster'] = k_means.labels_
+
+            cluster_averages = self.team_df.groupby('Cluster').mean()
+            cluster_averages = cluster_averages.sort_values(by='Bayes BT', ascending=False)
+            tiers = {cluster: tier for cluster, tier in zip(cluster_averages.index, range(num_tiers, 0, -1))}
+            self.team_df['Tier'] = self.team_df['Cluster'].map(tiers)
+
+            return {team: row['Tier'] for team, row in self.team_df.iterrows()}

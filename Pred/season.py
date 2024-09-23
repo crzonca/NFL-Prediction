@@ -242,6 +242,10 @@ def fit_bt():
     for team_name in team_df.index:
         team_df.at[team_name, 'BT Pct'] = bt_norm.cdf(bayes_bts.get(team_name, 0))
 
+    helper = Helper(team_df, individual_df, graph)
+    tiers = helper.get_tiers()
+    for team, tier in tiers.items():
+        team_df.at[team, 'Tier'] = tier
     team_df = team_df.fillna(0)
 
 
@@ -393,7 +397,7 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
                   str(round(higher_wp * 17)).ljust(2), 'win team, the', lower_name.ljust(justify_width),
                   'are on pace to be a', str(round(lower_wp * 17)), 'win team')
 
-        # le.plot_matchup(favored_team, underdog, prob, rounded_line if location == 'at home' else -rounded_line)
+        le.plot_matchup(favored_team, underdog, prob, rounded_line if location == 'at home' else -rounded_line)
         print()
 
     print()
