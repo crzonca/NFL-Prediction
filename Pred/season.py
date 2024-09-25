@@ -4,6 +4,8 @@ import statistics
 import networkx as nx
 import numpy as np
 import pandas as pd
+import warnings
+from statsmodels.discrete.discrete_model import GeneralizedPoisson
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from prettytable import PrettyTable
@@ -14,23 +16,23 @@ from Projects.nfl.NFL_Prediction.Pred import league_structure
 from Projects.nfl.NFL_Prediction.Pred.betting import Bettor
 from Projects.nfl.NFL_Prediction.Pred.evaluation import LeagueEvaluator
 from Projects.nfl.NFL_Prediction.Pred.helper import Helper
+from Projects.nfl.NFL_Prediction.Pred import playoff_chances as pc
 from Projects.nfl.NFL_Prediction.Pred.playoff_chances import PlayoffPredictor
 
 graph = nx.MultiDiGraph()
+gen_poisson_model = None
 team_df = pd.DataFrame(columns=['Team', 'Division', 'Games Played', 'Wins', 'Losses', 'Ties',
                                 'BT', 'BT Var', 'BT Pct', 'Bayes BT', 'Win Pct', 'Bayes Win Pct',
                                 'Avg Points', 'Avg Points Allowed', 'Bayes Avg Points', 'Bayes Avg Points Allowed',
-                                'Points Intercept', 'Points Coef', 'Points Coef SE', 'Points Allowed Coef',
-                                'Points Allowed Coef SE', 'Adjusted Points', 'Adjusted Points Allowed',
-                                'Adjusted Point Diff', 'Bayes Points Coef', 'Bayes Points Allowed Coef',
+                                'Adjusted Points', 'Adjusted Points Allowed', 'Adjusted Point Diff',
                                 'Bayes Adjusted Points', 'Bayes Adjusted Points Allowed', 'Bayes Adjusted Point Diff'])
 
 game_df = pd.DataFrame(columns=['Team', 'Win', 'Points', 'Points Allowed'])
-individual_df = pd.DataFrame(
-    columns=['Game ID', 'Team', 'Opponent', 'Points', 'Drives', 'PPD', 'Game Num', 'Weight', 'Is_Home'])
+individual_df = pd.DataFrame(columns=['Game ID', 'Team', 'Opponent', 'Points',
+                                      'Drives', 'PPAvg', 'Game Num', 'Is_Home'])
 
 
-def get_game_results(week, week_results, verbose_poisson=False):
+def get_game_results(week, week_results, current_week=False):
     week_results = week_results.loc[week_results['week'] == week]
 
     games_dict = dict()
@@ -53,8 +55,9 @@ def get_game_results(week, week_results, verbose_poisson=False):
                          home_version[1], away_version[1],
                          home_version[2], away_version[2])
 
-    fit_poisson(verbose=verbose_poisson)
+    fit_gen_poisson(verbose=current_week)
     fit_bt()
+    fit_drives()
 
 
 def set_game_outcome(game_id, home_name, away_name, home_points, away_points, home_drives, away_drives):
@@ -63,7 +66,7 @@ def set_game_outcome(game_id, home_name, away_name, home_points, away_points, ho
     global game_df
     global individual_df
 
-    helper = Helper(team_df, individual_df, graph)
+    helper = Helper(team_df, individual_df, graph, gen_poisson_model)
 
     home_victory = home_points > away_points
     away_victory = away_points > home_points
@@ -78,9 +81,9 @@ def set_game_outcome(game_id, home_name, away_name, home_points, away_points, ho
     away_game_num = len(individual_df.loc[individual_df['Team'] == away_name]) + 1
 
     individual_df.loc[len(individual_df.index)] = [game_id, home_name, away_name, home_points, home_drives, 0,
-                                                   home_game_num, 0, 1]
+                                                   home_game_num, 1]
     individual_df.loc[len(individual_df.index)] = [game_id, away_name, home_name, away_points, away_drives, 0,
-                                                   away_game_num, 0, 0]
+                                                   away_game_num, 0]
 
     if not tie:
         winner = home_name if home_victory else away_name
@@ -133,15 +136,15 @@ def set_game_outcome(game_id, home_name, away_name, home_points, away_points, ho
     team_df = team_df.fillna(0)
 
 
-def fit_poisson(verbose=False):
+def fit_gen_poisson(verbose=False):
     global team_df
+    global gen_poisson_model
 
-    helper = Helper(team_df, individual_df, graph)
-    average_drives = helper.predict_drives('', '')
-    individual_df['PPD'] = individual_df.apply(lambda r: r['Points'] / r['Drives'], axis=1)
-    individual_df['Weight'] = individual_df.apply(lambda r: r['Drives'] / average_drives, axis=1)
+    helper = Helper(team_df, individual_df, graph, gen_poisson_model)
+    average_drives = helper.predict_drives_team_averages('', '')
+    individual_df['PPAvg'] = individual_df.apply(lambda r: (r['Points'] / r['Drives']) * average_drives, axis=1)
 
-    if individual_df.empty:
+    if individual_df.empty or len(individual_df) < 96:
         team_df['Adjusted Points'] = 21
         team_df['Adjusted Points Allowed'] = 21
         team_df['Adjusted Point Diff'] = team_df.apply(lambda r: r['Adjusted Points'] - r['Adjusted Points Allowed'],
@@ -155,75 +158,54 @@ def fit_poisson(verbose=False):
         team_df = team_df.fillna(0)
         return
 
-    poisson_model = smf.glm(formula="PPD ~ Team + Opponent",
-                            data=individual_df,
-                            family=sm.families.Poisson(),
-                            var_weights=individual_df['Weight']).fit()  # method='lbfgs'
+    response = individual_df['Points']
+    explanatory = pd.get_dummies(individual_df[['Team', 'Opponent']])
+    explanatory = sm.add_constant(explanatory)
 
-    pearson_chi2 = chi2(df=poisson_model.df_resid)
-    p_value = pearson_chi2.sf(poisson_model.pearson_chi2)
-    alpha = .05
+    gen_poisson = GeneralizedPoisson(endog=response,
+                                     exog=explanatory,
+                                     p=1)
+
+    gen_poisson_model = gen_poisson.fit_regularized(method='l1', maxiter=int(1e6), alpha=.2)
 
     if verbose:
-        print('Poisson Model:')
-        print(poisson_model.summary())
-        print()
+        print(gen_poisson_model.summary())
 
-        print('Critical Value for alpha=.05:', pearson_chi2.ppf(1 - alpha))
-        print('Test Statistic:              ', poisson_model.pearson_chi2)
-        print('P-Value:                     ', p_value)
-        if p_value < alpha:
-            print('The Poisson Model is not a good fit for the data')
-        else:
-            print('The Poisson Model is a good fit for the data')
-        print()
-
-    off_coefs = {name.replace('Team', '').replace('[T.', '').replace(']', ''): coef
-                 for name, coef in poisson_model.params.items() if name.startswith('Team')}
-    def_coefs = {name.replace('Opponent', '').replace('[T.', '').replace(']', ''): coef
-                 for name, coef in poisson_model.params.items() if name.startswith('Opponent')}
-    off_coef_sds = {name.replace('Team', '').replace('[T.', '').replace(']', ''): coef
-                    for name, coef in poisson_model.bse.items() if name.startswith('Team')}
-    def_coef_sds = {name.replace('Opponent', '').replace('[T.', '').replace(']', ''): coef
-                    for name, coef in poisson_model.bse.items() if name.startswith('Opponent')}
-    intercept = poisson_model.params['Intercept']
+    series_index = explanatory.columns
 
     for team in team_df.index:
-        team_df.at[team, 'Points Intercept'] = intercept
-        team_df.at[team, 'Points Coef'] = off_coefs.get(team, 0)
-        team_df.at[team, 'Points Coef SE'] = off_coef_sds.get(team, statistics.mean(off_coef_sds.values()))
-        team_df.at[team, 'Points Allowed Coef'] = def_coefs.get(team, 0)
-        team_df.at[team, 'Points Allowed Coef SE'] = def_coef_sds.get(team, statistics.mean(def_coef_sds.values()))
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            pf_prediction_series = pd.Series(index=series_index)
+            pf_prediction_series.at['const'] = 1.0
+            pf_prediction_series.at['Team_' + team] = 1.0
+            pf_prediction_series = pf_prediction_series.fillna(0.0)
 
-    team_df['Adjusted Points'] = team_df.apply(
-        lambda r: math.exp(r['Points Intercept'] + r['Points Coef'] + team_df['Points Allowed Coef'].mean()) * average_drives, axis=1)
-    team_df['Adjusted Points Allowed'] = team_df.apply(
-        lambda r: math.exp(r['Points Intercept'] + r['Points Allowed Coef'] + team_df['Points Coef'].mean()) * average_drives, axis=1)
+            adj_points_for = gen_poisson_model.predict(pf_prediction_series).squeeze()
+            team_df.at[team, 'Adjusted Points'] = adj_points_for
+
+            pa_prediction_series = pd.Series(index=series_index)
+            pa_prediction_series.at['const'] = 1.0
+            pa_prediction_series.at['Opponent_' + team] = 1.0
+            pa_prediction_series = pa_prediction_series.fillna(0.0)
+
+            adj_points_allowed = gen_poisson_model.predict(pa_prediction_series).squeeze()
+            team_df.at[team, 'Adjusted Points Allowed'] = adj_points_allowed
+
     team_df['Adjusted Point Diff'] = team_df.apply(lambda r: r['Adjusted Points'] - r['Adjusted Points Allowed'],
                                                    axis=1)
 
-    team_df['Bayes Points Coef'] = team_df.apply(
-        lambda r: helper.get_bayes_avg(0, .64, r['Points Coef'], math.pow(r['Points Coef SE'], 2), r['Games Played']),
-        axis=1)
-    team_df['Bayes Points Allowed Coef'] = team_df.apply(
-        lambda r: helper.get_bayes_avg(0, .64, r['Points Allowed Coef'], math.pow(r['Points Allowed Coef SE'], 2),
-                                       r['Games Played']), axis=1)
-
-    team_df['Bayes Adjusted Points'] = team_df.apply(
-        lambda r: math.exp(r['Points Intercept'] + r['Bayes Points Coef'] + team_df['Bayes Points Allowed Coef'].mean()) * average_drives, axis=1)
-    team_df['Bayes Adjusted Points Allowed'] = team_df.apply(
-        lambda r: math.exp(r['Points Intercept'] + r['Bayes Points Allowed Coef'] + team_df['Bayes Points Coef'].mean()) * average_drives, axis=1)
-    team_df['Bayes Adjusted Point Diff'] = team_df.apply(
-        lambda r: r['Bayes Adjusted Points'] - r['Bayes Adjusted Points Allowed'], axis=1)
-
-    team_df = team_df.fillna(0)
+    team_df['Bayes Adjusted Points'] = team_df['Adjusted Points']
+    team_df['Bayes Adjusted Points Allowed'] = team_df['Adjusted Points Allowed']
+    team_df['Bayes Adjusted Point Diff'] = team_df['Adjusted Point Diff']
+    i = 0
 
 
 def fit_bt():
     global graph
     global team_df
 
-    helper = Helper(team_df, individual_df, graph)
+    helper = Helper(team_df, individual_df, graph, gen_poisson_model)
     bt_df = helper.get_bradley_terry_from_graph()
 
     bts = {index: row['BT'] for index, row in bt_df.iterrows()}
@@ -242,14 +224,41 @@ def fit_bt():
     for team_name in team_df.index:
         team_df.at[team_name, 'BT Pct'] = bt_norm.cdf(bayes_bts.get(team_name, 0))
 
-    helper = Helper(team_df, individual_df, graph)
+    helper = Helper(team_df, individual_df, graph, gen_poisson_model)
     tiers = helper.get_tiers()
     for team, tier in tiers.items():
         team_df.at[team, 'Tier'] = tier
     team_df = team_df.fillna(0)
 
 
+def fit_drives(verbose=False):
+    Y = individual_df['Drives']
+    X = pd.get_dummies(individual_df[['Team', 'Opponent']])
+    X = sm.add_constant(X)
+    model = sm.OLS(Y, X)
+    results = model.fit()
+
+    if verbose:
+        if results.f_pvalue > .05:
+            print('OLS model is not a good fit')
+        print(results.summary())
+
+    off_coefs = {name.replace('Team_', '').replace('[T.', '').replace(']', ''): coef
+                 for name, coef in results.params.items() if name.startswith('Team')}
+    def_coefs = {name.replace('Opponent_', '').replace('[T.', '').replace(']', ''): coef
+                 for name, coef in results.params.items() if name.startswith('Opponent')}
+    intercept = results.params['const']
+
+    for team, row in team_df.iterrows():
+        team_df.at[team, 'Drives Model Good'] = results.f_pvalue < .05
+        team_df.at[team, 'Drives Intercept'] = intercept
+        team_df.at[team, 'Off Drives Coef'] = off_coefs.get(team, 0)
+        team_df.at[team, 'Def Drives Coef'] = def_coefs.get(team, 0)
+
+
 def predict_game(model, pt, away_name, home_name, vegas_line):
+    bets = Bettor(team_df, individual_df, graph, gen_poisson_model)
+
     prediction_dict = dict()
     prediction_dict['Home Name'] = home_name
     prediction_dict['Away Name'] = away_name
@@ -264,25 +273,13 @@ def predict_game(model, pt, away_name, home_name, vegas_line):
     away_avg_points = team_df.at[away_name, 'Bayes Avg Points']
     avg_points_margin = home_avg_points - away_avg_points
 
-    home_points_coef = team_df.at[home_name, 'Bayes Points Coef']
-    away_points_coef = team_df.at[away_name, 'Bayes Points Coef']
-    home_points_allowed_coef = team_df.at[home_name, 'Bayes Points Allowed Coef']
-    away_points_allowed_coef = team_df.at[away_name, 'Bayes Points Allowed Coef']
-
-    home_expected_points = team_df.at[home_name, 'Points Intercept'] + home_points_coef + away_points_allowed_coef
-    away_expected_points = team_df.at[away_name, 'Points Intercept'] + away_points_coef + home_points_allowed_coef
-
-    helper = Helper(team_df, individual_df, graph)
-    average_drives = helper.predict_drives(home_name, away_name)
-    home_expected_points = math.exp(home_expected_points) * average_drives
-    away_expected_points = math.exp(away_expected_points) * average_drives
+    helper = Helper(team_df, individual_df, graph, gen_poisson_model)
+    home_expected_points, away_expected_points = helper.predict_score_from_gen_poisson_model(home_name, away_name)
 
     prediction_dict['Home Expected Points'] = home_expected_points
     prediction_dict['Away Expected Points'] = away_expected_points
 
-    expected_points_dist = skellam(home_expected_points, away_expected_points)
-    poisson_win_chance = expected_points_dist.sf(0)
-    poisson_tie_chance = expected_points_dist.pmf(0)
+    poisson_win_chance, poisson_tie_chance, poisson_loss_chance = bets.get_spread_chance(home_name, away_name, 0.0)
     poisson_win_chance = poisson_win_chance / (1 - poisson_tie_chance)
     poisson_win_chance = .5 if pd.isna(poisson_win_chance) else poisson_win_chance
 
@@ -325,9 +322,9 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
         predictions.append(prediction_dict)
     predictions = sorted(predictions, key=lambda d: d['Confidence'], reverse=True)
 
-    le = LeagueEvaluator(team_df, individual_df, graph)
-    helper = Helper(team_df, individual_df, graph)
-    bets = Bettor(team_df, individual_df, graph)
+    le = LeagueEvaluator(team_df, individual_df, graph, gen_poisson_model)
+    helper = Helper(team_df, individual_df, graph, gen_poisson_model)
+    bets = Bettor(team_df, individual_df, graph, gen_poisson_model)
     for pred in predictions:
         home_name = pred.get('Home Name')
         away_name = pred.get('Away Name')
@@ -348,6 +345,8 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
         location = 'at home' if line <= 0 else 'on the road'
 
         rounded_line = round(line * 2.0) / 2.0
+
+        pp = PlayoffPredictor(team_df, graph)
 
         if verbose:
             print('The', favored_team.ljust(justify_width), 'are favored by',
@@ -387,15 +386,16 @@ def order_predictions(model, pt, games_to_predict, verbose=False):
                   f'{bt * 100:.3f}' + '% chance to beat the', underdog_bt.ljust(justify_width + 3),
                   'according to the BT Model')
 
-            home_win_pct = pred.get('Home Bayes Wins')
-            away_win_pct = pred.get('Away Bayes Wins')
-            higher_name = home_name if home_win_pct >= away_win_pct else away_name
-            lower_name = away_name if home_win_pct >= away_win_pct else home_name
-            higher_wp = home_win_pct if home_win_pct >= away_win_pct else away_win_pct
-            lower_wp = away_win_pct if home_win_pct >= away_win_pct else home_win_pct
+            home_proj_wins = pp.get_proj_record(home_name)[0]
+            away_proj_wins = pp.get_proj_record(away_name)[0]
+            higher_name = home_name if home_proj_wins >= away_proj_wins else away_name
+            lower_name = away_name if home_proj_wins >= away_proj_wins else home_name
+            higher_proj = home_proj_wins if home_proj_wins >= away_proj_wins else away_proj_wins
+            lower_proj = away_proj_wins if home_proj_wins >= away_proj_wins else home_proj_wins
+
             print('The', higher_name.ljust(justify_width), 'are on pace to be a',
-                  str(round(higher_wp * 17)).ljust(2), 'win team, the', lower_name.ljust(justify_width),
-                  'are on pace to be a', str(round(lower_wp * 17)), 'win team')
+                  str(higher_proj).ljust(2), 'win team, the', lower_name.ljust(justify_width),
+                  'are on pace to be a', str(lower_proj), 'win team')
 
         le.plot_matchup(favored_team, underdog, prob, rounded_line if location == 'at home' else -rounded_line)
         print()
@@ -432,8 +432,8 @@ def print_table(week, sort_key='Bayes BT', sort_by_division=False):
     table = PrettyTable(columns)
     table.float_format = '0.3'
 
-    points_coefs = team_df['Bayes Points Coef']
-    points_allowed_coefs = team_df['Bayes Points Allowed Coef']
+    points_coefs = team_df['Bayes Adjusted Points']
+    points_allowed_coefs = team_df['Bayes Adjusted Points Allowed']
 
     points_avg = statistics.mean(points_coefs)
     points_allowed_avg = statistics.mean(points_allowed_coefs)
@@ -445,7 +445,7 @@ def print_table(week, sort_key='Bayes BT', sort_by_division=False):
 
     stop = '\033[0m'
     pp = PlayoffPredictor(team_df, graph)
-    helper = Helper(team_df, individual_df, graph)
+    helper = Helper(team_df, individual_df, graph, gen_poisson_model)
 
     for index, row in team_df.iterrows():
         table_row = list()
@@ -458,8 +458,8 @@ def print_table(week, sort_key='Bayes BT', sort_by_division=False):
         rank = team_df.index.get_loc(index) + 1
 
         points_pct = .1
-        points_color = helper.get_color(row['Bayes Points Coef'], points_avg, points_var, alpha=points_pct)
-        points_allowed_color = helper.get_color(row['Bayes Points Allowed Coef'], points_allowed_avg, points_allowed_var, alpha=points_pct,
+        points_color = helper.get_color(row['Bayes Adjusted Points'], points_avg, points_var, alpha=points_pct)
+        points_allowed_color = helper.get_color(row['Bayes Adjusted Points Allowed'], points_allowed_avg, points_allowed_var, alpha=points_pct,
                                                 invert=True)
         points_diff_color = helper.get_color(row['Bayes Adjusted Point Diff'], points_diff_avg, points_diff_var, alpha=points_pct,
                                              invert=False)
@@ -511,7 +511,7 @@ def set_bayes_bt(team):
     sample_avg = team_df.at[team, 'BT']
     sample_avg = team_df.at[team, 'Preseason BT'] if pd.isna(sample_avg) else sample_avg
 
-    helper = Helper(team_df, individual_df, graph)
+    helper = Helper(team_df, individual_df, graph, gen_poisson_model)
     bayes_bt = helper.get_bayes_avg(team_df.at[team, 'Preseason BT'],
                                     .275,
                                     sample_avg,
@@ -522,16 +522,15 @@ def set_bayes_bt(team):
 
 
 def season(week_num,
-           use_bt_predictions=False,
            manual_odds=False,
-           include_parity=False,
+           include_parity=True,
            verbose=True):
     global graph
     global team_df
     global game_df
 
-    helper = Helper(team_df, individual_df, graph)
-    le = LeagueEvaluator(team_df, individual_df, graph)
+    helper = Helper(team_df, individual_df, graph, gen_poisson_model)
+    le = LeagueEvaluator(team_df, individual_df, graph, gen_poisson_model)
 
     model = helper.load_model()
     pt = helper.load_pt()
@@ -579,7 +578,7 @@ def season(week_num,
         print('Preseason')
         print_table(week_num)
 
-    if use_bt_predictions or manual_odds:
+    if manual_odds:
         odds = []
     else:
         odds = Odds.get_odds()
@@ -587,7 +586,8 @@ def season(week_num,
     all_week_results = league_structure.get_games_before_week(week_num, use_persisted=True)
 
     for week in range(week_num):
-        get_game_results(week + 1, all_week_results, verbose_poisson=week == week_num - 1)
+        get_game_results(week + 1, all_week_results,
+                         current_week=week == week_num - 1,)
 
         if week == week_num - 1:
             print('Week', week + 1)
@@ -599,15 +599,14 @@ def season(week_num,
                     odds = game.get('line', 0)
                     games.append((away_name, home_name, odds))
                 else:
-                    bets = Bettor(team_df, individual_df, graph)
+                    bets = Bettor(team_df, individual_df, graph, gen_poisson_model)
                     games.append((away_name, home_name, bets.get_vegas_line(home_name, away_name, odds)))
 
             order_predictions(model, pt, games, verbose=verbose)
 
-            if include_parity:
-                le = LeagueEvaluator(team_df, individual_df, graph)
-                le.parity_clock()
-
+            afc_playoff_teams = list()
+            nfc_playoff_teams = list()
+            playoff_chances = pd.DataFrame()
             if week >= 10:
                 pp = PlayoffPredictor(team_df, graph)
                 for team in team_df.index:
@@ -628,16 +627,21 @@ def season(week_num,
 
             print_table(week, sort_by_division=False)
 
-    le = LeagueEvaluator(team_df, individual_df, graph)
+            if week >= 10:
+                pc.print_full_playoff_chances(afc_playoff_teams, nfc_playoff_teams, playoff_chances)
+
+    le = LeagueEvaluator(team_df, individual_df, graph, gen_poisson_model)
     # le.show_off_def()
     le.show_off_def_interactive()
     le.show_graph(divisional_edges_only=week_num > 5)
-    le.parity_clock()
 
     if 5 < week_num <= 18:
         le.surprises()
         le.get_schedule_difficulties()
 
     if not manual_odds and week_num > 5:
-        bets = Bettor(team_df, individual_df, graph)
+        bets = Bettor(team_df, individual_df, graph, gen_poisson_model)
         bets.all_bets(100)
+
+    if include_parity:
+        le.parity_clock()

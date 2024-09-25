@@ -4,6 +4,7 @@ import pickle
 import statistics
 import warnings
 
+import statsmodels.api as sm
 import choix
 import networkx as nx
 import numpy as np
@@ -15,25 +16,74 @@ from sklearn.metrics import calinski_harabasz_score
 
 
 class Helper:
-    def __init__(self, team_df, individual_df, graph):
+    def __init__(self, team_df, individual_df, graph, gen_poisson_model):
         self.team_df = team_df
         self.individual_df = individual_df
         self.graph = graph
+        self.gen_poisson_model = gen_poisson_model
 
-    def predict_drives(self, team1, team2):
+    def predict_drives_team_averages(self, team1, team2):
         average_drives = 12
-        if team1 in self.individual_df['Team'] or team1 in self.individual_df['Opponent']:
-            if team2 in self.individual_df['Team'] or team2 in self.individual_df['Opponent']:
+        if team1 in self.individual_df['Team']:
+            if team2 in self.individual_df['Team']:
                 relevant_df = self.individual_df.loc[(self.individual_df['Team'] == team1) |
-                                                     (self.individual_df['Opponent'] == team1) |
-                                                     (self.individual_df['Team'] == team2) |
-                                                     (self.individual_df['Opponent'] == team2)]
+                                                     (self.individual_df['Team'] == team2)]
                 if not relevant_df.empty:
                     average_drives = relevant_df['Drives'].mean()
         else:
             if not self.individual_df.empty:
                 average_drives = self.individual_df['Drives'].mean()
         return average_drives
+
+    def predict_drives(self, team1, team2):
+        if not self.team_df.at[team1, 'Drives Model Good']:
+            return self.predict_drives_team_averages(team1, team2)
+
+        intercept = self.team_df['Drives Intercept'].mean()
+        team1_off_coef = self.team_df.at[team1, 'Off Drives Coef']
+        team1_def_coef = self.team_df.at[team1, 'Def Drives Coef']
+        team2_off_coef = self.team_df.at[team2, 'Off Drives Coef']
+        team2_def_coef = self.team_df.at[team2, 'Def Drives Coef']
+
+        team1_drives = intercept + team1_off_coef + team2_def_coef
+        team2_drives = intercept + team2_off_coef + team1_def_coef
+        average_drives = (team1_drives + team2_drives) / 2
+        return average_drives
+
+    def get_dist_from_gen_poisson_model(self, team1, team2):
+        explanatory = pd.get_dummies(self.individual_df[['Team', 'Opponent']])
+        explanatory = sm.add_constant(explanatory)
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+
+            prediction_series = pd.Series(index=explanatory.columns)
+            prediction_series.at['const'] = 1.0
+            prediction_series.at['Team_' + team1] = 1.0
+            prediction_series.at['Opponent_' + team2] = 1.0
+            prediction_series = prediction_series.fillna(0.0)
+            dist = self.gen_poisson_model.get_distribution(prediction_series)
+        return dist
+
+    def predict_score_from_gen_poisson_model(self, team1, team2):
+        team1_dist = self.get_dist_from_gen_poisson_model(team1, team2)
+        team2_dist = self.get_dist_from_gen_poisson_model(team2, team1)
+
+        # TODO Possibly the following code
+        # self.gen_poisson_model.predict(prediction_series)
+
+        return float(team1_dist.mean()), float(team2_dist.mean())
+
+    def gen_poisson_to_sim_skellam_pmf(self, team1_dist, team2_dist, x):
+        max_points = 101
+        score_chances = list()
+        for score in range(max_points):
+            team2_chance = float(team2_dist.pmf(score))
+            team1_chance = float(team1_dist.pmf(score + x))
+
+            score_chance = team1_chance * team2_chance
+            score_chances.append(score_chance)
+        return sum(score_chances)
 
     def get_bayes_avg(self, prior_avg, prior_var, sample_avg, sample_var, n):
         k_0 = sample_var / prior_var
@@ -178,5 +228,6 @@ class Helper:
             cluster_averages = cluster_averages.sort_values(by='Bayes BT', ascending=False)
             tiers = {cluster: tier for cluster, tier in zip(cluster_averages.index, range(num_tiers, 0, -1))}
             self.team_df['Tier'] = self.team_df['Cluster'].map(tiers)
+            self.team_df = self.team_df.drop(columns=['Cluster'])
 
             return {team: row['Tier'] for team, row in self.team_df.iterrows()}

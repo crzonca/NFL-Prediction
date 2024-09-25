@@ -4,16 +4,19 @@ import pandas as pd
 from prettytable import PrettyTable
 from scipy.optimize import minimize_scalar
 from scipy.stats import skellam
+import statsmodels.api as sm
+import warnings
 
 import Projects.nfl.NFL_Prediction.OddsHelper as Odds
 from Projects.nfl.NFL_Prediction.Pred.helper import Helper
 
 
 class Bettor:
-    def __init__(self, team_df, individual_df, graph):
+    def __init__(self, team_df, individual_df, graph, gen_poisson_model):
         self.team_df = team_df
         self.individual_df = individual_df
         self.graph = graph
+        self.gen_poisson_model = gen_poisson_model
 
     def get_vegas_line(self, home_name, away_name, odds):
         matching_odds = [odd for odd in odds if (away_name in odd[0][0] or home_name in odd[0][0]) and
@@ -29,26 +32,31 @@ class Bettor:
         if spread > 0:
             return
 
-        intercept = self.team_df.at[favorite, 'Points Intercept']
-        favorite_off_coef = self.team_df.at[favorite, 'Bayes Points Coef']
-        underdog_off_coef = self.team_df.at[underdog, 'Bayes Points Coef']
-        favorite_def_coef = self.team_df.at[favorite, 'Bayes Points Allowed Coef']
-        underdog_def_coef = self.team_df.at[underdog, 'Bayes Points Allowed Coef']
+        helper = Helper(self.team_df, self.individual_df, self.graph, self.gen_poisson_model)
+        favorite_dist = helper.get_dist_from_gen_poisson_model(favorite, underdog)
+        underdog_dist = helper.get_dist_from_gen_poisson_model(underdog, favorite)
 
-        favorite_lambda = math.exp(intercept + favorite_off_coef + underdog_def_coef)
-        underdog_lambda = math.exp(intercept + underdog_off_coef + favorite_def_coef)
+        max_points = 101
+        cover_chances = list()
+        push_chances = list()
+        fail_chances = list()
+        for score in range(max_points):
+            underdog_chance = float(underdog_dist.pmf(score))
+            favorite_chance = float(favorite_dist.pmf(score))
+            favorite_cover = float(favorite_dist.sf(score - spread))
+            favorite_fail = float(favorite_dist.cdf(score - spread) - favorite_chance)
 
-        helper = Helper(self.team_df, self.individual_df, self.graph)
-        average_drives = helper.predict_drives(favorite, underdog)
-        favorite_lambda = favorite_lambda * average_drives
-        underdog_lambda = underdog_lambda * average_drives
+            cover_chance = underdog_chance * favorite_cover
+            push_chance = underdog_chance * favorite_chance
+            fail_chance = underdog_chance * favorite_fail
 
-        skel = skellam(favorite_lambda, underdog_lambda)
+            cover_chances.append(cover_chance)
+            push_chances.append(push_chance)
+            fail_chances.append(fail_chance)
 
-        push_chance = skel.pmf(-spread) if spread.is_integer() else 0.0
-        cover_chance = skel.sf(-spread)
+        cover_chance = sum(cover_chances)
+        push_chance = sum(push_chances)
         fail_chance = 1 - cover_chance - push_chance
-
         return cover_chance, push_chance, fail_chance
 
     def ats_bets(self, ):

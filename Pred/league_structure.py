@@ -212,9 +212,9 @@ def simulate_season():
 
     schedule_df = pd.read_csv(
         'D:\\Colin\\Documents\\Programming\\Python\\PythonProjects\\Projects\\nfl\\NFL_Prediction\\Pred\\resources\\2024games.csv')
-    drives_norm = scipy.stats.norm(10.7, 1.6)
-    drives = [round(x) for x in drives_norm.rvs(240) for _ in (0, 1)]
-    schedule_df['drives'] = pd.Series(list(schedule_df['drives'].head(64)) + drives)
+    drives_norm = scipy.stats.norm(10.65625, 1.574989557)
+    drives = [round(x) for x in drives_norm.rvs(224) for _ in (0, 1)]
+    schedule_df['drives'] = pd.Series(list(schedule_df['drives'].head(96)) + drives)
 
     for index, row in schedule_df.iterrows():
         if not pd.isna(row['points_scored']):
@@ -226,9 +226,9 @@ def simulate_season():
         opp = set(relevant_obs['team']) - set([team])
         opp = opp.pop()
 
-        proj_ppd = math.exp(intecept + off_coefs.get(team) + def_coefs.get(opp))
+        ppd_mu = math.exp(intecept + off_coefs.get(team) + def_coefs.get(opp))
         lamb = proj_ppd * drives
-        pois = scipy.stats.poisson(lamb)
+        pois = scipy.stats.nbinom(lamb)
         proj_score = pois.rvs(1)[0]
 
         opp_obs = schedule_df.loc[(schedule_df['boxscore_index'] == game_id) & (schedule_df['team'] == opp)].squeeze()

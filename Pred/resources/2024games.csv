@@ -9,8 +9,8 @@ Cardinals,1,28,10,Away,g4
 Bills,1,34,10,Home,g4
 Titans,1,17,13,Away,g5
 Bears,1,24,10,Home,g5
-Patriots,1,16,8,Away,g6
-Bengals,1,10,10,Home,g6
+Patriots,1,16,10,Away,g6
+Bengals,1,10,8,Home,g6
 Texans,1,29,10,Away,g7
 Colts,1,27,9,Home,g7
 Jaguars,1,17,11,Away,g8
@@ -91,10 +91,10 @@ Cowboys,3,25,11,Home,g44
 Rams,3,27,9,Home,g45
 Chiefs,3,22,10,Away,g46
 Falcons,3,17,10,Home,g46
-Jaguars,3,,,Away,g47
-Bills,3,,,Home,g47
-Commanders,3,,,Away,g48
-Bengals,3,,,Home,g48
+Jaguars,3,10,10,Away,g47
+Bills,3,47,10,Home,g47
+Commanders,3,38,8,Away,g48
+Bengals,3,33,7,Home,g48
 Cowboys,4,,,Away,g49
 Giants,4,,,Home,g49
 Saints,4,,,Away,g50

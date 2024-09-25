@@ -4,10 +4,40 @@ import math
 import numpy as np
 import pandas as pd
 from scipy.stats import rankdata
+from prettytable import PrettyTable
 
 from Projects.nfl.NFL_Prediction.Pred import league_structure
 from Projects.nfl.NFL_Prediction.Pred.poibin import PoiBin
 from Projects.play.bracket import Bracket
+
+
+def print_full_playoff_chances(afc_playoff_teams, nfc_playoff_teams, playoff_chances):
+    table = PrettyTable(['Team',
+                         'Reach Div. Round Chance',
+                         'Reach Conf. Round Chance',
+                         'Reach Superbowl Chance',
+                         'Win Superbowl Chance'])
+    table.float_format = '0.3'
+
+    print('Playoff chances assuming the following seeding:')
+    print('AFC:', ' '.join([str(seed) + '. ' + team.ljust(12)
+                            for seed, team in zip(range(1, 8), afc_playoff_teams)]))
+    print('NFC:', ' '.join([str(seed) + '. ' + team.ljust(12)
+                            for seed, team in zip(range(1, 8), nfc_playoff_teams)]))
+
+    for index, row in playoff_chances.iterrows():
+        table_row = list()
+        table_row.append(index)
+        table_row.append((f'{row["Reach Divisional Round Chance"] * 100:.1f}' + '%').rjust(6))
+        table_row.append((f'{row["Reach Conference Round Chance"] * 100:.1f}' + '%').rjust(6))
+        table_row.append((f'{row["Reach Superbowl Chance"] * 100:.1f}' + '%').rjust(6))
+        table_row.append((f'{row["Win Superbowl Chance"] * 100:.1f}' + '%').rjust(5))
+
+        table.add_row(table_row)
+
+    # Print the table
+    print(table)
+    print()
 
 
 class PlayoffPredictor:
@@ -372,8 +402,6 @@ class PlayoffPredictor:
         team_total_losses = 0
         team_total_ties = 0
         for loser, winner, weight in teams_games:
-            if weight != 0:
-                i = 0
             if winner == team:
                 other_team = loser
             else:
@@ -644,3 +672,4 @@ class PlayoffPredictor:
 
         seeding = [first_round_bye] + division_winners + wild_cards
         return seeding
+

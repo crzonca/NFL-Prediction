@@ -24,10 +24,11 @@ from Projects.nfl.NFL_Prediction.Pred.playoff_chances import PlayoffPredictor
 
 
 class LeagueEvaluator:
-    def __init__(self, team_df, individual_df, graph):
+    def __init__(self, team_df, individual_df, graph, gen_poisson_model):
         self.team_df = team_df
         self.individual_df = individual_df
         self.graph = graph
+        self.gen_poisson_model = gen_poisson_model
 
     def get_preseason_bts(self, use_mse=True, use_persisted=True):
         path = 'Projects/nfl/NFL_Prediction/Pred/resources/preseason_bts.csv'
@@ -169,8 +170,6 @@ class LeagueEvaluator:
 
         # If there are any cycles
         if cycle:
-            print('Parity Clock')
-
             # Reverse the cycle direction
             cycle = list(reversed(cycle))
 
@@ -215,7 +214,7 @@ class LeagueEvaluator:
 
             # Select the size of the image (relative to the X axis)
             icon_size = {team: (ax.get_xlim()[1] - ax.get_xlim()[0]) * 0.025 * math.exp(bt) for team, bt in bts.items()}
-            icon_size['Bears'] = icon_size.get('Bears') * .8
+            icon_size['Bears'] = icon_size.get('Bears', 0) * .8
             icon_center = {team: size / 2.0 for team, size in icon_size.items()}
 
             for n in parity_graph.nodes:
@@ -229,6 +228,8 @@ class LeagueEvaluator:
             plt.show()
 
             if verbose:
+                print('Parity Clock')
+
                 # Format new lines if the length of the cycle is too long to print in one line
                 if len(cycle) > 8:
                     cycle[8] = '\n' + cycle[8]
@@ -623,7 +624,7 @@ class LeagueEvaluator:
         plt.rcParams['font.family'] = 'monospace'
 
         is_favorite = team1_spread < 0
-        bets = Bettor(self.team_df, self.individual_df, self.graph)
+        bets = Bettor(self.team_df, self.individual_df, self.graph, self.gen_poisson_model)
         if is_favorite:
             cover_chance, push_chance, fail_chance = bets.get_spread_chance(team1, team2, team1_spread)
         else:
@@ -645,32 +646,24 @@ class LeagueEvaluator:
                               31: 'st',
                               32: 'nd'}
 
-        # Skellam PMF
-        intercept = self.team_df.at[team1, 'Points Intercept']
-        team1_off_coef = self.team_df.at[team1, 'Bayes Points Coef']
-        team2_off_coef = self.team_df.at[team2, 'Bayes Points Coef']
-        team1_def_coef = self.team_df.at[team1, 'Bayes Points Allowed Coef']
-        team2_def_coef = self.team_df.at[team2, 'Bayes Points Allowed Coef']
+        helper = Helper(self.team_df, self.individual_df, self.graph, self.gen_poisson_model)
+        team1_dist = helper.get_dist_from_gen_poisson_model(team1, team2)
+        team2_dist = helper.get_dist_from_gen_poisson_model(team2, team1)
 
-        team1_lambda = math.exp(intercept + team1_off_coef + team2_def_coef)
-        team2_lambda = math.exp(intercept + team2_off_coef + team1_def_coef)
+        win_chance, tie_chance, loss_chance = bets.get_spread_chance(team1, team2, 0.0)
 
-        helper = Helper(self.team_df, self.individual_df, self.graph)
-        average_drives = helper.predict_drives(team1, team2)
-        team1_lambda = team1_lambda * average_drives
-        team2_lambda = team2_lambda * average_drives
-
-        skel = skellam(team1_lambda, team2_lambda)
-        win_chance = skel.sf(0)
-        tie_chance = skel.pmf(0)
         win_chance = win_chance / (1 - tie_chance)
         loss_chance = 1 - win_chance
 
-        min_end = skel.ppf(.001)
-        max_end = skel.ppf(.999)
+        min_end = team1_dist.ppf(.01) - team2_dist.ppf(.99)
+        max_end = team1_dist.ppf(.99) - team2_dist.ppf(.01)
 
         x_range = np.arange(min_end, max_end, 1.0)
-        pmf_range = [skel.pmf(x) for x in x_range]
+
+        pmf_range = list()
+        for x in x_range:
+            margin_chance = helper.gen_poisson_to_sim_skellam_pmf(team1_dist, team2_dist, x)
+            pmf_range.append(margin_chance)
 
         fig, ax = plt.subplots(figsize=(20, 10))
 
@@ -682,12 +675,13 @@ class LeagueEvaluator:
         plt.ylim((0.0, 0.09))
 
         # Projected score
-        common_team1_points = helper.get_common_score(team1_lambda)
-        common_team2_points = helper.get_common_score(team2_lambda)
+        team1_score, team2_score = helper.predict_score_from_gen_poisson_model(team1, team2)
+        common_team1_points = helper.get_common_score(team1_score)
+        common_team2_points = helper.get_common_score(team2_score)
         is_ot = False
         if common_team1_points == common_team2_points:
             is_ot = True
-            if team1_lambda >= team2_lambda:
+            if team1_score >= team2_score:
                 common_team1_points = common_team1_points + 3
             else:
                 common_team2_points = common_team2_points + 3
@@ -707,19 +701,19 @@ class LeagueEvaluator:
                 return
             pmfs = list()
             for x in range(int(range_start), int(range_end)):
-                prob = skel.pmf(x)
+                prob = helper.gen_poisson_to_sim_skellam_pmf(team1_dist, team2_dist, x)
                 pmfs.append(prob)
             total = sum(pmfs)
 
             total_prob = 0
             for x in range(int(range_start), int(range_end)):
-                prob = skel.pmf(x)
+                prob = helper.gen_poisson_to_sim_skellam_pmf(team1_dist, team2_dist, x)
                 total_prob = total_prob + prob
                 if total_prob >= total / 2:
                     r1_center = x
                     break
 
-            r1_height = skel.pmf(r1_center) / 2
+            r1_height = helper.gen_poisson_to_sim_skellam_pmf(team1_dist, team2_dist, r1_center) / 2
             r1_size = r1_height * 2 / .06 * 40
             r1_size = max([r1_size, 10])
             r1_size = min([r1_size, 35])
@@ -748,27 +742,27 @@ class LeagueEvaluator:
 
         plt.fill_between(x=r1,
                          y1=[0 for x in range(len(r1))],
-                         y2=[skel.pmf(x) for x in r1],
+                         y2=[helper.gen_poisson_to_sim_skellam_pmf(team1_dist, team2_dist, x) for x in r1],
                          color='r' if is_favorite else 'r',
                          alpha=.3)
 
         plt.fill_between(x=r2,
                          y1=[0 for x in range(len(r2))],
-                         y2=[skel.pmf(x) for x in r2],
+                         y2=[helper.gen_poisson_to_sim_skellam_pmf(team1_dist, team2_dist, x) for x in r2],
                          color='yellowgreen' if is_favorite else 'g',
                          alpha=.3)
 
         plt.fill_between(x=r3,
                          y1=[0 for x in range(len(r3))],
-                         y2=[skel.pmf(x) for x in r3],
+                         y2=[helper.gen_poisson_to_sim_skellam_pmf(team1_dist, team2_dist, x) for x in r3],
                          color='g' if is_favorite else 'darkgreen',
                          alpha=.3)
 
         # Mean margin of victory
-        skel_mean = team1_lambda - team2_lambda
+        skel_mean = team1_score - team2_score
         ax.vlines(x=skel_mean,
                   ymin=0,
-                  ymax=skel.pmf(math.floor(skel_mean)),
+                  ymax=helper.gen_poisson_to_sim_skellam_pmf(team1_dist, team2_dist, math.floor(skel_mean)),
                   linestyles='dashed',
                   label='mean',
                   color='k',
@@ -894,89 +888,89 @@ class LeagueEvaluator:
 
         plt.show()
 
-    def plot_score_heatmap(self, team1, team2):
-        intercept = self.team_df.at[team1, 'Points Intercept']
-        team1_off_coef = self.team_df.at[team1, 'Bayes Points Coef']
-        team2_off_coef = self.team_df.at[team2, 'Bayes Points Coef']
-        team1_def_coef = self.team_df.at[team1, 'Bayes Points Allowed Coef']
-        team2_def_coef = self.team_df.at[team2, 'Bayes Points Allowed Coef']
-
-        team1_lambda = math.exp(intercept + team1_off_coef + team2_def_coef)
-        team2_lambda = math.exp(intercept + team2_off_coef + team1_def_coef)
-
-        helper = Helper(self.team_df, self.individual_df, self.graph)
-        average_drives = helper.predict_drives(team1, team2)
-        team1_lambda = team1_lambda * average_drives
-        team2_lambda = team2_lambda * average_drives
-
-        team1_poisson = poisson(team1_lambda)
-        team2_poisson = poisson(team2_lambda)
-
-        rows = list()
-        team1_max_score = int(team1_poisson.ppf(.999))
-        team2_max_score = int(team2_poisson.ppf(.999))
-        for team1_score in range(team1_max_score + 1):
-            for team2_score in range(team2_max_score + 1):
-                team1_chance = team1_poisson.pmf(team1_score)
-                team2_chance = team2_poisson.pmf(team2_score)
-                total_chance = team1_chance * team2_chance
-                row_dict = {team1 + ' Score': team1_score,
-                            team1 + ' Chance': team1_chance,
-                            team2 + ' Score': team2_score,
-                            team2 + ' Chance': team2_chance,
-                            'Total Chance': total_chance}
-                rows.append(row_dict)
-        score_df = pd.DataFrame(rows)
-
-        score_df[team1 + ' Common Score'] = score_df.apply(
-            lambda r: league_structure.get_common_score(r[team1 + ' Score']), axis=1)
-        score_df[team2 + ' Common Score'] = score_df.apply(
-            lambda r: league_structure.get_common_score(r[team2 + ' Score']), axis=1)
-        score_df = score_df.groupby(by=[team1 + ' Common Score', team2 + ' Common Score']).sum()
-        for index, row in score_df.iterrows():
-            team1_score, team2_score = index
-            score_df.at[index, team1 + ' Score'] = team1_score
-            score_df.at[index, team2 + ' Score'] = team2_score
-
-        score_df = score_df.pivot(index=team1 + ' Score', columns=team2 + ' Score', values='Total Chance')
-
-        fig, ax = plt.subplots(figsize=(20, 10))
-        sns.heatmap(score_df, annot=True, fmt=".1%", ax=ax)
-        fig.show()
-
-    def plot_score_joint(self, team1, team2):
-        intercept = self.team_df.at[team1, 'Points Intercept']
-        team1_off_coef = self.team_df.at[team1, 'Bayes Points Coef']
-        team2_off_coef = self.team_df.at[team2, 'Bayes Points Coef']
-        team1_def_coef = self.team_df.at[team1, 'Bayes Points Allowed Coef']
-        team2_def_coef = self.team_df.at[team2, 'Bayes Points Allowed Coef']
-
-        team1_lambda = math.exp(intercept + team1_off_coef + team2_def_coef)
-        team2_lambda = math.exp(intercept + team2_off_coef + team1_def_coef)
-
-        helper = Helper(self.team_df, self.individual_df, self.graph)
-        average_drives = helper.predict_drives(team1, team2)
-        team1_lambda = team1_lambda * average_drives
-        team2_lambda = team2_lambda * average_drives
-
-        team1_poisson = poisson(team1_lambda)
-        team2_poisson = poisson(team2_lambda)
-
-        score_df = pd.DataFrame(columns=[team1 + ' Score', team2 + ' Score'])
-        score_df[team1 + ' Score'] = [league_structure.get_common_score(score) for score in
-                                      team1_poisson.rvs(size=10_000)]
-        score_df[team2 + ' Score'] = [league_structure.get_common_score(score) for score in
-                                      team2_poisson.rvs(size=10_000)]
-
-        team1_max_score = int(team1_poisson.ppf(.999))
-        team2_max_score = int(team2_poisson.ppf(.999))
-        max_score = max([team1_max_score, team2_max_score])
-
-        # TODO figure out how to display
-        fig, ax = plt.subplots(figsize=(20, 10))
-        g = sns.JointGrid(data=score_df, x=team1 + ' Score', y=team2 + ' Score', space=0)
-        g.plot_joint(sns.kdeplot,
-                     fill=True, clip=((0, max_score), (0, max_score)),
-                     thresh=0, levels=100, cmap="rocket")
-        g.plot_marginals(sns.histplot, color="#03051A", alpha=1, bins=25)
-        # g.savefig('temp.png')
+    # def plot_score_heatmap(self, team1, team2):
+    #     intercept = self.team_df.at[team1, 'Points Intercept']
+    #     team1_off_coef = self.team_df.at[team1, 'Bayes Points Coef']
+    #     team2_off_coef = self.team_df.at[team2, 'Bayes Points Coef']
+    #     team1_def_coef = self.team_df.at[team1, 'Bayes Points Allowed Coef']
+    #     team2_def_coef = self.team_df.at[team2, 'Bayes Points Allowed Coef']
+    #
+    #     team1_lambda = math.exp(intercept + team1_off_coef + team2_def_coef)
+    #     team2_lambda = math.exp(intercept + team2_off_coef + team1_def_coef)
+    #
+    #     helper = Helper(self.team_df, self.individual_df, self.graph)
+    #     average_drives = helper.predict_drives(team1, team2)
+    #     team1_lambda = team1_lambda * average_drives
+    #     team2_lambda = team2_lambda * average_drives
+    #
+    #     team1_poisson = poisson(team1_lambda)
+    #     team2_poisson = poisson(team2_lambda)
+    #
+    #     rows = list()
+    #     team1_max_score = int(team1_poisson.ppf(.999))
+    #     team2_max_score = int(team2_poisson.ppf(.999))
+    #     for team1_score in range(team1_max_score + 1):
+    #         for team2_score in range(team2_max_score + 1):
+    #             team1_chance = team1_poisson.pmf(team1_score)
+    #             team2_chance = team2_poisson.pmf(team2_score)
+    #             total_chance = team1_chance * team2_chance
+    #             row_dict = {team1 + ' Score': team1_score,
+    #                         team1 + ' Chance': team1_chance,
+    #                         team2 + ' Score': team2_score,
+    #                         team2 + ' Chance': team2_chance,
+    #                         'Total Chance': total_chance}
+    #             rows.append(row_dict)
+    #     score_df = pd.DataFrame(rows)
+    #
+    #     score_df[team1 + ' Common Score'] = score_df.apply(
+    #         lambda r: league_structure.get_common_score(r[team1 + ' Score']), axis=1)
+    #     score_df[team2 + ' Common Score'] = score_df.apply(
+    #         lambda r: league_structure.get_common_score(r[team2 + ' Score']), axis=1)
+    #     score_df = score_df.groupby(by=[team1 + ' Common Score', team2 + ' Common Score']).sum()
+    #     for index, row in score_df.iterrows():
+    #         team1_score, team2_score = index
+    #         score_df.at[index, team1 + ' Score'] = team1_score
+    #         score_df.at[index, team2 + ' Score'] = team2_score
+    #
+    #     score_df = score_df.pivot(index=team1 + ' Score', columns=team2 + ' Score', values='Total Chance')
+    #
+    #     fig, ax = plt.subplots(figsize=(20, 10))
+    #     sns.heatmap(score_df, annot=True, fmt=".1%", ax=ax)
+    #     fig.show()
+    #
+    # def plot_score_joint(self, team1, team2):
+    #     intercept = self.team_df.at[team1, 'Points Intercept']
+    #     team1_off_coef = self.team_df.at[team1, 'Bayes Points Coef']
+    #     team2_off_coef = self.team_df.at[team2, 'Bayes Points Coef']
+    #     team1_def_coef = self.team_df.at[team1, 'Bayes Points Allowed Coef']
+    #     team2_def_coef = self.team_df.at[team2, 'Bayes Points Allowed Coef']
+    #
+    #     team1_lambda = math.exp(intercept + team1_off_coef + team2_def_coef)
+    #     team2_lambda = math.exp(intercept + team2_off_coef + team1_def_coef)
+    #
+    #     helper = Helper(self.team_df, self.individual_df, self.graph)
+    #     average_drives = helper.predict_drives(team1, team2)
+    #     team1_lambda = team1_lambda * average_drives
+    #     team2_lambda = team2_lambda * average_drives
+    #
+    #     team1_poisson = poisson(team1_lambda)
+    #     team2_poisson = poisson(team2_lambda)
+    #
+    #     score_df = pd.DataFrame(columns=[team1 + ' Score', team2 + ' Score'])
+    #     score_df[team1 + ' Score'] = [league_structure.get_common_score(score) for score in
+    #                                   team1_poisson.rvs(size=10_000)]
+    #     score_df[team2 + ' Score'] = [league_structure.get_common_score(score) for score in
+    #                                   team2_poisson.rvs(size=10_000)]
+    #
+    #     team1_max_score = int(team1_poisson.ppf(.999))
+    #     team2_max_score = int(team2_poisson.ppf(.999))
+    #     max_score = max([team1_max_score, team2_max_score])
+    #
+    #     # TODO figure out how to display
+    #     fig, ax = plt.subplots(figsize=(20, 10))
+    #     g = sns.JointGrid(data=score_df, x=team1 + ' Score', y=team2 + ' Score', space=0)
+    #     g.plot_joint(sns.kdeplot,
+    #                  fill=True, clip=((0, max_score), (0, max_score)),
+    #                  thresh=0, levels=100, cmap="rocket")
+    #     g.plot_marginals(sns.histplot, color="#03051A", alpha=1, bins=25)
+    #     # g.savefig('temp.png')
